@@ -1,93 +1,93 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Search, Filter, Star, Heart } from 'lucide-react';
+import { ShoppingCart, Search, Star, Heart } from 'lucide-react';
 import Header from '@/components/Header';
+import { useCart } from '../context/CartContext';
+import { Link } from 'react-router-dom';
+
+const TOTAL_PRODUCTS = 200;
+const PRODUCTS_PER_LOAD = 24;
+
+function generateProducts() {
+  const categories = ['electronics', 'gaming', 'wearables', 'computers'];
+  const names = [
+    'Quantum Pro', 'Neon Gaming', 'Cyber Watch', 'UltraBook', 'PixelCam', 'SoundMax', 'VR Vision', 'NanoDrone'
+  ];
+  const products = [];
+  for (let i = 1; i <= TOTAL_PRODUCTS; i++) {
+    const category = categories[i % categories.length];
+    const name = names[i % names.length];
+    products.push({
+      id: i,
+      nome: `${name} #${i}`,
+      price: Math.round(500 + Math.random() * 5000),
+      originalPrice: Math.random() > 0.5 ? Math.round(500 + Math.random() * 5000) : null,
+      category,
+      image: '/placeholder.svg',
+      rating: +(4 + Math.random()).toFixed(1),
+      reviews: Math.floor(Math.random() * 300),
+      discount: Math.random() > 0.5 ? Math.floor(Math.random() * 30) : 0,
+      inStock: Math.random() > 0.1,
+      featured: Math.random() > 0.7
+    });
+  }
+  return products;
+}
+
+const allProducts = generateProducts();
+
+const categories = [
+  { id: 'all', name: 'Todos' },
+  { id: 'electronics', name: 'Eletrônicos' },
+  { id: 'gaming', name: 'Gaming' },
+  { id: 'wearables', name: 'Wearables' },
+  { id: 'computers', name: 'Computadores' }
+];
 
 const Loja = () => {
+  const { adicionarProduto, produtos } = useCart();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_LOAD);
+  const loaderRef = useRef<HTMLDivElement>(null);
 
-  const products = [
-    {
-      id: 1,
-      name: 'Smartphone Quantum Pro',
-      price: 2499.99,
-      originalPrice: 2999.99,
-      category: 'electronics',
-      image: '/placeholder.svg',
-      rating: 4.8,
-      reviews: 156,
-      discount: 17,
-      inStock: true,
-      featured: true
-    },
-    {
-      id: 2,
-      name: 'Headset Neon Gaming',
-      price: 799.99,
-      originalPrice: 999.99,
-      category: 'gaming',
-      image: '/placeholder.svg',
-      rating: 4.9,
-      reviews: 89,
-      discount: 20,
-      inStock: true,
-      featured: false
-    },
-    {
-      id: 3,
-      name: 'Smart Watch Cyber',
-      price: 1299.99,
-      originalPrice: 1599.99,
-      category: 'wearables',
-      image: '/placeholder.svg',
-      rating: 4.7,
-      reviews: 234,
-      discount: 19,
-      inStock: false,
-      featured: true
-    },
-    {
-      id: 4,
-      name: 'Notebook UltraBook',
-      price: 4999.99,
-      originalPrice: null,
-      category: 'computers',
-      image: '/placeholder.svg',
-      rating: 4.9,
-      reviews: 67,
-      discount: 0,
-      inStock: true,
-      featured: false
-    }
-  ];
-
-  const categories = [
-    { id: 'all', name: 'Todos' },
-    { id: 'electronics', name: 'Eletrônicos' },
-    { id: 'gaming', name: 'Gaming' },
-    { id: 'wearables', name: 'Wearables' },
-    { id: 'computers', name: 'Computadores' }
-  ];
-
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredProducts = allProducts.filter(product => {
+    const matchesSearch = product.nome.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const addToCart = (product: any) => {
-    // Cart logic here
-    console.log('Added to cart:', product);
+  // Infinite scroll: load more products when reaching the bottom
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        loaderRef.current &&
+        loaderRef.current.getBoundingClientRect().top < window.innerHeight
+      ) {
+        setVisibleCount((prev) =>
+          Math.min(prev + PRODUCTS_PER_LOAD, filteredProducts.length)
+        );
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [filteredProducts.length]);
+
+  const handleAddToCart = (product: any) => {
+    adicionarProduto({
+      id: product.id,
+      nome: product.nome,
+      preco: product.price,
+      quantidade: 1
+    });
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
       <main className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -106,7 +106,10 @@ const Loja = () => {
             <Input
               placeholder="Buscar produtos..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setVisibleCount(PRODUCTS_PER_LOAD); // Reset scroll on search
+              }}
               className="pl-10 bg-card border-border/30 focus:border-neon-cyan"
             />
           </div>
@@ -116,7 +119,10 @@ const Loja = () => {
                 key={category.id}
                 variant={selectedCategory === category.id ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedCategory(category.id)}
+                onClick={() => {
+                  setSelectedCategory(category.id);
+                  setVisibleCount(PRODUCTS_PER_LOAD); // Reset scroll on filter
+                }}
                 className={selectedCategory === category.id 
                   ? "bg-gradient-primary" 
                   : "border-border/30 hover:border-neon-cyan/50"
@@ -130,14 +136,14 @@ const Loja = () => {
 
         {/* Products Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
+          {filteredProducts.slice(0, visibleCount).map((product) => (
             <Card key={product.id} className="bg-card border-border/20 hover:border-neon-cyan/30 transition-all duration-300 hover:shadow-xl hover:shadow-neon-cyan/10 group">
               <CardHeader className="p-0 relative">
                 {/* Product Image */}
                 <div className="aspect-square bg-muted rounded-t-lg relative overflow-hidden">
                   <img 
                     src={product.image} 
-                    alt={product.name}
+                    alt={product.nome}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   
@@ -167,7 +173,7 @@ const Loja = () => {
 
               <CardContent className="p-4">
                 <h3 className="font-semibold text-lg mb-2 text-foreground group-hover:text-neon-cyan transition-colors">
-                  {product.name}
+                  {product.nome}
                 </h3>
                 
                 {/* Rating */}
@@ -195,7 +201,7 @@ const Loja = () => {
               <CardFooter className="p-4 pt-0">
                 <Button 
                   className="w-full bg-gradient-primary hover:bg-gradient-secondary disabled:opacity-50"
-                  onClick={() => addToCart(product)}
+                  onClick={() => handleAddToCart(product)}
                   disabled={!product.inStock}
                 >
                   <ShoppingCart className="h-4 w-4 mr-2" />
@@ -205,6 +211,13 @@ const Loja = () => {
             </Card>
           ))}
         </div>
+
+        {/* Loader for infinite scroll */}
+        {visibleCount < filteredProducts.length && (
+          <div ref={loaderRef} className="flex justify-center py-8">
+            <span className="text-neon-cyan animate-pulse">Carregando mais produtos...</span>
+          </div>
+        )}
 
         {/* No results */}
         {filteredProducts.length === 0 && (

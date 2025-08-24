@@ -8,25 +8,65 @@ import Loja from "./pages/Loja";
 import Configuracoes from "./pages/Configuracoes";
 import DadosPessoais from "./pages/DadosPessoais";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import RecoverPassword from "./pages/RecoverPassword";
+import AuthGuard from "./pages/AuthGuard";
+import Noticias from "./pages/Noticias";
+import Sobre from "./pages/Sobre";
+import Contatos from "./pages/Contatos";
+import Carrinho from "./pages/Carrinho";
+import { CartProvider } from "./context/CartContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/loja" element={<Loja />} />
-          <Route path="/configuracoes" element={<Configuracoes />} />
-          <Route path="/dados-pessoais" element={<DadosPessoais />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <CartProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Rotas públicas */}
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/recover-password" element={<RecoverPassword />} />
+            <Route path="/noticias" element={<Noticias />} />
+            <Route path="/sobre" element={<Sobre />} />
+            <Route path="/contatos" element={<Contatos />} />
+            <Route path="/carrinho" element={<Carrinho />} />
+            {/* Rotas protegidas */}
+            <Route
+              path="/loja"
+              element={
+                <AuthGuard>
+                  <Loja />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/configuracoes"
+              element={
+                <AuthGuard>
+                  <Configuracoes />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/dados-pessoais"
+              element={
+                <AuthGuard>
+                  <DadosPessoais />
+                </AuthGuard>
+              }
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </CartProvider>
   </QueryClientProvider>
 );
 
