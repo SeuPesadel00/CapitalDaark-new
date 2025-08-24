@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, Search, Star, Heart } from 'lucide-react';
 import Header from '@/components/Header';
 import { useCart } from '../context/CartContext';
+import { useToast } from '../hooks/use-toast';
 import { Link } from 'react-router-dom';
 
 const TOTAL_PRODUCTS = 200;
@@ -49,6 +50,7 @@ const categories = [
 
 const Loja = () => {
   const { adicionarProduto, produtos } = useCart();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_LOAD);
@@ -82,6 +84,11 @@ const Loja = () => {
       nome: product.nome,
       preco: product.price,
       quantidade: 1
+    });
+    
+    toast({
+      title: "Produto adicionado!",
+      description: `${product.nome} foi adicionado ao seu carrinho.`,
     });
   };
 

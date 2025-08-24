@@ -1,154 +1,222 @@
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
-
-const produtosExemplo = [
-  { id: 1, nome: 'Produto 1', preco: 99.90, quantidade: 1 },
-  { id: 2, nome: 'Produto 2', preco: 59.90, quantidade: 2 },
-];
+import { useCart } from '../context/CartContext';
+import { Button } from '../components/ui/button';
+import { Minus, Plus, Trash2, ShoppingCart, CreditCard, Package, Truck } from 'lucide-react';
+import { useToast } from '../hooks/use-toast';
 
 function Carrinho() {
-  const [produtos, setProdutos] = useState(produtosExemplo);
-  const [pagamento, setPagamento] = useState('credito');
-  const [cartao, setCartao] = useState({
-    numero: '',
-    nome: '',
-    validade: '',
-    cvv: '',
-  });
+  const { produtos, removerProduto, alterarQuantidade, limparCarrinho } = useCart();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const total = produtos.reduce((acc, p) => acc + p.preco * p.quantidade, 0);
+  const subtotal = produtos.reduce((acc, p) => acc + p.preco * p.quantidade, 0);
+  const frete = subtotal > 200 ? 0 : 15.90;
+  const total = subtotal + frete;
 
-  const handleRemover = (id: number) => {
-    setProdutos(produtos.filter(p => p.id !== id));
+  const handleAlterarQuantidade = (id: number, novaQuantidade: number) => {
+    if (novaQuantidade <= 0) {
+      removerProduto(id);
+      toast({
+        title: "Produto removido",
+        description: "Item removido do carrinho com sucesso.",
+      });
+    } else {
+      alterarQuantidade(id, novaQuantidade);
+    }
   };
 
-  const handleAlterarQuantidade = (id: number, quantidade: number) => {
-    setProdutos(produtos.map(p => p.id === id ? { ...p, quantidade } : p));
+  const handleRemoverProduto = (id: number) => {
+    removerProduto(id);
+    toast({
+      title: "Produto removido",
+      description: "Item removido do carrinho com sucesso.",
+    });
   };
 
-  const handleFinalizarCompra = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('Compra finalizada!');
+  const handleContinuarCompra = () => {
+    if (produtos.length === 0) {
+      toast({
+        title: "Carrinho vazio",
+        description: "Adicione produtos ao carrinho antes de continuar.",
+        variant: "destructive"
+      });
+      return;
+    }
+    navigate('/checkout');
   };
+
+  if (produtos.length === 0) {
+    return (
+      <Layout>
+        <section className="fade-in container mx-auto px-4 py-12 md:py-24">
+          <div className="max-w-4xl mx-auto text-center">
+            <ShoppingCart className="w-24 h-24 mx-auto text-muted-foreground mb-8" />
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Seu carrinho está vazio</h2>
+            <p className="text-muted-foreground mb-8 text-lg">Adicione produtos incríveis do nosso catálogo!</p>
+            <Button 
+              onClick={() => navigate('/loja')} 
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg"
+            >
+              Ir às compras
+            </Button>
+          </div>
+        </section>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
-      <section className="fade-in container mx-auto px-4 py-12 md:py-24">
-        <h2 className="text-3xl md:text-5xl font-bold text-center mb-12 neon-text">Carrinho de Compras</h2>
-        <div className="max-w-2xl mx-auto bg-gray-800 rounded-xl p-8 shadow-lg neon-border">
-          <h3 className="text-xl font-bold text-neon-cyan mb-6">Produtos no Carrinho</h3>
-          <ul className="mb-8">
-            {produtos.length === 0 ? (
-              <li className="text-gray-400">Seu carrinho está vazio.</li>
-            ) : (
-              produtos.map(produto => (
-                <li key={produto.id} className="flex items-center justify-between py-2 border-b border-border/20">
-                  <span className="text-gray-300">{produto.nome}</span>
-                  <span className="text-gray-300">R$ {produto.preco.toFixed(2)}</span>
-                  <input
-                    type="number"
-                    min={1}
-                    value={produto.quantidade}
-                    onChange={e => handleAlterarQuantidade(produto.id, Number(e.target.value))}
-                    className="w-16 px-2 py-1 rounded bg-card/80 text-neon-cyan border border-neon-cyan mx-2"
-                  />
-                  <button
-                    className="text-red-400 hover:underline"
-                    onClick={() => handleRemover(produto.id)}
+      <section className="fade-in container mx-auto px-4 py-8 md:py-12">
+        <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center text-foreground">
+          Carrinho de Compras ({produtos.length})
+        </h1>
+        
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Lista de Produtos */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="bg-card rounded-lg border border-border shadow-sm">
+              <div className="p-6 border-b border-border">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                    <Package className="w-5 h-5" />
+                    Produtos ({produtos.length})
+                  </h2>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={limparCarrinho}
+                    className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
                   >
-                    Remover
-                  </button>
-                </li>
-              ))
-            )}
-          </ul>
-          <div className="mb-8 text-right text-lg text-neon-cyan font-bold">
-            Total: R$ {total.toFixed(2)}
+                    Limpar carrinho
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="divide-y divide-border">
+                {produtos.map(produto => (
+                  <div key={produto.id} className="p-6 flex items-center gap-4">
+                    <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center">
+                      <Package className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-foreground truncate">{produto.nome}</h3>
+                      <p className="text-2xl font-bold text-primary mt-1">
+                        R$ {produto.preco.toFixed(2)}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center border border-border rounded-lg">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAlterarQuantidade(produto.id, produto.quantidade - 1)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </Button>
+                        <span className="px-3 py-1 min-w-[3rem] text-center text-foreground">
+                          {produto.quantidade}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAlterarQuantidade(produto.id, produto.quantidade + 1)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoverProduto(produto.id)}
+                        className="text-destructive hover:text-destructive-foreground hover:bg-destructive/10 h-8 w-8 p-0"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    
+                    <div className="text-right min-w-[100px]">
+                      <p className="text-lg font-bold text-foreground">
+                        R$ {(produto.preco * produto.quantidade).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          <form onSubmit={handleFinalizarCompra} className="space-y-6">
-            <h3 className="text-xl font-bold text-neon-cyan mb-4">Pagamento</h3>
-            <div>
-              <label className="block text-gray-300 text-sm font-bold mb-2">Forma de pagamento</label>
-              <select
-                value={pagamento}
-                onChange={e => setPagamento(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg bg-card/80 text-neon-cyan border border-neon-cyan"
-              >
-                <option value="credito">Cartão de Crédito</option>
-                <option value="debito">Cartão de Débito</option>
-                <option value="pix">Pix</option>
-                <option value="boleto">Boleto</option>
-              </select>
-            </div>
-            {(pagamento === 'credito' || pagamento === 'debito') && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-gray-300 text-sm font-bold mb-2">Número do cartão</label>
-                  <input
-                    type="text"
-                    maxLength={16}
-                    value={cartao.numero}
-                    onChange={e => setCartao({ ...cartao, numero: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg bg-card/80 text-neon-cyan border border-neon-cyan"
-                    placeholder="1234 5678 9012 3456"
-                    required
-                  />
+
+          {/* Resumo do Pedido */}
+          <div className="space-y-6">
+            <div className="bg-card rounded-lg border border-border shadow-sm">
+              <div className="p-6 border-b border-border">
+                <h2 className="text-xl font-semibold text-foreground">Resumo do Pedido</h2>
+              </div>
+              
+              <div className="p-6 space-y-4">
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Subtotal ({produtos.length} {produtos.length === 1 ? 'item' : 'itens'})</span>
+                  <span>R$ {subtotal.toFixed(2)}</span>
                 </div>
-                <div>
-                  <label className="block text-gray-300 text-sm font-bold mb-2">Nome no cartão</label>
-                  <input
-                    type="text"
-                    value={cartao.nome}
-                    onChange={e => setCartao({ ...cartao, nome: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg bg-card/80 text-neon-cyan border border-neon-cyan"
-                    placeholder="Seu nome"
-                    required
-                  />
+                
+                <div className="flex justify-between text-muted-foreground">
+                  <span className="flex items-center gap-2">
+                    <Truck className="w-4 h-4" />
+                    Frete
+                  </span>
+                  <span className={frete === 0 ? "text-green-600 font-medium" : ""}>
+                    {frete === 0 ? "GRÁTIS" : `R$ ${frete.toFixed(2)}`}
+                  </span>
                 </div>
-                <div className="flex space-x-4">
-                  <div className="flex-1">
-                    <label className="block text-gray-300 text-sm font-bold mb-2">Validade</label>
-                    <input
-                      type="text"
-                      maxLength={5}
-                      value={cartao.validade}
-                      onChange={e => setCartao({ ...cartao, validade: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg bg-card/80 text-neon-cyan border border-neon-cyan"
-                      placeholder="MM/AA"
-                      required
-                    />
+                
+                {subtotal < 200 && (
+                  <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                    💡 Frete grátis em compras acima de R$ 200,00
                   </div>
-                  <div className="flex-1">
-                    <label className="block text-gray-300 text-sm font-bold mb-2">CVV</label>
-                    <input
-                      type="text"
-                      maxLength={4}
-                      value={cartao.cvv}
-                      onChange={e => setCartao({ ...cartao, cvv: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg bg-card/80 text-neon-cyan border border-neon-cyan"
-                      placeholder="123"
-                      required
-                    />
+                )}
+                
+                <div className="border-t border-border pt-4">
+                  <div className="flex justify-between text-lg font-bold text-foreground">
+                    <span>Total</span>
+                    <span>R$ {total.toFixed(2)}</span>
                   </div>
                 </div>
+                
+                <Button 
+                  onClick={handleContinuarCompra}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-lg font-medium"
+                >
+                  <CreditCard className="w-5 h-5 mr-2" />
+                  Finalizar Compra
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate('/loja')}
+                  className="w-full"
+                >
+                  Continuar Comprando
+                </Button>
               </div>
-            )}
-            {pagamento === 'pix' && (
-              <div className="text-gray-300">
-                Chave Pix: <span className="text-neon-cyan">pix@capitaldaark.com</span>
-              </div>
-            )}
-            {pagamento === 'boleto' && (
-              <div className="text-gray-300">
-                O boleto será gerado após finalizar a compra.
-              </div>
-            )}
-            <div className="text-center">
-              <button type="submit" className="neon-button text-white font-bold py-3 px-10 rounded-full text-lg">
-                Finalizar Compra
-              </button>
             </div>
-          </form>
+            
+            {/* Informações de Segurança */}
+            <div className="bg-card rounded-lg border border-border shadow-sm p-6">
+              <h3 className="font-semibold text-foreground mb-3">🔒 Compra Segura</h3>
+              <ul className="text-sm text-muted-foreground space-y-2">
+                <li>✓ Pagamentos 100% seguros</li>
+                <li>✓ Dados criptografados</li>
+                <li>✓ Garantia de entrega</li>
+                <li>✓ Suporte 24/7</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
     </Layout>

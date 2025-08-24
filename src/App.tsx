@@ -16,6 +16,7 @@ import Noticias from "./pages/Noticias";
 import Sobre from "./pages/Sobre";
 import Contatos from "./pages/Contatos";
 import Carrinho from "./pages/Carrinho";
+import Checkout from "./pages/Checkout";
 import { CartProvider } from "./context/CartContext";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/sobre" element={<Sobre />} />
             <Route path="/contatos" element={<Contatos />} />
             <Route path="/carrinho" element={<Carrinho />} />
+            <Route path="/checkout" element={<Checkout />} />
             {/* Rotas protegidas */}
             <Route
               path="/loja"
