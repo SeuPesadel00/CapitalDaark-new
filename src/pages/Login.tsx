@@ -27,28 +27,28 @@ function Login() {
 
   return (
     <Layout hideNav>
-      <section id="login" className="min-h-screen flex items-center justify-center px-4 bg-gradient-primary">
+      <section id="login" className="min-h-screen flex items-center justify-center px-4 bg-background">
         <div className="w-full max-w-md">
           {/* Header com animação */}
           <div className="text-center mb-8 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-neon-cyan glow-neon mb-2">
+            <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-primary mb-2">
               Bem-vindo
             </h1>
             <p className="text-muted-foreground">Acesse sua conta para continuar</p>
           </div>
 
           {/* Card de login com glass effect */}
-          <div className="glass rounded-2xl p-8 shadow-neon border border-neon-cyan/20 animate-scale-in">
+          <div className="bg-card rounded-2xl p-8 shadow-soft border border-border animate-scale-in">
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-4">
                 <div className="group">
-                  <label htmlFor="email" className="text-sm font-medium text-neon-cyan/80 block mb-2">
+                  <label htmlFor="email" className="text-sm font-medium text-primary block mb-2">
                     Email
                   </label>
                   <input
                     type="email"
                     id="email"
-                    className="w-full px-4 py-3 rounded-xl bg-background/50 border border-neon-cyan/30 text-foreground placeholder:text-muted-foreground focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan/20 transition-all duration-300 hover:border-neon-cyan/50"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-primary/70"
                     placeholder="seu@email.com"
                     required
                     value={email}
@@ -57,13 +57,13 @@ function Login() {
                 </div>
                 
                 <div className="group">
-                  <label htmlFor="password" className="text-sm font-medium text-neon-cyan/80 block mb-2">
+                  <label htmlFor="password" className="text-sm font-medium text-primary block mb-2">
                     Senha
                   </label>
                   <input
                     type="password"
                     id="password"
-                    className="w-full px-4 py-3 rounded-xl bg-background/50 border border-neon-cyan/30 text-foreground placeholder:text-muted-foreground focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan/20 transition-all duration-300 hover:border-neon-cyan/50"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-primary/70"
                     placeholder="••••••••"
                     required
                     value={password}
@@ -74,7 +74,7 @@ function Login() {
 
               <button 
                 type="submit" 
-                className="w-full bg-gradient-primary text-white font-semibold py-3 px-6 rounded-xl hover:scale-105 transition-all duration-300 shadow-neon hover:shadow-glow border border-neon-cyan/30"
+                className="w-full bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-soft border border-primary/30"
               >
                 Entrar na Conta
               </button>
@@ -82,7 +82,7 @@ function Login() {
 
             {message && (
               <div className={`mt-4 text-center text-sm font-medium animate-fade-in ${
-                message.includes('sucesso') ? 'text-neon-green' : 'text-destructive'
+                message.includes('sucesso') ? 'text-accent' : 'text-destructive'
               }`}>
                 {message}
               </div>
@@ -93,7 +93,7 @@ function Login() {
               <div className="text-center">
                 <Link 
                   to="/recover-password" 
-                  className="text-sm text-neon-cyan hover:text-neon-cyan/80 transition-colors hover:underline"
+                  className="text-sm text-primary hover:text-primary/80 transition-colors hover:underline"
                 >
                   Esqueceu sua senha?
                 </Link>
@@ -113,7 +113,7 @@ function Login() {
                   Não tem uma conta?{' '}
                   <Link 
                     to="/register" 
-                    className="text-neon-purple hover:text-neon-purple/80 font-medium transition-colors hover:underline"
+                    className="text-secondary hover:text-secondary/80 font-medium transition-colors hover:underline"
                   >
                     Criar conta
                   </Link>

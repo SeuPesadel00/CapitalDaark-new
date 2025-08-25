@@ -39,29 +39,29 @@ function Register() {
 
   return (
     <Layout hideNav>
-      <section className="min-h-screen flex items-center justify-center px-4 bg-gradient-primary">
+      <section className="min-h-screen flex items-center justify-center px-4 bg-background">
         <div className="w-full max-w-md">
           {/* Header com animação */}
           <div className="text-center mb-8 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-neon-purple glow-neon mb-2">
+            <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-secondary mb-2">
               Junte-se a Nós
             </h1>
             <p className="text-muted-foreground">Crie sua conta e comece sua jornada</p>
           </div>
 
           {/* Card de registro com glass effect */}
-          <div className="glass rounded-2xl p-8 shadow-neon border border-neon-purple/20 animate-scale-in">
+          <div className="bg-card rounded-2xl p-8 shadow-soft border border-border animate-scale-in">
             <form onSubmit={handleRegister} className="space-y-6">
               <div className="space-y-4">
                 <div className="group">
-                  <label htmlFor="email" className="text-sm font-medium text-neon-purple/80 block mb-2">
+                  <label htmlFor="email" className="text-sm font-medium text-secondary block mb-2">
                     Email
                   </label>
                   <input
                     type="email"
                     id="email"
                     name="email"
-                    className="w-full px-4 py-3 rounded-xl bg-background/50 border border-neon-purple/30 text-foreground placeholder:text-muted-foreground focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/20 transition-all duration-300 hover:border-neon-purple/50"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-secondary focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-secondary/70"
                     placeholder="seu@email.com"
                     required
                     value={email}
@@ -70,14 +70,14 @@ function Register() {
                 </div>
                 
                 <div className="group">
-                  <label htmlFor="username" className="text-sm font-medium text-neon-purple/80 block mb-2">
+                  <label htmlFor="username" className="text-sm font-medium text-secondary block mb-2">
                     Nome de Usuário
                   </label>
                   <input
                     type="text"
                     id="username"
                     name="username"
-                    className="w-full px-4 py-3 rounded-xl bg-background/50 border border-neon-purple/30 text-foreground placeholder:text-muted-foreground focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/20 transition-all duration-300 hover:border-neon-purple/50"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-secondary focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-secondary/70"
                     placeholder="Como quer ser chamado?"
                     required
                     value={username}
@@ -86,14 +86,14 @@ function Register() {
                 </div>
 
                 <div className="group">
-                  <label htmlFor="password" className="text-sm font-medium text-neon-purple/80 block mb-2">
+                  <label htmlFor="password" className="text-sm font-medium text-secondary block mb-2">
                     Senha
                   </label>
                   <input
                     type="password"
                     id="password"
                     name="password"
-                    className="w-full px-4 py-3 rounded-xl bg-background/50 border border-neon-purple/30 text-foreground placeholder:text-muted-foreground focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/20 transition-all duration-300 hover:border-neon-purple/50"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-secondary focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-secondary/70"
                     placeholder="••••••••"
                     required
                     value={password}
@@ -104,7 +104,7 @@ function Register() {
 
               <button 
                 type="submit" 
-                className="w-full bg-gradient-secondary text-white font-semibold py-3 px-6 rounded-xl hover:scale-105 transition-all duration-300 shadow-neon hover:shadow-glow border border-neon-purple/30"
+                className="w-full bg-secondary text-secondary-foreground font-semibold py-3 px-6 rounded-xl hover:bg-secondary/90 transition-all duration-300 shadow-soft border border-secondary/30"
               >
                 Criar Minha Conta
               </button>
@@ -112,7 +112,7 @@ function Register() {
 
             {message && (
               <div className={`mt-4 text-center text-sm font-medium animate-fade-in ${
-                message.includes('sucesso') || message.includes('Registrando') ? 'text-neon-green' : 'text-destructive'
+                message.includes('sucesso') || message.includes('Registrando') ? 'text-accent' : 'text-destructive'
               }`}>
                 {message}
               </div>
@@ -134,7 +134,7 @@ function Register() {
                   Já tem uma conta?{' '}
                   <Link 
                     to="/login" 
-                    className="text-neon-cyan hover:text-neon-cyan/80 font-medium transition-colors hover:underline"
+                    className="text-primary hover:text-primary/80 font-medium transition-colors hover:underline"
                   >
                     Fazer login
                   </Link>

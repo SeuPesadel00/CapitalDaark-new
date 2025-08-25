@@ -40,11 +40,11 @@ function RecoverPassword() {
 
   return (
     <Layout hideNav>
-      <section className="min-h-screen flex items-center justify-center px-4 bg-gradient-primary">
+      <section className="min-h-screen flex items-center justify-center px-4 bg-background">
         <div className="w-full max-w-md">
           {/* Header com animação */}
           <div className="text-center mb-8 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-neon-green glow-neon mb-2">
+            <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-accent mb-2">
               Recuperar Acesso
             </h1>
             <p className="text-muted-foreground">
@@ -55,18 +55,18 @@ function RecoverPassword() {
           </div>
 
           {/* Card de recuperação com glass effect */}
-          <div className="glass rounded-2xl p-8 shadow-neon border border-neon-green/20 animate-scale-in">
+          <div className="bg-card rounded-2xl p-8 shadow-soft border border-border animate-scale-in">
             {step === 1 && (
               <form onSubmit={handleSendCode} className="space-y-6">
                 <div className="group">
-                  <label htmlFor="email" className="text-sm font-medium text-neon-green/80 block mb-2">
+                  <label htmlFor="email" className="text-sm font-medium text-accent block mb-2">
                     Email cadastrado
                   </label>
                   <input
                     type="email"
                     id="email"
                     name="email"
-                    className="w-full px-4 py-3 rounded-xl bg-background/50 border border-neon-green/30 text-foreground placeholder:text-muted-foreground focus:border-neon-green focus:ring-2 focus:ring-neon-green/20 transition-all duration-300 hover:border-neon-green/50"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-accent/70"
                     placeholder="seu@email.com"
                     required
                     value={email}
@@ -75,7 +75,7 @@ function RecoverPassword() {
                 </div>
                 <button 
                   type="submit" 
-                  className="w-full bg-gradient-accent text-white font-semibold py-3 px-6 rounded-xl hover:scale-105 transition-all duration-300 shadow-neon hover:shadow-glow border border-neon-green/30"
+                  className="w-full bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-xl hover:bg-accent/90 transition-all duration-300 shadow-soft border border-accent/30"
                 >
                   Enviar Código de Verificação
                 </button>
@@ -85,14 +85,14 @@ function RecoverPassword() {
             {step === 2 && (
               <form onSubmit={handleVerifyCode} className="space-y-6">
                 <div className="group">
-                  <label htmlFor="code" className="text-sm font-medium text-neon-green/80 block mb-2">
+                  <label htmlFor="code" className="text-sm font-medium text-accent block mb-2">
                     Código de verificação
                   </label>
                   <input
                     type="text"
                     id="code"
                     name="code"
-                    className="w-full px-4 py-3 rounded-xl bg-background/50 border border-neon-green/30 text-foreground placeholder:text-muted-foreground focus:border-neon-green focus:ring-2 focus:ring-neon-green/20 transition-all duration-300 hover:border-neon-green/50 text-center text-lg tracking-widest"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-accent/70 text-center text-lg tracking-widest"
                     placeholder="123456"
                     maxLength={6}
                     required
@@ -105,7 +105,7 @@ function RecoverPassword() {
                 </div>
                 <button 
                   type="submit" 
-                  className="w-full bg-gradient-accent text-white font-semibold py-3 px-6 rounded-xl hover:scale-105 transition-all duration-300 shadow-neon hover:shadow-glow border border-neon-green/30"
+                  className="w-full bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-xl hover:bg-accent/90 transition-all duration-300 shadow-soft border border-accent/30"
                 >
                   Verificar Código
                 </button>
@@ -115,14 +115,14 @@ function RecoverPassword() {
             {step === 3 && (
               <form onSubmit={handleResetPassword} className="space-y-6">
                 <div className="group">
-                  <label htmlFor="newPassword" className="text-sm font-medium text-neon-green/80 block mb-2">
+                  <label htmlFor="newPassword" className="text-sm font-medium text-accent block mb-2">
                     Nova senha
                   </label>
                   <input
                     type="password"
                     id="newPassword"
                     name="newPassword"
-                    className="w-full px-4 py-3 rounded-xl bg-background/50 border border-neon-green/30 text-foreground placeholder:text-muted-foreground focus:border-neon-green focus:ring-2 focus:ring-neon-green/20 transition-all duration-300 hover:border-neon-green/50"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-accent/70"
                     placeholder="••••••••"
                     required
                     value={newPassword}
@@ -134,7 +134,7 @@ function RecoverPassword() {
                 </div>
                 <button 
                   type="submit" 
-                  className="w-full bg-gradient-accent text-white font-semibold py-3 px-6 rounded-xl hover:scale-105 transition-all duration-300 shadow-neon hover:shadow-glow border border-neon-green/30"
+                  className="w-full bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-xl hover:bg-accent/90 transition-all duration-300 shadow-soft border border-accent/30"
                 >
                   Confirmar Nova Senha
                 </button>
@@ -143,7 +143,7 @@ function RecoverPassword() {
 
             {message && (
               <div className={`mt-4 text-center text-sm font-medium animate-fade-in ${
-                message.includes('sucesso') || message.includes('enviado') || message.includes('verificado') ? 'text-neon-green' : 'text-destructive'
+                message.includes('sucesso') || message.includes('enviado') || message.includes('verificado') ? 'text-accent' : 'text-destructive'
               }`}>
                 {message}
               </div>
@@ -157,7 +157,7 @@ function RecoverPassword() {
               </div>
               <div className="w-full bg-background/30 rounded-full h-2">
                 <div 
-                  className="bg-gradient-accent h-2 rounded-full transition-all duration-500"
+                  className="bg-accent h-2 rounded-full transition-all duration-500"
                   style={{ width: `${(step / 3) * 100}%` }}
                 ></div>
               </div>
@@ -166,7 +166,7 @@ function RecoverPassword() {
             {/* Link de volta */}
             <div className="mt-8 text-center">
               <button
-                className="text-sm text-neon-cyan hover:text-neon-cyan/80 transition-colors hover:underline"
+                className="text-sm text-primary hover:text-primary/80 transition-colors hover:underline"
                 onClick={() => navigate('/login')}
               >
                 ← Voltar para o Login
