@@ -38,61 +38,109 @@ function Register() {
   };
 
   return (
-    <Layout>
-      <section id="register" className="fade-in container mx-auto px-4 py-12 md:py-24">
-        <h2 className="text-3xl md:text-5xl font-bold text-center mb-12 neon-text">Crie sua Conta</h2>
-        <div className="max-w-md mx-auto bg-gray-800 rounded-xl p-8 shadow-lg neon-border">
-          <form id="registerForm" onSubmit={handleRegister} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-gray-300 text-sm font-bold mb-2">E-mail</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                className="w-full px-4 py-2 rounded-lg bg-card/80 text-neon-cyan placeholder:text-neon-cyan/60 border border-neon-cyan focus:outline-none focus:ring-2 focus:ring-neon-cyan transition"
-                placeholder="seu.email@exemplo.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="username" className="block text-gray-300 text-sm font-bold mb-2">Usuário</label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                className="w-full px-4 py-2 rounded-lg bg-card/80 text-neon-cyan placeholder:text-neon-cyan/60 border border-neon-cyan focus:outline-none focus:ring-2 focus:ring-neon-cyan transition"
-                placeholder="Seu nome de usuário"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-gray-300 text-sm font-bold mb-2">Senha</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                className="w-full px-4 py-2 rounded-lg bg-card/80 text-neon-cyan placeholder:text-neon-cyan/60 border border-neon-cyan focus:outline-none focus:ring-2 focus:ring-neon-cyan transition"
-                placeholder="Sua senha"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <div className="text-center">
-              <button type="submit" className="neon-button text-white font-bold py-3 px-10 rounded-full text-lg">
-                Registrar
-              </button>
-            </div>
-          </form>
-          <div id="message" className="mt-4 text-center text-sm font-semibold text-red-400">
-            {message}
+    <Layout hideNav>
+      <section className="min-h-screen flex items-center justify-center px-4 bg-gradient-primary">
+        <div className="w-full max-w-md">
+          {/* Header com animação */}
+          <div className="text-center mb-8 animate-fade-in">
+            <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-neon-purple glow-neon mb-2">
+              Junte-se a Nós
+            </h1>
+            <p className="text-muted-foreground">Crie sua conta e comece sua jornada</p>
           </div>
-          <div className="mt-6 text-center text-gray-400">
-            <p>Já tem uma conta? <Link to="/login" className="text-cyan-400 hover:underline">Entrar</Link></p>
+
+          {/* Card de registro com glass effect */}
+          <div className="glass rounded-2xl p-8 shadow-neon border border-neon-purple/20 animate-scale-in">
+            <form onSubmit={handleRegister} className="space-y-6">
+              <div className="space-y-4">
+                <div className="group">
+                  <label htmlFor="email" className="text-sm font-medium text-neon-purple/80 block mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    className="w-full px-4 py-3 rounded-xl bg-background/50 border border-neon-purple/30 text-foreground placeholder:text-muted-foreground focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/20 transition-all duration-300 hover:border-neon-purple/50"
+                    placeholder="seu@email.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                
+                <div className="group">
+                  <label htmlFor="username" className="text-sm font-medium text-neon-purple/80 block mb-2">
+                    Nome de Usuário
+                  </label>
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    className="w-full px-4 py-3 rounded-xl bg-background/50 border border-neon-purple/30 text-foreground placeholder:text-muted-foreground focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/20 transition-all duration-300 hover:border-neon-purple/50"
+                    placeholder="Como quer ser chamado?"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </div>
+
+                <div className="group">
+                  <label htmlFor="password" className="text-sm font-medium text-neon-purple/80 block mb-2">
+                    Senha
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    className="w-full px-4 py-3 rounded-xl bg-background/50 border border-neon-purple/30 text-foreground placeholder:text-muted-foreground focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/20 transition-all duration-300 hover:border-neon-purple/50"
+                    placeholder="••••••••"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                className="w-full bg-gradient-secondary text-white font-semibold py-3 px-6 rounded-xl hover:scale-105 transition-all duration-300 shadow-neon hover:shadow-glow border border-neon-purple/30"
+              >
+                Criar Minha Conta
+              </button>
+            </form>
+
+            {message && (
+              <div className={`mt-4 text-center text-sm font-medium animate-fade-in ${
+                message.includes('sucesso') || message.includes('Registrando') ? 'text-neon-green' : 'text-destructive'
+              }`}>
+                {message}
+              </div>
+            )}
+
+            {/* Links */}
+            <div className="mt-8">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border/50"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">ou</span>
+                </div>
+              </div>
+
+              <div className="text-center mt-4">
+                <p className="text-sm text-muted-foreground">
+                  Já tem uma conta?{' '}
+                  <Link 
+                    to="/login" 
+                    className="text-neon-cyan hover:text-neon-cyan/80 font-medium transition-colors hover:underline"
+                  >
+                    Fazer login
+                  </Link>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

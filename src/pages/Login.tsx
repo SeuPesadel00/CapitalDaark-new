@@ -27,58 +27,99 @@ function Login() {
 
   return (
     <Layout hideNav>
-      <section id="login" className="fade-in container mx-auto px-4 py-12 md:py-24">
-        <h2 className="text-3xl md:text-5xl font-bold text-center mb-12 neon-text">Acesso ao Sistema</h2>
-        <div className="max-w-md mx-auto bg-gray-800 rounded-xl p-8 shadow-lg neon-border">
-          <form id="loginForm" onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-gray-300 text-sm font-bold mb-2">E-mail</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                className="w-full px-4 py-2 rounded-lg bg-card/80 text-neon-cyan placeholder:text-neon-cyan/60 border border-neon-cyan focus:outline-none focus:ring-2 focus:ring-neon-cyan transition"
-                placeholder="seu.email@exemplo.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-gray-300 text-sm font-bold mb-2">Senha</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                className="w-full px-4 py-2 rounded-lg bg-card/80 text-neon-cyan placeholder:text-neon-cyan/60 border border-neon-cyan focus:outline-none focus:ring-2 focus:ring-neon-cyan transition"
-                placeholder="Sua senha"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <div className="text-center">
-              <button type="submit" className="neon-button text-white font-bold py-3 px-10 rounded-full text-lg">
-                Entrar
-              </button>
-            </div>
-          </form>
-          <div id="message" className="mt-4 text-center text-sm font-semibold text-red-400">
-            {message}
+      <section id="login" className="min-h-screen flex items-center justify-center px-4 bg-gradient-primary">
+        <div className="w-full max-w-md">
+          {/* Header com animação */}
+          <div className="text-center mb-8 animate-fade-in">
+            <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-neon-cyan glow-neon mb-2">
+              Bem-vindo
+            </h1>
+            <p className="text-muted-foreground">Acesse sua conta para continuar</p>
           </div>
-          <div className="mt-6 text-center text-gray-400">
-            <p className="mb-2">
-              Esqueceu sua senha?{' '}
-              <Link to="/recover-password" className="text-cyan-400 hover:underline">
-                Recuperar
-              </Link>
-            </p>
-            <p>
-              Não tem uma conta?{' '}
-              <Link to="/register" className="text-purple-400 hover:underline">
-                Registre-se
-              </Link>
-            </p>
+
+          {/* Card de login com glass effect */}
+          <div className="glass rounded-2xl p-8 shadow-neon border border-neon-cyan/20 animate-scale-in">
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div className="space-y-4">
+                <div className="group">
+                  <label htmlFor="email" className="text-sm font-medium text-neon-cyan/80 block mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    className="w-full px-4 py-3 rounded-xl bg-background/50 border border-neon-cyan/30 text-foreground placeholder:text-muted-foreground focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan/20 transition-all duration-300 hover:border-neon-cyan/50"
+                    placeholder="seu@email.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                
+                <div className="group">
+                  <label htmlFor="password" className="text-sm font-medium text-neon-cyan/80 block mb-2">
+                    Senha
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    className="w-full px-4 py-3 rounded-xl bg-background/50 border border-neon-cyan/30 text-foreground placeholder:text-muted-foreground focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan/20 transition-all duration-300 hover:border-neon-cyan/50"
+                    placeholder="••••••••"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                className="w-full bg-gradient-primary text-white font-semibold py-3 px-6 rounded-xl hover:scale-105 transition-all duration-300 shadow-neon hover:shadow-glow border border-neon-cyan/30"
+              >
+                Entrar na Conta
+              </button>
+            </form>
+
+            {message && (
+              <div className={`mt-4 text-center text-sm font-medium animate-fade-in ${
+                message.includes('sucesso') ? 'text-neon-green' : 'text-destructive'
+              }`}>
+                {message}
+              </div>
+            )}
+
+            {/* Links */}
+            <div className="mt-8 space-y-4">
+              <div className="text-center">
+                <Link 
+                  to="/recover-password" 
+                  className="text-sm text-neon-cyan hover:text-neon-cyan/80 transition-colors hover:underline"
+                >
+                  Esqueceu sua senha?
+                </Link>
+              </div>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border/50"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">ou</span>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  Não tem uma conta?{' '}
+                  <Link 
+                    to="/register" 
+                    className="text-neon-purple hover:text-neon-purple/80 font-medium transition-colors hover:underline"
+                  >
+                    Criar conta
+                  </Link>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
