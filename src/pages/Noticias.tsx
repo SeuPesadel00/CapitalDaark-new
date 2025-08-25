@@ -4,7 +4,9 @@ function Noticias() {
   return (
     <Layout>
       <section className="fade-in container mx-auto px-4 py-12 md:py-24">
-        <h2 className="text-3xl md:text-5xl font-bold text-center mb-12 neon-text">Notícias</h2>
+        <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-neon-cyan mb-4 text-center">
+          <span className="text-neon-purple">Notícias</span>
+        </h1>
         <div className="max-w-2xl mx-auto bg-gray-800 rounded-xl p-8 shadow-lg neon-border">
           <div className="space-y-8">
             {/* Exemplo de notícia */}

@@ -58,9 +58,9 @@ const Header = ({ hideNav = false }: HeaderProps) => {
             </nav>
           )}
 
-          {/* Desktop Actions */}
+          {/* Desktop Actions - Hidden on small to medium screens, shown from large */}
           {!hideNav && (
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden lg:flex items-center space-x-4">
               {/* Cart Button */}
               <Button
                 variant="outline"
@@ -114,6 +114,25 @@ const Header = ({ hideNav = false }: HeaderProps) => {
             </div>
           )}
 
+          {/* Mobile/Tablet Actions - Show cart on medium screens */}
+          {!hideNav && (
+            <div className="hidden md:flex lg:hidden items-center space-x-4">
+              <Button
+                variant="outline"
+                size="icon"
+                className="relative border-neon-cyan/30 hover:border-neon-cyan hover:bg-neon-cyan/10"
+                onClick={() => navigate('/carrinho')}
+              >
+                <ShoppingCart className="h-5 w-5 text-neon-cyan" />
+                {totalItensCarrinho > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-neon-green text-xs rounded-full w-5 h-5 flex items-center justify-center text-white font-bold">
+                    {totalItensCarrinho}
+                  </span>
+                )}
+              </Button>
+            </div>
+          )}
+
           {/* Mobile Menu Button */}
           {!hideNav && (
             <Button
@@ -162,7 +181,10 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                   variant="outline"
                   size="sm"
                   className="flex-1 border-neon-purple/30 hover:border-neon-purple"
-                  onClick={() => navigate('/configuracoes')}
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    navigate('/');
+                  }}
                 >
                   <User className="h-4 w-4 mr-2 text-neon-purple" />
                   Perfil

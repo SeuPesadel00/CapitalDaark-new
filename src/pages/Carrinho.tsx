@@ -73,9 +73,9 @@ function Carrinho() {
           Carrinho de Compras ({produtos.length})
         </h1>
         
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
           {/* Lista de Produtos */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-4 min-w-0">
             <div className="bg-card rounded-lg border border-border shadow-sm">
               <div className="p-6 border-b border-border">
                 <div className="flex items-center justify-between">
@@ -96,55 +96,57 @@ function Carrinho() {
               
               <div className="divide-y divide-border">
                 {produtos.map(produto => (
-                  <div key={produto.id} className="p-6 flex items-center gap-4">
-                    <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center">
-                      <Package className="w-8 h-8 text-muted-foreground" />
+                  <div key={produto.id} className="p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="w-16 h-16 md:w-20 md:h-20 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Package className="w-6 h-6 md:w-8 md:h-8 text-muted-foreground" />
                     </div>
                     
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-foreground truncate">{produto.nome}</h3>
-                      <p className="text-2xl font-bold text-primary mt-1">
+                    <div className="flex-1 min-w-0 w-full sm:w-auto">
+                      <h3 className="font-medium text-foreground truncate text-sm md:text-base">{produto.nome}</h3>
+                      <p className="text-lg md:text-2xl font-bold text-primary mt-1">
                         R$ {produto.preco.toFixed(2)}
                       </p>
                     </div>
                     
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center border border-border rounded-lg">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+                      <div className="flex items-center justify-between w-full sm:w-auto gap-3">
+                        <div className="flex items-center border border-border rounded-lg">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleAlterarQuantidade(produto.id, produto.quantidade - 1)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </Button>
+                          <span className="px-2 md:px-3 py-1 min-w-[2.5rem] md:min-w-[3rem] text-center text-foreground text-sm md:text-base">
+                            {produto.quantidade}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleAlterarQuantidade(produto.id, produto.quantidade + 1)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleAlterarQuantidade(produto.id, produto.quantidade - 1)}
-                          className="h-8 w-8 p-0"
+                          onClick={() => handleRemoverProduto(produto.id)}
+                          className="text-destructive hover:text-destructive-foreground hover:bg-destructive/10 h-8 w-8 p-0"
                         >
-                          <Minus className="w-4 h-4" />
-                        </Button>
-                        <span className="px-3 py-1 min-w-[3rem] text-center text-foreground">
-                          {produto.quantidade}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleAlterarQuantidade(produto.id, produto.quantidade + 1)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Plus className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                       
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoverProduto(produto.id)}
-                        className="text-destructive hover:text-destructive-foreground hover:bg-destructive/10 h-8 w-8 p-0"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    
-                    <div className="text-right min-w-[100px]">
-                      <p className="text-lg font-bold text-foreground">
-                        R$ {(produto.preco * produto.quantidade).toFixed(2)}
-                      </p>
+                      <div className="text-left sm:text-right w-full sm:min-w-[100px]">
+                        <p className="text-base md:text-lg font-bold text-foreground">
+                          R$ {(produto.preco * produto.quantidade).toFixed(2)}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -153,7 +155,7 @@ function Carrinho() {
           </div>
 
           {/* Resumo do Pedido */}
-          <div className="space-y-6">
+          <div className="space-y-4 lg:space-y-6">
             <div className="bg-card rounded-lg border border-border shadow-sm">
               <div className="p-6 border-b border-border">
                 <h2 className="text-xl font-semibold text-foreground">Resumo do Pedido</h2>
