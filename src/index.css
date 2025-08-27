@@ -7,7 +7,7 @@
 /* Design System - Capital Dark Theme */
 @layer base {
   :root {
-    /* Dark modern theme with softer accents */
+    /* Dark modern theme with brighter accents */
     --background: 220 27% 8%;
     --foreground: 210 40% 95%;
 
@@ -17,48 +17,50 @@
     --popover: 220 27% 12%;
     --popover-foreground: 210 40% 95%;
 
-    /* Softer Primary - Cyan */
-    --primary: 195 60% 45%;
+    /* Neon Primary - Cyan */
+    --primary: 195 100% 55%;
     --primary-foreground: 220 27% 8%;
-    --primary-glow: 195 60% 60%;
+    --primary-glow: 195 100% 70%;
 
-    /* Softer Secondary - Purple */
-    --secondary: 280 50% 55%;
+    /* Neon Secondary - Purple */
+    --secondary: 280 80% 65%;
     --secondary-foreground: 220 27% 8%;
-    --secondary-glow: 280 50% 70%;
+    --secondary-glow: 280 80% 80%;
 
-    /* Softer Accent - Green */
-    --accent: 142 60% 45%;
+    /* Neon Accent - Green */
+    --accent: 142 100% 55%;
     --accent-foreground: 220 27% 8%;
-    --accent-glow: 142 60% 60%;
+    --accent-glow: 142 100% 70%;
 
     --muted: 220 27% 15%;
     --muted-foreground: 215 20% 60%;
 
-    --destructive: 0 60% 55%;
+    --destructive: 0 80% 60%;
     --destructive-foreground: 220 27% 8%;
 
     --border: 220 27% 20%;
     --input: 220 27% 18%;
-    --ring: 195 60% 45%;
+    --ring: 195 100% 55%;
 
     --radius: 0.75rem;
 
-    /* Softer neon colors */
-    --neon-cyan: 195 60% 45%;
-    --neon-purple: 280 50% 55%;
-    --neon-green: 142 60% 45%;
-    --neon-pink: 320 50% 55%;
-    --neon-orange: 30 60% 55%;
+    /* Neon colors */
+    --neon-cyan: 195 100% 55%;
+    --neon-purple: 280 80% 65%;
+    --neon-green: 142 100% 55%;
+    --neon-pink: 320 80% 65%;
+    --neon-orange: 30 100% 65%;
 
-    /* Subtle gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(195, 40%, 35%), hsl(280, 35%, 45%));
-    --gradient-secondary: linear-gradient(135deg, hsl(280, 35%, 45%), hsl(320, 35%, 50%));
-    --gradient-accent: linear-gradient(135deg, hsl(142, 40%, 35%), hsl(195, 40%, 35%));
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(195, 80%, 45%), hsl(280, 80%, 55%));
+    --gradient-secondary: linear-gradient(135deg, hsl(280, 80%, 55%), hsl(320, 80%, 60%));
+    --gradient-accent: linear-gradient(135deg, hsl(145, 70%, 13%), hsl(195, 80%, 45%));
     --gradient-dark: linear-gradient(135deg, hsl(220 27% 8%), hsl(220 27% 12%));
 
-    /* Softer shadows and glows */
-    --shadow-neon: 0 0 15px hsl(var(--primary) / 0.2);
+    /* Stronger shadows and glows */
+    --shadow-neon: 0 0 24px hsl(var(--primary) / 0.7);
+    --shadow-neon-purple: 0 0 24px hsl(var(--neon-purple) / 0.7);
+    --shadow-neon-green: 0 0 24px hsl(var(--neon-green) / 0.7);
     --shadow-soft: 0 4px 20px hsl(220 27% 4% / 0.4);
     --shadow-elegant: 0 10px 40px -10px hsl(220 27% 8% / 0.3);
 
@@ -68,12 +70,12 @@
 
     --sidebar-background: 220 27% 10%;
     --sidebar-foreground: 210 40% 95%;
-    --sidebar-primary: 195 60% 45%;
+    --sidebar-primary: 195 100% 55%;
     --sidebar-primary-foreground: 220 27% 8%;
     --sidebar-accent: 220 27% 15%;
     --sidebar-accent-foreground: 210 40% 95%;
     --sidebar-border: 220 27% 20%;
-    --sidebar-ring: 195 60% 45%;
+    --sidebar-ring: 195 100% 55%;
   }
 
   .dark {
@@ -98,7 +100,7 @@
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 80% 60%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
@@ -157,17 +159,20 @@
   /* Neon text effects */
   .text-neon-cyan {
     color: hsl(var(--neon-cyan));
-    text-shadow: 0 0 10px hsl(var(--neon-cyan) / 0.5);
+    text-shadow: 0 0 18px hsl(var(--neon-cyan) / 0.8), 0 0 2px #fff;
+    font-weight: 700;
   }
 
   .text-neon-purple {
     color: hsl(var(--neon-purple));
-    text-shadow: 0 0 10px hsl(var(--neon-purple) / 0.5);
+    text-shadow: 0 0 18px hsl(var(--neon-purple) / 0.8), 0 0 2px #fff;
+    font-weight: 700;
   }
 
   .text-neon-green {
     color: hsl(var(--neon-green));
-    text-shadow: 0 0 10px hsl(var(--neon-green) / 0.5);
+    text-shadow: 0 0 18px hsl(var(--neon-green) / 0.8), 0 0 2px #fff;
+    font-weight: 700;
   }
 
   /* Gradient backgrounds */
@@ -189,15 +194,15 @@
 
   /* Glow effects */
   .glow-neon {
-    box-shadow: var(--shadow-neon);
+    box-shadow: var(--shadow-neon), 0 0 8px #fff2;
   }
 
   .glow-neon-purple {
-    box-shadow: var(--shadow-neon-purple);
+    box-shadow: var(--shadow-neon-purple), 0 0 8px #fff2;
   }
 
   .glow-neon-green {
-    box-shadow: var(--shadow-neon-green);
+    box-shadow: var(--shadow-neon-green), 0 0 8px #fff2;
   }
 
   /* Hover animations */
@@ -206,8 +211,9 @@
   }
 
   .hover-glow:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px hsl(var(--primary) / 0.3);
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 10px 40px hsl(var(--primary-glow) / 0.5), 0 0 12px #fff3;
+    filter: brightness(1.2);
   }
 
   /* Animated border */

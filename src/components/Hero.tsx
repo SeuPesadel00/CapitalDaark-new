@@ -23,7 +23,7 @@ const Hero = () => {
           {/* Main heading */}
           <h1 className="text-5xl md:text-7xl font-orbitron font-bold mb-6 leading-tight">
             <span className="text-neon-cyan">Capital</span>
-            <span className="text-neon-purple">Dark</span>
+            <span className="text-neon-purple">Daark</span>
             <br />
             <span className="text-2xl md:text-4xl font-inter font-light text-foreground/80">
               O futuro é agora

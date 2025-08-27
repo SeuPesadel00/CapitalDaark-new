@@ -29,16 +29,19 @@ const Header = ({ hideNav = false }: HeaderProps) => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border/20">
+    <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border/20 shadow-[0_0_32px_0_hsl(var(--primary)/0.25)]">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <span className="text-2xl font-orbitron font-bold text-primary-foreground">C</span>
+          {/* Logo - AGORA CLICÁVEL */}
+          <div 
+            className="flex items-center space-x-2 cursor-pointer"
+            onClick={() => navigate('/')}
+          >
+            <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center shadow-[0_0_16px_0_hsl(var(--primary-glow)/0.7)]">
+              <span className="text-2xl font-orbitron font-bold text-primary-foreground text-shadow-neon-cyan">C</span>
             </div>
-            <span className="text-2xl font-orbitron font-bold text-neon-cyan">
-              Capital<span className="text-neon-purple">Dark</span>
+            <span className="text-2xl font-orbitron font-bold text-neon-cyan text-shadow-neon-cyan">
+              Capital<span className="text-neon-purple text-shadow-neon-purple">Daark</span>
             </span>
           </div>
 
@@ -49,7 +52,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                 <Button
                   key={item.label}
                   variant="ghost"
-                  className="text-foreground hover:text-neon-cyan transition-colors font-medium"
+                  className="text-foreground hover:text-neon-cyan hover:scale-105 transition-all font-medium text-shadow-neon-cyan"
                   onClick={() => navigate(item.href)}
                 >
                   {item.label}
@@ -58,19 +61,19 @@ const Header = ({ hideNav = false }: HeaderProps) => {
             </nav>
           )}
 
-          {/* Desktop Actions - Hidden on small to medium screens, shown from large */}
+          {/* Desktop Actions */}
           {!hideNav && (
             <div className="hidden lg:flex items-center space-x-4">
               {/* Cart Button */}
               <Button
                 variant="outline"
                 size="icon"
-                className="relative border-neon-cyan/30 hover:border-neon-cyan hover:bg-neon-cyan/10"
+                className="relative border-neon-cyan/50 hover:border-neon-cyan hover:bg-neon-cyan/10 shadow-[0_0_16px_0_hsl(var(--neon-cyan)/0.5)]"
                 onClick={() => navigate('/carrinho')}
               >
-                <ShoppingCart className="h-5 w-5 text-neon-cyan" />
+                <ShoppingCart className="h-5 w-5 text-neon-cyan drop-shadow-[0_0_8px_hsl(var(--neon-cyan)/0.7)]" />
                 {totalItensCarrinho > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-neon-green text-xs rounded-full w-5 h-5 flex items-center justify-center text-white font-bold">
+                  <span className="absolute -top-2 -right-2 bg-neon-green text-xs rounded-full w-5 h-5 flex items-center justify-center text-white font-bold shadow-[0_0_8px_0_hsl(var(--neon-green)/0.7)]">
                     {totalItensCarrinho}
                   </span>
                 )}
@@ -82,29 +85,29 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="border-neon-purple/30 hover:border-neon-purple hover:bg-neon-purple/10"
+                    className="border-neon-purple/50 hover:border-neon-purple hover:bg-neon-purple/10 shadow-[0_0_16px_0_hsl(var(--neon-purple)/0.5)]"
                   >
-                    <User className="h-5 w-5 text-neon-purple" />
+                    <User className="h-5 w-5 text-neon-purple drop-shadow-[0_0_8px_hsl(var(--neon-purple)/0.7)]" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-card border-border/20">
+                <DropdownMenuContent align="end" className="w-56 bg-card border-border/20 shadow-[0_0_24px_0_hsl(var(--primary-glow)/0.2)]">
                   <DropdownMenuItem
                     onClick={() => navigate('/configuracoes')}
-                    className="cursor-pointer hover:bg-muted/50"
+                    className="cursor-pointer hover:bg-muted/50 text-neon-cyan text-shadow-neon-cyan"
                   >
                     <Settings className="mr-2 h-4 w-4 text-neon-cyan" />
                     Configurações
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => navigate('/dados-pessoais')}
-                    className="cursor-pointer hover:bg-muted/50"
+                    className="cursor-pointer hover:bg-muted/50 text-neon-green text-shadow-neon-green"
                   >
                     <UserCircle className="mr-2 h-4 w-4 text-neon-green" />
                     Dados Pessoais
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => navigate('/login')}
-                    className="cursor-pointer hover:bg-muted/50 text-destructive"
+                    className="cursor-pointer hover:bg-muted/50 text-destructive font-bold"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sair
@@ -114,18 +117,18 @@ const Header = ({ hideNav = false }: HeaderProps) => {
             </div>
           )}
 
-          {/* Mobile/Tablet Actions - Show cart on medium screens */}
+          {/* Mobile/Tablet Actions */}
           {!hideNav && (
             <div className="hidden md:flex lg:hidden items-center space-x-4">
               <Button
                 variant="outline"
                 size="icon"
-                className="relative border-neon-cyan/30 hover:border-neon-cyan hover:bg-neon-cyan/10"
+                className="relative border-neon-cyan/50 hover:border-neon-cyan hover:bg-neon-cyan/10 shadow-[0_0_16px_0_hsl(var(--neon-cyan)/0.5)]"
                 onClick={() => navigate('/carrinho')}
               >
-                <ShoppingCart className="h-5 w-5 text-neon-cyan" />
+                <ShoppingCart className="h-5 w-5 text-neon-cyan drop-shadow-[0_0_8px_hsl(var(--neon-cyan)/0.7)]" />
                 {totalItensCarrinho > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-neon-green text-xs rounded-full w-5 h-5 flex items-center justify-center text-white font-bold">
+                  <span className="absolute -top-2 -right-2 bg-neon-green text-xs rounded-full w-5 h-5 flex items-center justify-center text-white font-bold shadow-[0_0_8px_0_hsl(var(--neon-green)/0.7)]">
                     {totalItensCarrinho}
                   </span>
                 )}
@@ -142,9 +145,9 @@ const Header = ({ hideNav = false }: HeaderProps) => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? (
-                <X className="h-6 w-6 text-neon-cyan" />
+                <X className="h-6 w-6 text-neon-cyan drop-shadow-[0_0_8px_hsl(var(--neon-cyan)/0.7)]" />
               ) : (
-                <Menu className="h-6 w-6 text-neon-cyan" />
+                <Menu className="h-6 w-6 text-neon-cyan drop-shadow-[0_0_8px_hsl(var(--neon-cyan)/0.7)]" />
               )}
             </Button>
           )}
@@ -158,7 +161,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                 <Button
                   key={item.label}
                   variant="ghost"
-                  className="justify-start text-foreground hover:text-neon-cyan transition-colors"
+                  className="justify-start text-foreground hover:text-neon-cyan hover:scale-105 transition-all text-shadow-neon-cyan"
                   onClick={() => {
                     navigate(item.href);
                     setIsMobileMenuOpen(false);
@@ -171,7 +174,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-neon-cyan/30 hover:border-neon-cyan"
+                  className="flex-1 border-neon-cyan/50 hover:border-neon-cyan shadow-[0_0_12px_0_hsl(var(--neon-cyan)/0.5)]"
                   onClick={() => navigate('/carrinho')}
                 >
                   <ShoppingCart className="h-4 w-4 mr-2 text-neon-cyan" />
@@ -180,7 +183,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-neon-purple/30 hover:border-neon-purple"
+                  className="flex-1 border-neon-purple/50 hover:border-neon-purple shadow-[0_0_12px_0_hsl(var(--neon-purple)/0.5)]"
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     navigate('/');
@@ -192,7 +195,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-destructive/30 hover:border-destructive"
+                  className="flex-1 border-destructive/50 hover:border-destructive shadow-[0_0_12px_0_hsl(var(--destructive)/0.5)]"
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     navigate('/login');
