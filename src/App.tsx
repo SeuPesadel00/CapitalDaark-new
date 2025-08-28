@@ -18,6 +18,7 @@ import Carrinho from "./pages/Carrinho";
 import Checkout from "./pages/Checkout";
 import NoticiaDetalhes from "./pages/NoticiaDetalhes";
 import { CartProvider } from "./context/CartContext";
+import UserHome from "./pages/UserHome"; // Adicione esta importação
 
 const queryClient = new QueryClient();
 
@@ -29,22 +30,23 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Rotas públicas */}
+            {/* Rotas Públicas */}
             <Route path="/" element={<Login />} />
-            <Route path="/" element={<Index />} />
             <Route path="/register" element={<Register />} />
             <Route path="/recover-password" element={<RecoverPassword />} />
-            <Route path="/noticia/:id" element={<NoticiaDetalhes />} />
-            <Route path="/sobre" element={<Sobre />} />
+            <Route path="/loja" element={<Loja />} />
             <Route path="/contatos" element={<Contatos />} />
+            <Route path="/sobre" element={<Sobre />} />
             <Route path="/carrinho" element={<Carrinho />} />
             <Route path="/checkout" element={<Checkout />} />
-            {/* Rotas protegidas */}
+            <Route path="/noticia/:id" element={<NoticiaDetalhes />} />
+
+            {/* Rotas Protegidas - Use o AuthGuard para garantir que apenas usuários logados acessem */}
             <Route
-              path="/loja"
+              path="/user-home" // Corrigido para /user-home
               element={
                 <AuthGuard>
-                  <Loja />
+                  <UserHome />
                 </AuthGuard>
               }
             />
@@ -64,6 +66,8 @@ const App = () => (
                 </AuthGuard>
               }
             />
+
+            {/* Rota para lidar com URLs não encontradas */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
