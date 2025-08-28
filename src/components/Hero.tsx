@@ -47,12 +47,15 @@ const Hero = () => {
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button 
-              variant="outline" 
-              size="lg"
-              className="border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10 text-lg px-8 py-6 rounded-xl font-semibold"
-              onClick={() => navigate('/sobre')}
+              size="lg" 
+              className="bg-gradient-primary hover:bg-gradient-secondary text-lg px-8 py-6 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl group"
+              onClick={() => {
+                const newsSection = document.getElementById('news-section');
+                newsSection?.scrollIntoView({ behavior: 'smooth' });
+              }}
             >
-              Saiba Mais
+              Notícias
+              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
 
