@@ -1,3 +1,5 @@
+// frontend/src/pages/Login.tsx
+
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
@@ -45,12 +47,14 @@ function Login() {
     <Layout hideNav>
       <section id="login" className="min-h-screen flex items-center justify-center px-4 bg-background">
         <div className="w-full max-w-md">
+          {/* Header com animação */}
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-primary mb-2">
               Bem-vindo
             </h1>
             <p className="text-muted-foreground">Acesse sua conta para continuar</p>
           </div>
+          {/* Card de login com glass effect */}
           <div className="bg-card rounded-2xl p-8 shadow-soft border border-border animate-scale-in">
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-4">
