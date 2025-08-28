@@ -30,7 +30,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             {/* Rotas públicas */}
-            <Route path="/login" element={<Index />} />
+            <Route path="/" element={<Login />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/recover-password" element={<RecoverPassword />} />
