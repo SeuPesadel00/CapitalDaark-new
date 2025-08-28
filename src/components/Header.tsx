@@ -23,7 +23,6 @@ const Header = ({ hideNav = false }: HeaderProps) => {
   const navItems = [
     { label: 'Início', href: '/' },
     { label: 'Loja', href: '/loja' },
-    { label: 'Notícias', href: '/noticias' },
     { label: 'Sobre Nós', href: '/sobre' },
     { label: 'Contatos', href: '/contatos' },
   ];

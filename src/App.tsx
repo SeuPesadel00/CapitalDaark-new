@@ -12,11 +12,11 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import RecoverPassword from "./pages/RecoverPassword";
 import AuthGuard from "./pages/AuthGuard";
-import Noticias from "./pages/Noticias";
 import Sobre from "./pages/Sobre";
 import Contatos from "./pages/Contatos";
 import Carrinho from "./pages/Carrinho";
 import Checkout from "./pages/Checkout";
+import NoticiaDetalhes from "./pages/NoticiaDetalhes";
 import { CartProvider } from "./context/CartContext";
 
 const queryClient = new QueryClient();
@@ -34,7 +34,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/recover-password" element={<RecoverPassword />} />
-            <Route path="/noticias" element={<Noticias />} />
+            <Route path="/noticia/:id" element={<NoticiaDetalhes />} />
             <Route path="/sobre" element={<Sobre />} />
             <Route path="/contatos" element={<Contatos />} />
             <Route path="/carrinho" element={<Carrinho />} />
