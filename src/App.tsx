@@ -31,7 +31,7 @@ const App = () => (
           <Routes>
             {/* Rotas públicas */}
             <Route path="/" element={<Login />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Index />} />
             <Route path="/register" element={<Register />} />
             <Route path="/recover-password" element={<RecoverPassword />} />
             <Route path="/noticia/:id" element={<NoticiaDetalhes />} />
