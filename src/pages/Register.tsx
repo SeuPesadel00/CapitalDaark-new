@@ -27,7 +27,10 @@ function Register() {
 
       if (response.ok) {
         setMessage(data.message);
-        navigate('/Index');
+        // Redireciona para a página de login após o registro
+        setTimeout(() => {
+            navigate('/login');
+        }, 1500);
       } else {
         setMessage(data.message || 'Erro no registro.');
       }
@@ -41,15 +44,12 @@ function Register() {
     <Layout hideNav>
       <section className="min-h-screen flex items-center justify-center px-4 bg-background">
         <div className="w-full max-w-md">
-          {/* Header com animação */}
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-secondary mb-2">
               Junte-se a Nós
             </h1>
             <p className="text-muted-foreground">Crie sua conta e comece sua jornada</p>
           </div>
-
-          {/* Card de registro com glass effect */}
           <div className="bg-card rounded-2xl p-8 shadow-soft border border-border animate-scale-in">
             <form onSubmit={handleRegister} className="space-y-6">
               <div className="space-y-4">
@@ -68,7 +68,6 @@ function Register() {
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
-                
                 <div className="group">
                   <label htmlFor="username" className="text-sm font-medium text-secondary block mb-2">
                     Nome de Usuário
@@ -84,7 +83,6 @@ function Register() {
                     onChange={(e) => setUsername(e.target.value)}
                   />
                 </div>
-
                 <div className="group">
                   <label htmlFor="password" className="text-sm font-medium text-secondary block mb-2">
                     Senha
@@ -101,7 +99,6 @@ function Register() {
                   />
                 </div>
               </div>
-
               <button 
                 type="submit" 
                 className="w-full bg-secondary text-secondary-foreground font-semibold py-3 px-6 rounded-xl hover:bg-secondary/90 transition-all duration-300 shadow-soft border border-secondary/30"
@@ -109,7 +106,6 @@ function Register() {
                 Criar Minha Conta
               </button>
             </form>
-
             {message && (
               <div className={`mt-4 text-center text-sm font-medium animate-fade-in ${
                 message.includes('sucesso') || message.includes('Registrando') ? 'text-accent' : 'text-destructive'
@@ -117,8 +113,6 @@ function Register() {
                 {message}
               </div>
             )}
-
-            {/* Links */}
             <div className="mt-8">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
@@ -128,7 +122,6 @@ function Register() {
                   <span className="bg-background px-2 text-muted-foreground">ou</span>
                 </div>
               </div>
-
               <div className="text-center mt-4">
                 <p className="text-sm text-muted-foreground">
                   Já tem uma conta?{' '}

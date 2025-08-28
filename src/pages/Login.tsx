@@ -2,26 +2,42 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 
-const TEST_USER = {
-  email: 'teste@email.com',
-  password: '123456'
-};
-
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (email === TEST_USER.email && password === TEST_USER.password) {
-      setMessage('Login realizado com sucesso!');
-      localStorage.setItem('token', 'fake-token');
-      navigate('/'); // Redireciona para uma página protegida
-    } else {
-      setMessage('Usuário ou senha inválidos.');
+    setMessage('Tentando login...');
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(data.message);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('username', data.username);
+        
+        setTimeout(() => {
+          navigate('/user-home'); 
+        }, 1500); 
+      } else {
+        setMessage(data.message || 'Erro no login.');
+      }
+    } catch (error) {
+      console.error('Erro na requisição de login:', error);
+      setMessage('Erro de conexão com o servidor.');
     }
   };
 
@@ -29,15 +45,12 @@ function Login() {
     <Layout hideNav>
       <section id="login" className="min-h-screen flex items-center justify-center px-4 bg-background">
         <div className="w-full max-w-md">
-          {/* Header com animação */}
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-primary mb-2">
               Bem-vindo
             </h1>
             <p className="text-muted-foreground">Acesse sua conta para continuar</p>
           </div>
-
-          {/* Card de login com glass effect */}
           <div className="bg-card rounded-2xl p-8 shadow-soft border border-border animate-scale-in">
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-4">
@@ -55,7 +68,6 @@ function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
-                
                 <div className="group">
                   <label htmlFor="password" className="text-sm font-medium text-primary block mb-2">
                     Senha
@@ -71,7 +83,6 @@ function Login() {
                   />
                 </div>
               </div>
-
               <button 
                 type="submit" 
                 className="w-full bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-soft border border-primary/30"
@@ -79,7 +90,6 @@ function Login() {
                 Entrar na Conta
               </button>
             </form>
-
             {message && (
               <div className={`mt-4 text-center text-sm font-medium animate-fade-in ${
                 message.includes('sucesso') ? 'text-accent' : 'text-destructive'
@@ -87,8 +97,6 @@ function Login() {
                 {message}
               </div>
             )}
-
-            {/* Links */}
             <div className="mt-8 space-y-4">
               <div className="text-center">
                 <Link 
@@ -98,7 +106,6 @@ function Login() {
                   Esqueceu sua senha?
                 </Link>
               </div>
-              
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-border/50"></div>
@@ -107,7 +114,6 @@ function Login() {
                   <span className="bg-background px-2 text-muted-foreground">ou</span>
                 </div>
               </div>
-
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">
                   Não tem uma conta?{' '}

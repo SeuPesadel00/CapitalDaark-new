@@ -1,3 +1,4 @@
+// frontend/src/App.tsx
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,7 +19,7 @@ import Carrinho from "./pages/Carrinho";
 import Checkout from "./pages/Checkout";
 import NoticiaDetalhes from "./pages/NoticiaDetalhes";
 import { CartProvider } from "./context/CartContext";
-import UserHome from "./pages/UserHome"; // Adicione esta importação
+import UserHome from "./pages/UserHome";
 
 const queryClient = new QueryClient();
 
@@ -31,7 +32,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             {/* Rotas Públicas */}
-            <Route path="/" element={<Login />} />
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/recover-password" element={<RecoverPassword />} />
             <Route path="/loja" element={<Loja />} />
@@ -41,9 +43,9 @@ const App = () => (
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/noticia/:id" element={<NoticiaDetalhes />} />
 
-            {/* Rotas Protegidas - Use o AuthGuard para garantir que apenas usuários logados acessem */}
+            {/* Rotas Protegidas - O AuthGuard só permite acesso se o usuário estiver logado */}
             <Route
-              path="/user-home" // Corrigido para /user-home
+              path="/user-home"
               element={
                 <AuthGuard>
                   <UserHome />
@@ -67,7 +69,7 @@ const App = () => (
               }
             />
 
-            {/* Rota para lidar com URLs não encontradas */}
+            {/* Rota para URLs não encontradas */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
