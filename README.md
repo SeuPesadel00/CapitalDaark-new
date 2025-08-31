@@ -1,10 +1,10 @@
-# Capital Daark
+# ⛬ Capital Daark
 
 Seja bem-vindo ao CapitalDaark, um portal digital futurista com uma estética cyberpunk e funcionalidades completas de um site moderno. Este projeto é uma prova de conceito que demonstra a criação de uma aplicação web full-stack utilizando as tecnologias mais atuais do mercado, com foco em segurança, experiência do usuário e design inovador.
 
 **O objetivo do CapitalDaark é simular um ambiente de notícias e e-commerce focado em tecnologia de ponta, acessível apenas a usuários registrados.**
 
-## 🛠️ Tecnologias Utilizadas
+# 🛠️ Tecnologias Utilizadas
 
 **Este projeto foi construído com uma arquitetura full-stack, separando o frontend e o backend para garantir escalabilidade e performance.**
 
@@ -27,12 +27,12 @@ Seja bem-vindo ao CapitalDaark, um portal digital futurista com uma estética cy
 - **Render:** Plataforma de hospedagem para o backend (API).
 - **Netlify:** Plataforma de hospedagem para o frontend.
 
-## ✨ Funcionalidades Principais
+# ✨ Funcionalidades Principais
 - **Autenticação de Usuário:** Sistema completo de registro e login com segurança via JWT.
 - **Rotas Protegidas:** Páginas como a user-home, loja e configurações são acessíveis somente a usuários autenticados, garantindo a privacidade e a segurança dos dados.
 - **Design Moderno:** Interface com um tema escuro e elementos neon, otimizada para uma experiência imersiva e responsiva em todos os dispositivos.
 - **Loja de Produtos:** Um espaço com produtos de alta tecnologia, demonstrando funcionalidades de um e-commerce.
 - **Gerenciamento de Estado:** Utilização de localStorage para armazenar tokens de autenticação e dados de usuário de forma segura.
 
-## 👤 Autor
+# 👤 Autor
 Este projeto foi desenvolvido e configurado por: **Arthur Henrique Gomes de Oliveira**
