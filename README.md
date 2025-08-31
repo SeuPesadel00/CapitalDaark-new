@@ -1,73 +1,38 @@
-# Welcome to your Lovable project
+# Capital Daark
 
-## Project info
+Seja bem-vindo ao CapitalDaark, um portal digital futurista com uma estética cyberpunk e funcionalidades completas de um site moderno. Este projeto é uma prova de conceito que demonstra a criação de uma aplicação web full-stack utilizando as tecnologias mais atuais do mercado, com foco em segurança, experiência do usuário e design inovador.
 
-**URL**: https://lovable.dev/projects/14a2d8fd-af91-4122-bf28-3270a0757260
+**O objetivo do CapitalDaark é simular um ambiente de notícias e e-commerce focado em tecnologia de ponta, acessível apenas a usuários registrados.**
 
-## How can I edit this code?
+## 🛠️ Tecnologias Utilizadas
 
-There are several ways of editing your application.
+**Este projeto foi construído com uma arquitetura full-stack, separando o frontend e o backend para garantir escalabilidade e performance.**
 
-**Use Lovable**
+### Frontend
+- **Vite:** uma ferramenta de build de alta performance.
+- **TypeScript:** uma linguagem que adiciona tipagem estática ao JavaScript.
+- **React:** uma biblioteca JavaScript para construir interfaces de usuário.
+- **React Router:** Biblioteca para gerenciar a navegação e o roteamento das páginas.
+- **shadcn-ui:** um conjunto de componentes reutilizáveis para interfaces.
+- **Tailwind CSS:** um framework CSS para estilização rápida e eficiente.## 
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/14a2d8fd-af91-4122-bf28-3270a0757260) and start prompting.
+### Back-end
+- **Node.js:** Ambiente de execução do JavaScript no servidor.
+- **Express.js:** Framework minimalista e flexível para a criação da API.
+- **jsonwebtoken (JWT):** Biblioteca para a criação e validação de tokens de segurança, essencial para autenticação.
+- **bcryptjs:** Biblioteca para o hash seguro de senhas.
 
-Changes made via Lovable will be committed automatically to this repo.
+### Banco de Dados & Deploy
+- **MongoDB Atlas:** Banco de dados NoSQL baseado em nuvem, utilizado para armazenar os dados de usuários e produtos.
+- **Render:** Plataforma de hospedagem para o backend (API).
+- **Netlify:** Plataforma de hospedagem para o frontend.
 
-**Use your preferred IDE**
+## ✨ Funcionalidades Principais
+- **Autenticação de Usuário:** Sistema completo de registro e login com segurança via JWT.
+- **Rotas Protegidas:** Páginas como a user-home, loja e configurações são acessíveis somente a usuários autenticados, garantindo a privacidade e a segurança dos dados.
+- **Design Moderno:** Interface com um tema escuro e elementos neon, otimizada para uma experiência imersiva e responsiva em todos os dispositivos.
+- **Loja de Produtos:** Um espaço com produtos de alta tecnologia, demonstrando funcionalidades de um e-commerce.
+- **Gerenciamento de Estado:** Utilização de localStorage para armazenar tokens de autenticação e dados de usuário de forma segura.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/14a2d8fd-af91-4122-bf28-3270a0757260) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 👤 Autor
+Este projeto foi desenvolvido e configurado por: **Arthur Henrique Gomes de Oliveira**
