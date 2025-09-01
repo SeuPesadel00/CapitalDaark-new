@@ -46,8 +46,7 @@ function RecoverPassword() {
 
   return (
     <Layout hideNav>
-      <section className="min-h-screen flex items-center justify-center px-4 bg-background">
-        <div className="w-full max-w-md">
+      <div className="w-full max-w-md px-4">
           {/* Header com animação */}
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-accent mb-2">
@@ -180,7 +179,6 @@ function RecoverPassword() {
             </div>
           </div>
         </div>
-      </section>
     </Layout>
   );
 }

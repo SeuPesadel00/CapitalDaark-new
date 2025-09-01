@@ -45,8 +45,7 @@ function Login() {
 
   return (
     <Layout hideNav>
-      <section id="login" className="min-h-screen flex items-center justify-center px-4 bg-background">
-        <div className="w-full max-w-md">
+      <div className="w-full max-w-md px-4">
           {/* Header com animação */}
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-primary mb-2">
@@ -132,7 +131,6 @@ function Login() {
             </div>
           </div>
         </div>
-      </section>
     </Layout>
   );
 }

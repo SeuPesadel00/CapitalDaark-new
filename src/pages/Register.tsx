@@ -42,8 +42,7 @@ function Register() {
 
   return (
     <Layout hideNav>
-      <section className="min-h-screen flex items-center justify-center px-4 bg-background">
-        <div className="w-full max-w-md">
+      <div className="w-full max-w-md px-4">
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-secondary mb-2">
               Junte-se a Nós
@@ -136,7 +135,6 @@ function Register() {
             </div>
           </div>
         </div>
-      </section>
     </Layout>
   );
 }

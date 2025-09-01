@@ -11,21 +11,28 @@ interface LayoutProps {
 const Layout = ({ children, hideNav = false }: LayoutProps) => {
   const navigate = useNavigate();
 
+  if (hideNav) {
+    // Layout especial para páginas de autenticação - sem rolagem
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
-      {!hideNav && (
-        <header className="bg-gray-900 bg-opacity-70 backdrop-blur-sm p-4 md:p-6 shadow-lg fixed w-full z-10">
-          <nav className="container mx-auto flex flex-col md:flex-row justify-between items-center">
-            {/* Logo agora com a fonte correta e clicável */}
-            <div 
-              className="text-2xl md:text-3xl font-orbitron font-bold text-white mb-4 md:mb-0 cursor-pointer"
-              onClick={() => navigate('/')} 
-            >
-              <span className="neon-text">Capital</span> <span className="text-purple-500">Daark</span>
-            </div>
-          </nav>
-        </header>
-      )}
+      <header className="bg-gray-900 bg-opacity-70 backdrop-blur-sm p-4 md:p-6 shadow-lg fixed w-full z-10">
+        <nav className="container mx-auto flex flex-col md:flex-row justify-between items-center">
+          {/* Logo agora com a fonte correta e clicável */}
+          <div 
+            className="text-2xl md:text-3xl font-orbitron font-bold text-white mb-4 md:mb-0 cursor-pointer"
+            onClick={() => navigate('/')} 
+          >
+            <span className="neon-text">Capital</span> <span className="text-purple-500">Daark</span>
+          </div>
+        </nav>
+      </header>
       
       <main className="flex-grow pt-24 pb-12 flex items-center justify-center">
         {children}
