@@ -1,42 +1,60 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 
 function Register() {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { signUp, user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/user-home');
+    }
+  }, [user, navigate]);
 
   const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    setMessage('Registrando...');
+    setLoading(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, username, password }),
+      const { error } = await signUp(email, password, {
+        username,
+        first_name: firstName,
+        last_name: lastName
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage(data.message);
-        // Redireciona para a página de login após o registro
-        setTimeout(() => {
-            navigate('/login');
-        }, 1500);
+      
+      if (error) {
+        toast({
+          title: "Erro no registro",
+          description: error.message,
+          variant: "destructive",
+        });
       } else {
-        setMessage(data.message || 'Erro no registro.');
+        toast({
+          title: "Conta criada com sucesso!",
+          description: "Verifique seu e-mail para confirmar a conta.",
+        });
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
       }
-    } catch (error) {
-      console.error('Erro na requisição de registro:', error);
-      setMessage('Erro de conexão com o servidor.');
+    } catch (error: any) {
+      toast({
+        title: "Erro no registro",
+        description: "Erro de conexão com o servidor.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,6 +83,36 @@ function Register() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="group">
+                  <label htmlFor="firstName" className="text-sm font-medium text-secondary block mb-2">
+                    Nome
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-secondary focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-secondary/70"
+                    placeholder="Seu primeiro nome"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                </div>
+                <div className="group">
+                  <label htmlFor="lastName" className="text-sm font-medium text-secondary block mb-2">
+                    Sobrenome
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-secondary focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-secondary/70"
+                    placeholder="Seu sobrenome"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
                   />
                 </div>
                 <div className="group">
@@ -100,18 +148,12 @@ function Register() {
               </div>
               <button 
                 type="submit" 
-                className="w-full bg-secondary text-secondary-foreground font-semibold py-3 px-6 rounded-xl hover:bg-secondary/90 transition-all duration-300 shadow-soft border border-secondary/30"
+                disabled={loading}
+                className="w-full bg-secondary text-secondary-foreground font-semibold py-3 px-6 rounded-xl hover:bg-secondary/90 transition-all duration-300 shadow-soft border border-secondary/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Criar Minha Conta
+                {loading ? 'Criando Conta...' : 'Criar Minha Conta'}
               </button>
             </form>
-            {message && (
-              <div className={`mt-4 text-center text-sm font-medium animate-fade-in ${
-                message.includes('sucesso') || message.includes('Registrando') ? 'text-accent' : 'text-destructive'
-              }`}>
-                {message}
-              </div>
-            )}
             <div className="mt-8">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">

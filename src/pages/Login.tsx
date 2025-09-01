@@ -1,45 +1,53 @@
 // frontend/src/pages/Login.tsx
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { signIn, user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/user-home');
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    setMessage('Tentando login...');
+    setLoading(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage(data.message);
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('username', data.username);
-        
-        setTimeout(() => {
-          navigate('/user-home'); 
-        }, 1500); 
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        toast({
+          title: "Erro no login",
+          description: error.message,
+          variant: "destructive",
+        });
       } else {
-        setMessage(data.message || 'Erro no login.');
+        toast({
+          title: "Login realizado com sucesso!",
+          description: "Redirecionando...",
+        });
+        navigate('/user-home');
       }
-    } catch (error) {
-      console.error('Erro na requisição de login:', error);
-      setMessage('Erro de conexão com o servidor.');
+    } catch (error: any) {
+      toast({
+        title: "Erro no login",
+        description: "Erro de conexão com o servidor.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,18 +96,12 @@ function Login() {
               </div>
               <button 
                 type="submit" 
-                className="w-full bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-soft border border-primary/30"
+                disabled={loading}
+                className="w-full bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-soft border border-primary/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Entrar na Conta
+                {loading ? 'Entrando...' : 'Entrar na Conta'}
               </button>
             </form>
-            {message && (
-              <div className={`mt-4 text-center text-sm font-medium animate-fade-in ${
-                message.includes('sucesso') ? 'text-accent' : 'text-destructive'
-              }`}>
-                {message}
-              </div>
-            )}
             <div className="mt-8 space-y-4">
               <div className="text-center">
                 <Link 

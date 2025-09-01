@@ -1,47 +1,56 @@
 // frontend/src/pages/RecoverPassword.tsx
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
-// Importe os componentes do Shadcn UI
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 
 function RecoverPassword() {
-  const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { resetPassword, user } = useAuth();
+  const { toast } = useToast();
 
-  // Simulação de envio de código
-  const handleSendCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // Aqui você faria a chamada para o backend
-    setMessage('Código de recuperação enviado para seu e-mail.');
-    setStep(2);
-  };
-
-  // Simulação de verificação de código
-  const handleVerifyCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // Aqui você faria a chamada para o backend
-    if (code === '123456') { // Substitua por sua lógica de verificação real
-      setMessage('Código verificado! Crie uma nova senha.');
-      setStep(3);
-    } else {
-      setMessage('Código inválido.');
+  useEffect(() => {
+    if (user) {
+      navigate('/user-home');
     }
-  };
+  }, [user, navigate]);
 
-  // Simulação de redefinição de senha
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui você faria a chamada para o backend
-    setMessage('Senha redefinida com sucesso! Faça login.');
-    setTimeout(() => navigate('/login'), 2000);
+    setLoading(true);
+
+    try {
+      const { error } = await resetPassword(email);
+      
+      if (error) {
+        toast({
+          title: "Erro na recuperação",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "E-mail enviado!",
+          description: "Verifique sua caixa de entrada para redefinir a senha.",
+        });
+        setTimeout(() => navigate('/login'), 2000);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erro na recuperação",
+        description: "Erro de conexão com o servidor.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,120 +62,37 @@ function RecoverPassword() {
               Recuperar Acesso
             </h1>
             <p className="text-muted-foreground">
-              {step === 1 && "Digite seu email para receber o código"}
-              {step === 2 && "Verifique seu email e digite o código"}
-              {step === 3 && "Crie uma nova senha segura"}
+              Digite seu email para receber o link de redefinição
             </p>
           </div>
 
           {/* Card de recuperação com glass effect */}
           <div className="bg-card rounded-2xl p-8 shadow-soft border border-border animate-scale-in">
-            {step === 1 && (
-              <form onSubmit={handleSendCode} className="space-y-6">
-                <div className="group">
-                  <Label htmlFor="email" className="text-sm font-medium text-accent block mb-2">
-                    Email cadastrado
-                  </Label>
-                  <Input
-                    type="email"
-                    id="email"
-                    name="email"
-                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent transition-all duration-300 hover:border-accent/70" // Correção aplicada aqui
-                    placeholder="seu@email.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-xl hover:bg-accent/90 transition-all duration-300 shadow-soft border border-accent/30"
-                >
-                  Enviar Código de Verificação
-                </Button>
-              </form>
-            )}
-
-            {step === 2 && (
-              <form onSubmit={handleVerifyCode} className="space-y-6">
-                <div className="group">
-                  <Label htmlFor="code" className="text-sm font-medium text-accent block mb-2">
-                    Código de verificação
-                  </Label>
-                  <Input
-                    type="text"
-                    id="code"
-                    name="code"
-                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent transition-all duration-300 hover:border-accent/70 text-center text-lg tracking-widest" // Correção aplicada aqui
-                    placeholder="123456"
-                    maxLength={6}
-                    required
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Código de 6 dígitos enviado para {email}
-                  </p>
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-xl hover:bg-accent/90 transition-all duration-300 shadow-soft border border-accent/30"
-                >
-                  Verificar Código
-                </Button>
-              </form>
-            )}
-
-            {step === 3 && (
-              <form onSubmit={handleResetPassword} className="space-y-6">
-                <div className="group">
-                  <Label htmlFor="newPassword" className="text-sm font-medium text-accent block mb-2">
-                    Nova senha
-                  </Label>
-                  <Input
-                    type="password"
-                    id="newPassword"
-                    name="newPassword"
-                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent transition-all duration-300 hover:border-accent/70" // Correção aplicada aqui
-                    placeholder="••••••••"
-                    required
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Escolha uma senha forte com pelo menos 8 caracteres
-                  </p>
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-xl hover:bg-accent/90 transition-all duration-300 shadow-soft border border-accent/30"
-                >
-                  Confirmar Nova Senha
-                </Button>
-              </form>
-            )}
-
-            {message && (
-              <div className={`mt-4 text-center text-sm font-medium animate-fade-in ${
-                message.includes('sucesso') || message.includes('enviado') || message.includes('verificado') ? 'text-accent' : 'text-destructive'
-              }`}>
-                {message}
+            <form onSubmit={handleResetPassword} className="space-y-6">
+              <div className="group">
+                <Label htmlFor="email" className="text-sm font-medium text-accent block mb-2">
+                  Email cadastrado
+                </Label>
+                <Input
+                  type="email"
+                  id="email"
+                  name="email"
+                  className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent transition-all duration-300 hover:border-accent/70"
+                  placeholder="seu@email.com"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
-            )}
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-xl hover:bg-accent/90 transition-all duration-300 shadow-soft border border-accent/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Enviando...' : 'Enviar Link de Recuperação'}
+              </Button>
+            </form>
 
-            {/* Progresso visual */}
-            <div className="mt-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs text-muted-foreground">Progresso</span>
-                <span className="text-xs text-muted-foreground">{step}/3</span>
-              </div>
-              <div className="w-full bg-background/30 rounded-full h-2">
-                <div
-                  className="bg-accent h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${(step / 3) * 100}%` }}
-                ></div>
-              </div>
-            </div>
 
             {/* Link de volta */}
             <div className="mt-8 text-center">

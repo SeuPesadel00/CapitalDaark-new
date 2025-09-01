@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -19,6 +20,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
   const totalItensCarrinho = produtos.reduce((acc, p) => acc + p.quantidade, 0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { user, profile, signOut } = useAuth();
 
   const navItems = [
     { label: 'Início', href: '/' },
@@ -28,12 +30,9 @@ const Header = ({ hideNav = false }: HeaderProps) => {
     { label: 'Contatos', href: '/contatos' },
   ];
 
-  // FUNÇÃO CORRIGIDA: Adicionamos { replace: true }
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    // Isso substitui a entrada atual no histórico do navegador,
-    // impedindo o "voltar" para a página anterior
+  // FUNÇÃO CORRIGIDA PARA USAR O SUPABASE
+  const handleLogout = async () => {
+    await signOut();
     navigate('/login', { replace: true });
   };
 
@@ -85,42 +84,70 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                 )}
               </Button>
 
-              {/* Profile Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              {/* User Info and Profile */}
+              {user ? (
+                <div className="flex items-center space-x-3">
+                  <span className="text-foreground font-medium">
+                    Olá, {profile?.first_name || user.email?.split('@')[0]}!
+                  </span>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="border-neon-purple/30 hover:border-neon-purple hover:bg-neon-purple/10"
+                      >
+                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                          <span className="text-primary-foreground text-xs font-medium">
+                            {profile?.first_name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
+                          </span>
+                        </div>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56 bg-card border-border/20">
+                      <DropdownMenuItem
+                        onClick={() => navigate('/user-profile')}
+                        className="cursor-pointer hover:bg-muted/50"
+                      >
+                        <UserCircle className="mr-2 h-4 w-4 text-neon-purple" />
+                        Meu Perfil
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => navigate('/configuracoes')}
+                        className="cursor-pointer hover:bg-muted/50"
+                      >
+                        <Settings className="mr-2 h-4 w-4 text-neon-cyan" />
+                        Configurações
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={signOut}
+                        className="cursor-pointer hover:bg-muted/50 text-destructive"
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sair
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
                   <Button
                     variant="outline"
-                    size="icon"
-                    className="border-neon-purple/30 hover:border-neon-purple hover:bg-neon-purple/10"
+                    size="sm"
+                    onClick={() => navigate('/login')}
+                    className="border-primary/30 hover:border-primary"
                   >
-                    <User className="h-5 w-5 text-neon-purple" />
+                    Entrar
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-card border-border/20">
-                  <DropdownMenuItem
-                    onClick={() => navigate('/configuracoes')}
-                    className="cursor-pointer hover:bg-muted/50"
+                  <Button
+                    size="sm"
+                    onClick={() => navigate('/register')}
+                    className="bg-secondary text-secondary-foreground"
                   >
-                    <Settings className="mr-2 h-4 w-4 text-neon-cyan" />
-                    Configurações
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => navigate('/dados-pessoais')}
-                    className="cursor-pointer hover:bg-muted/50"
-                  >
-                    <UserCircle className="mr-2 h-4 w-4 text-neon-green" />
-                    Dados Pessoais
-                  </DropdownMenuItem>
-                  {/* BOTÃO "SAIR" AGORA CHAMA A FUNÇÃO DE LOGOUT */}
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    className="cursor-pointer hover:bg-muted/50 text-destructive"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sair
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    Cadastrar
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
@@ -199,15 +226,15 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                   <User className="h-4 w-4 mr-2 text-neon-purple" />
                   Perfil
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 border-destructive/30 hover:border-destructive"
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    navigate('/login');
-                  }}
-                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 border-destructive/30 hover:border-destructive"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                  >
                   <LogOut className="h-4 w-4 mr-2 text-destructive" />
                   Sair
                 </Button>
