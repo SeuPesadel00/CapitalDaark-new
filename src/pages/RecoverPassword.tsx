@@ -1,6 +1,12 @@
+// frontend/src/pages/RecoverPassword.tsx
+
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
+// Importe os componentes do Shadcn UI
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 function RecoverPassword() {
   const [step, setStep] = useState(1);
@@ -22,7 +28,7 @@ function RecoverPassword() {
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     // Aqui você faria a chamada para o backend
-    if (code === '123456') {
+    if (code === '123456') { // Substitua por sua lógica de verificação real
       setMessage('Código verificado! Crie uma nova senha.');
       setStep(3);
     } else {
@@ -59,40 +65,40 @@ function RecoverPassword() {
             {step === 1 && (
               <form onSubmit={handleSendCode} className="space-y-6">
                 <div className="group">
-                  <label htmlFor="email" className="text-sm font-medium text-accent block mb-2">
+                  <Label htmlFor="email" className="text-sm font-medium text-accent block mb-2">
                     Email cadastrado
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     type="email"
                     id="email"
                     name="email"
-                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-accent/70"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent transition-all duration-300 hover:border-accent/70" // Correção aplicada aqui
                     placeholder="seu@email.com"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
-                <button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-xl hover:bg-accent/90 transition-all duration-300 shadow-soft border border-accent/30"
                 >
                   Enviar Código de Verificação
-                </button>
+                </Button>
               </form>
             )}
 
             {step === 2 && (
               <form onSubmit={handleVerifyCode} className="space-y-6">
                 <div className="group">
-                  <label htmlFor="code" className="text-sm font-medium text-accent block mb-2">
+                  <Label htmlFor="code" className="text-sm font-medium text-accent block mb-2">
                     Código de verificação
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     type="text"
                     id="code"
                     name="code"
-                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-accent/70 text-center text-lg tracking-widest"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent transition-all duration-300 hover:border-accent/70 text-center text-lg tracking-widest" // Correção aplicada aqui
                     placeholder="123456"
                     maxLength={6}
                     required
@@ -103,26 +109,26 @@ function RecoverPassword() {
                     Código de 6 dígitos enviado para {email}
                   </p>
                 </div>
-                <button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-xl hover:bg-accent/90 transition-all duration-300 shadow-soft border border-accent/30"
                 >
                   Verificar Código
-                </button>
+                </Button>
               </form>
             )}
 
             {step === 3 && (
               <form onSubmit={handleResetPassword} className="space-y-6">
                 <div className="group">
-                  <label htmlFor="newPassword" className="text-sm font-medium text-accent block mb-2">
+                  <Label htmlFor="newPassword" className="text-sm font-medium text-accent block mb-2">
                     Nova senha
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     type="password"
                     id="newPassword"
                     name="newPassword"
-                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-accent/70"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent transition-all duration-300 hover:border-accent/70" // Correção aplicada aqui
                     placeholder="••••••••"
                     required
                     value={newPassword}
@@ -132,12 +138,12 @@ function RecoverPassword() {
                     Escolha uma senha forte com pelo menos 8 caracteres
                   </p>
                 </div>
-                <button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-xl hover:bg-accent/90 transition-all duration-300 shadow-soft border border-accent/30"
                 >
                   Confirmar Nova Senha
-                </button>
+                </Button>
               </form>
             )}
 
@@ -156,7 +162,7 @@ function RecoverPassword() {
                 <span className="text-xs text-muted-foreground">{step}/3</span>
               </div>
               <div className="w-full bg-background/30 rounded-full h-2">
-                <div 
+                <div
                   className="bg-accent h-2 rounded-full transition-all duration-500"
                   style={{ width: `${(step / 3) * 100}%` }}
                 ></div>
@@ -165,12 +171,12 @@ function RecoverPassword() {
 
             {/* Link de volta */}
             <div className="mt-8 text-center">
-              <button
+              <Link
                 className="text-sm text-primary hover:text-primary/80 transition-colors hover:underline"
-                onClick={() => navigate('/login')}
+                to="/login"
               >
                 ← Voltar para o Login
-              </button>
+              </Link>
             </div>
           </div>
         </div>
