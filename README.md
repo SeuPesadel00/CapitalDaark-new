@@ -34,5 +34,8 @@ Seja bem-vindo ao CapitalDaark, um portal digital futurista com uma estética cy
 - **Loja de Produtos:** Um espaço com produtos de alta tecnologia, demonstrando funcionalidades de um e-commerce.
 - **Gerenciamento de Estado:** Utilização de localStorage para armazenar tokens de autenticação e dados de usuário de forma segura.
 
-# 👤 Autor
+## 👤 Autor
 Este projeto foi desenvolvido e configurado por: **Arthur Henrique Gomes de Oliveira**
+- [Linkedin](https://www.linkedin.com/public-profile/settings?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_self_edit_contact-info%3BSJdUMHUWR1OQZlbv63KPag%3D%3D)
+- [CapitalDaark](https://capitaldaarknew.netlify.app/)
+- [Curriculo Interativo](https://webcurriculoo.netlify.app/)
