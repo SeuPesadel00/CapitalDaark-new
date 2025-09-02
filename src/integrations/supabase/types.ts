@@ -16,34 +16,172 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          address: Json | null
           avatar_url: string | null
           bio: string | null
+          birth_date: string | null
           created_at: string
           first_name: string | null
           id: string
           last_name: string | null
+          phone: string | null
+          privacy_accepted: boolean | null
+          privacy_accepted_at: string | null
+          profile_image_url: string | null
+          terms_accepted: boolean | null
+          terms_accepted_at: string | null
           updated_at: string
           username: string | null
         }
         Insert: {
+          address?: Json | null
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           created_at?: string
           first_name?: string | null
           id: string
           last_name?: string | null
+          phone?: string | null
+          privacy_accepted?: boolean | null
+          privacy_accepted_at?: string | null
+          profile_image_url?: string | null
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
           updated_at?: string
           username?: string | null
         }
         Update: {
+          address?: Json | null
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
+          phone?: string | null
+          privacy_accepted?: boolean | null
+          privacy_accepted_at?: string | null
+          profile_image_url?: string | null
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
           updated_at?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      user_activity_log: {
+        Row: {
+          activity_type: string
+          created_at: string
+          description: string | null
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_payment_methods: {
+        Row: {
+          card_brand: string | null
+          cardholder_name: string | null
+          created_at: string
+          expiry_month: number | null
+          expiry_year: number | null
+          id: string
+          is_default: boolean | null
+          last_four: string | null
+          method_type: string
+          stripe_payment_method_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          card_brand?: string | null
+          cardholder_name?: string | null
+          created_at?: string
+          expiry_month?: number | null
+          expiry_year?: number | null
+          id?: string
+          is_default?: boolean | null
+          last_four?: string | null
+          method_type?: string
+          stripe_payment_method_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          card_brand?: string | null
+          cardholder_name?: string | null
+          created_at?: string
+          expiry_month?: number | null
+          expiry_year?: number | null
+          id?: string
+          is_default?: boolean | null
+          last_four?: string | null
+          method_type?: string
+          stripe_payment_method_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          email_notifications: boolean | null
+          id: string
+          language: string | null
+          marketing_emails: boolean | null
+          push_notifications: boolean | null
+          theme: string | null
+          two_factor_enabled: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_notifications?: boolean | null
+          id?: string
+          language?: string | null
+          marketing_emails?: boolean | null
+          push_notifications?: boolean | null
+          theme?: string | null
+          two_factor_enabled?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_notifications?: boolean | null
+          id?: string
+          language?: string | null
+          marketing_emails?: boolean | null
+          push_notifications?: boolean | null
+          theme?: string | null
+          two_factor_enabled?: boolean | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
 
 function Register() {
   const [email, setEmail] = useState('');
@@ -11,6 +12,8 @@ function Register() {
   const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const navigate = useNavigate();
   const { signUp, user } = useAuth();
   const { toast } = useToast();
@@ -23,13 +26,25 @@ function Register() {
 
   const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    
+    if (!termsAccepted || !privacyAccepted) {
+      toast({
+        title: "Termos obrigatórios",
+        description: "Você deve aceitar os Termos de Uso e a Política de Privacidade para continuar.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
 
     try {
       const { error } = await signUp(email, password, {
         username,
         first_name: firstName,
-        last_name: lastName
+        last_name: lastName,
+        terms_accepted: termsAccepted,
+        privacy_accepted: privacyAccepted
       });
       
       if (error) {
@@ -145,10 +160,45 @@ function Register() {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
+                
+                {/* Terms and Privacy Acceptance */}
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-2">
+                    <Checkbox
+                      id="terms"
+                      checked={termsAccepted}
+                      onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                      required
+                    />
+                    <label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed">
+                      Eu aceito os{' '}
+                      <Link to="/terms" target="_blank" className="text-secondary hover:underline">
+                        Termos de Uso
+                      </Link>
+                      {' '}da plataforma Capital Daark
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-start space-x-2">
+                    <Checkbox
+                      id="privacy"
+                      checked={privacyAccepted}
+                      onCheckedChange={(checked) => setPrivacyAccepted(checked as boolean)}
+                      required
+                    />
+                    <label htmlFor="privacy" className="text-sm text-muted-foreground leading-relaxed">
+                      Eu aceito a{' '}
+                      <Link to="/privacy" target="_blank" className="text-secondary hover:underline">
+                        Política de Privacidade
+                      </Link>
+                      {' '}e autorizo o tratamento dos meus dados pessoais conforme a LGPD
+                    </label>
+                  </div>
+                </div>
               </div>
               <button 
                 type="submit" 
-                disabled={loading}
+                disabled={loading || !termsAccepted || !privacyAccepted}
                 className="w-full bg-secondary text-secondary-foreground font-semibold py-3 px-6 rounded-xl hover:bg-secondary/90 transition-all duration-300 shadow-soft border border-secondary/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Criando Conta...' : 'Criar Minha Conta'}
