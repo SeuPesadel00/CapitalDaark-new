@@ -127,7 +127,7 @@ const Configuracoes = () => {
           </div>
 
           <Tabs defaultValue="general" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 bg-card border border-border/20">
+          <TabsList className="grid w-full grid-cols-4 bg-card/80 backdrop-blur-sm border border-border/30 rounded-xl">
               <TabsTrigger value="general" className="data-[state=active]:bg-gradient-primary">
                 <Settings className="h-4 w-4 mr-2" />
                 Geral
@@ -148,7 +148,7 @@ const Configuracoes = () => {
 
             {/* General Settings */}
             <TabsContent value="general" className="space-y-6">
-              <Card className="bg-card border-border/20">
+            <Card className="bg-card/80 backdrop-blur-sm border-border/30 shadow-lg hover:shadow-neon-cyan/10">
                 <CardHeader>
                   <CardTitle className="text-neon-cyan">Configurações Gerais</CardTitle>
                   <CardDescription>

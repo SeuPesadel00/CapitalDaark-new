@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import Layout from '../components/Layout';
+import Header from '@/components/Header';
 import { useCart } from '../context/CartContext';
 import { Button } from '../components/ui/button';
 import { Minus, Plus, Trash2, ShoppingCart, CreditCard, Package, Truck } from 'lucide-react';
@@ -48,36 +48,40 @@ function Carrinho() {
 
   if (produtos.length === 0) {
     return (
-      <Layout>
-        <section className="fade-in container mx-auto px-4 py-12 md:py-24">
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-6 py-12 md:py-24">
           <div className="max-w-4xl mx-auto text-center">
-            <ShoppingCart className="w-24 h-24 mx-auto text-muted-foreground mb-8" />
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Seu carrinho está vazio</h2>
-            <p className="text-muted-foreground mb-8 text-lg">Adicione produtos incríveis do nosso catálogo!</p>
+            <div className="w-32 h-32 mx-auto mb-8 bg-gradient-primary rounded-full flex items-center justify-center">
+              <ShoppingCart className="w-16 h-16 text-white" />
+            </div>
+            <h2 className="text-4xl md:text-5xl font-orbitron font-bold mb-4 text-neon-cyan">Seu carrinho está vazio</h2>
+            <p className="text-muted-foreground mb-8 text-xl">Adicione produtos incríveis do nosso catálogo!</p>
             <Button 
               onClick={() => navigate('/loja')} 
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg"
+              className="bg-gradient-primary hover:bg-gradient-secondary text-white px-12 py-4 text-xl font-medium shadow-lg hover:shadow-neon-cyan/30 transition-all duration-300"
             >
-              Ir às compras
+              Explorar Loja
             </Button>
           </div>
-        </section>
-      </Layout>
+        </main>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <section className="fade-in container mx-auto px-4 py-8 md:py-12">
-        <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center text-foreground">
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="container mx-auto px-6 py-8">
+        <h1 className="text-3xl md:text-4xl font-orbitron font-bold mb-8 text-center text-neon-cyan">
           Carrinho de Compras ({produtos.length})
         </h1>
         
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
           {/* Lista de Produtos */}
           <div className="lg:col-span-2 space-y-4 min-w-0">
-            <div className="bg-card rounded-lg border border-border shadow-sm">
-              <div className="p-6 border-b border-border">
+            <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/30 shadow-lg hover:shadow-neon-cyan/10">
+              <div className="p-6 border-b border-border/30">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
                     <Package className="w-5 h-5" />
@@ -156,8 +160,8 @@ function Carrinho() {
 
           {/* Resumo do Pedido */}
           <div className="space-y-4 lg:space-y-6">
-            <div className="bg-card rounded-lg border border-border shadow-sm">
-              <div className="p-6 border-b border-border">
+            <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/30 shadow-lg hover:shadow-neon-purple/10">
+              <div className="p-6 border-b border-border/30">
                 <h2 className="text-xl font-semibold text-foreground">Resumo do Pedido</h2>
               </div>
               
@@ -192,7 +196,7 @@ function Carrinho() {
                 
                 <Button 
                   onClick={handleContinuarCompra}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-lg font-medium"
+                  className="w-full bg-gradient-primary hover:bg-gradient-secondary text-white py-3 text-lg font-medium shadow-lg hover:shadow-neon-cyan/30 transition-all duration-300"
                 >
                   <CreditCard className="w-5 h-5 mr-2" />
                   Finalizar Compra
@@ -209,7 +213,7 @@ function Carrinho() {
             </div>
             
             {/* Informações de Segurança */}
-            <div className="bg-card rounded-lg border border-border shadow-sm p-6">
+            <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/30 shadow-lg p-6">
               <h3 className="font-semibold text-foreground mb-3">🔒 Compra Segura</h3>
               <ul className="text-sm text-muted-foreground space-y-2">
                 <li>✓ Pagamentos 100% seguros</li>
@@ -220,8 +224,8 @@ function Carrinho() {
             </div>
           </div>
         </div>
-      </section>
-    </Layout>
+      </main>
+    </div>
   );
 }
 

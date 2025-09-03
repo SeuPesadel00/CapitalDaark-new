@@ -49,7 +49,7 @@ const categories = [
 ];
 
 const Loja = () => {
-  const { adicionarProduto, produtos } = useCart();
+  const { adicionarProduto } = useCart();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
