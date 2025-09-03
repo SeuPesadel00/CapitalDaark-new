@@ -1,466 +1,355 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import Layout from '../components/Layout';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar,
-  Edit,
-  Save,
-  Camera,
-  CreditCard,
-  Shield,
-  Check,
-  X
-} from 'lucide-react';
-import Header from '@/components/Header';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Upload, User, Mail, Phone, MapPin, Calendar } from 'lucide-react';
 
-const DadosPessoais = () => {
+function DadosPessoais() {
+  const { user, profile } = useAuth();
   const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(false);
-  const [emailVerified, setEmailVerified] = useState(true);
-  const [phoneVerified, setPhoneVerified] = useState(false);
-
-  const [userData, setUserData] = useState({
-    firstName: 'João',
-    lastName: 'Silva',
-    email: 'joao.silva@gmail.com',
-    phone: '+55 11 99999-9999',
-    cpf: '123.456.789-00',
-    birthDate: '1990-05-15',
-    gender: 'masculino',
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
+    username: '',
+    bio: '',
+    phone: '',
+    birth_date: '',
     address: {
-      street: 'Rua das Flores, 123',
-      neighborhood: 'Centro',
-      city: 'São Paulo',
-      state: 'SP',
-      zipCode: '01234-567',
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
       country: 'Brasil'
-    },
-    bio: 'Desenvolvedor apaixonado por tecnologia e inovação.',
-    profileImage: '/placeholder.svg'
+    }
   });
 
-  const validateCPF = (cpf: string) => {
-    // Simple CPF validation
-    const cleanCPF = cpf.replace(/[^\d]/g, '');
-    return cleanCPF.length === 11;
-  };
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const validDomains = ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'uol.com.br', 'terra.com.br'];
-    const domain = email.split('@')[1];
-    return emailRegex.test(email) && validDomains.includes(domain?.toLowerCase());
-  };
-
-  const formatCPF = (value: string) => {
-    const numbers = value.replace(/[^\d]/g, '');
-    return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  };
-
-  const formatPhone = (value: string) => {
-    const numbers = value.replace(/[^\d]/g, '');
-    return numbers.replace(/(\d{2})(\d{2})(\d{5})(\d{4})/, '+$1 $2 $3-$4');
-  };
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
+        username: profile.username || '',
+        bio: profile.bio || '',
+        phone: profile.phone || '',
+        birth_date: profile.birth_date || '',
+        address: profile.address || {
+          street: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: 'Brasil'
+        }
+      });
+    }
+  }, [profile]);
 
   const handleInputChange = (field: string, value: string) => {
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
-      setUserData(prev => ({
+    if (field.startsWith('address.')) {
+      const addressField = field.split('.')[1];
+      setFormData(prev => ({
         ...prev,
-        [parent]: {
-          ...(prev[parent as keyof typeof prev] as any),
-          [child]: value
+        address: {
+          ...prev.address,
+          [addressField]: value
         }
       }));
     } else {
-      setUserData(prev => ({
+      setFormData(prev => ({
         ...prev,
         [field]: value
       }));
     }
   };
 
-  const handleSave = () => {
-    // Validate required fields
-    if (!userData.firstName || !userData.lastName || !userData.email) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          username: formData.username,
+          bio: formData.bio,
+          phone: formData.phone,
+          birth_date: formData.birth_date || null,
+          address: formData.address
+        })
+        .eq('id', user?.id);
+
+      if (error) throw error;
+
       toast({
-        title: "Erro",
-        description: "Preencha todos os campos obrigatórios",
+        title: "Perfil atualizado",
+        description: "Suas informações foram salvas com sucesso!"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao atualizar perfil",
+        description: error.message,
         variant: "destructive"
       });
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    // Validate email
-    if (!validateEmail(userData.email)) {
-      toast({
-        title: "Erro",
-        description: "Por favor, insira um email válido de um domínio conhecido (Gmail, Outlook, etc.)",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Validate CPF
-    if (!validateCPF(userData.cpf)) {
-      toast({
-        title: "Erro",
-        description: "CPF inválido. Verifique o número digitado.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Save logic here
-    setIsEditing(false);
-    toast({
-      title: "Sucesso",
-      description: "Dados pessoais atualizados com sucesso!"
-    });
   };
 
-  const verifyEmail = () => {
-    // Email verification logic
-    toast({
-      title: "Email de Verificação Enviado",
-      description: "Verifique sua caixa de entrada e spam"
-    });
-  };
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  const verifyPhone = () => {
-    // Phone verification logic  
-    toast({
-      title: "SMS de Verificação Enviado",
-      description: "Você receberá um código por SMS em alguns instantes"
-    });
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "A imagem deve ter no máximo 5MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Formato inválido",
+        description: "Por favor, selecione uma imagem válida",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ profile_image_url: data.publicUrl })
+        .eq('id', user?.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Foto atualizada",
+        description: "Sua foto de perfil foi atualizada com sucesso!"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro no upload",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container mx-auto px-6 py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <User className="h-6 w-6 text-white" />
+    <Layout>
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center">
+              <User className="w-6 h-6 mr-2" />
+              Dados Pessoais
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Profile Image */}
+              <div className="flex flex-col items-center space-y-4">
+                <Avatar className="w-32 h-32">
+                  <AvatarImage 
+                    src={profile?.profile_image_url} 
+                    alt={profile?.username || 'Avatar'} 
+                  />
+                  <AvatarFallback className="text-2xl">
+                    {(profile?.first_name?.[0] || '') + (profile?.last_name?.[0] || '')}
+                  </AvatarFallback>
+                </Avatar>
+                
+                <div>
+                  <input
+                    type="file"
+                    id="avatar-upload"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <Label htmlFor="avatar-upload" className="cursor-pointer">
+                    <Button variant="outline" type="button" asChild>
+                      <span>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Alterar Foto
+                      </span>
+                    </Button>
+                  </Label>
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-orbitron font-bold text-neon-cyan">Dados Pessoais</h1>
-                <p className="text-foreground/70">Gerencie suas informações pessoais e de contato</p>
-              </div>
-            </div>
-            <Button
-              onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-              className={isEditing ? "bg-gradient-accent" : "bg-gradient-primary"}
-            >
-              {isEditing ? (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Salvar
-                </>
-              ) : (
-                <>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Editar
-                </>
-              )}
-            </Button>
-          </div>
 
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Profile Card */}
-            <Card className="lg:col-span-1 bg-card border-border/20">
-              <CardHeader className="text-center">
-                <div className="relative mx-auto mb-4">
-                  <Avatar className="w-24 h-24 border-2 border-neon-cyan">
-                    <AvatarImage src={userData.profileImage} alt="Profile" />
-                    <AvatarFallback className="bg-gradient-primary text-white text-2xl font-bold">
-                      {userData.firstName[0]}{userData.lastName[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  {isEditing && (
-                    <Button
-                      size="icon"
-                      className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-neon-cyan text-primary-foreground"
-                    >
-                      <Camera className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                <CardTitle className="text-neon-cyan">
-                  {userData.firstName} {userData.lastName}
-                </CardTitle>
-                <CardDescription>{userData.email}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Status da conta:</span>
-                  <Badge className="bg-neon-green text-white">Ativo</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Email verificado:</span>
-                  {emailVerified ? (
-                    <Badge className="bg-neon-green text-white">
-                      <Check className="w-3 h-3 mr-1" />
-                      Verificado
-                    </Badge>
-                  ) : (
-                    <Button size="sm" variant="outline" onClick={verifyEmail}>
-                      Verificar
-                    </Button>
-                  )}
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Telefone verificado:</span>
-                  {phoneVerified ? (
-                    <Badge className="bg-neon-green text-white">
-                      <Check className="w-3 h-3 mr-1" />
-                      Verificado
-                    </Badge>
-                  ) : (
-                    <Button size="sm" variant="outline" onClick={verifyPhone}>
-                      Verificar
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Personal Information */}
-            <Card className="lg:col-span-2 bg-card border-border/20">
-              <CardHeader>
-                <CardTitle className="text-neon-cyan">Informações Pessoais</CardTitle>
-                <CardDescription>
-                  Mantenha seus dados atualizados para uma melhor experiência
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">Nome *</Label>
-                    <Input
-                      id="firstName"
-                      value={userData.firstName}
-                      onChange={(e) => handleInputChange('firstName', e.target.value)}
-                      disabled={!isEditing}
-                      className="disabled:opacity-70"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Sobrenome *</Label>
-                    <Input
-                      id="lastName"
-                      value={userData.lastName}
-                      onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      disabled={!isEditing}
-                      className="disabled:opacity-70"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/50 h-4 w-4" />
-                      <Input
-                        id="email"
-                        type="email"
-                        value={userData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        disabled={!isEditing}
-                        className="pl-10 disabled:opacity-70"
-                      />
-                    </div>
-                    {isEditing && !validateEmail(userData.email) && userData.email && (
-                      <p className="text-sm text-destructive">
-                        Email deve ser de um domínio válido (Gmail, Outlook, etc.)
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Telefone</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/50 h-4 w-4" />
-                      <Input
-                        id="phone"
-                        value={userData.phone}
-                        onChange={(e) => handleInputChange('phone', formatPhone(e.target.value))}
-                        disabled={!isEditing}
-                        className="pl-10 disabled:opacity-70"
-                        maxLength={18}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="cpf">CPF *</Label>
-                    <div className="relative">
-                      <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/50 h-4 w-4" />
-                      <Input
-                        id="cpf"
-                        value={userData.cpf}
-                        onChange={(e) => handleInputChange('cpf', formatCPF(e.target.value))}
-                        disabled={!isEditing}
-                        className="pl-10 disabled:opacity-70"
-                        maxLength={14}
-                      />
-                    </div>
-                    {isEditing && !validateCPF(userData.cpf) && userData.cpf && (
-                      <p className="text-sm text-destructive">CPF inválido</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="birthDate">Data de Nascimento</Label>
-                    <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/50 h-4 w-4" />
-                      <Input
-                        id="birthDate"
-                        type="date"
-                        value={userData.birthDate}
-                        onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                        disabled={!isEditing}
-                        className="pl-10 disabled:opacity-70"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="gender">Gênero</Label>
-                    <Select 
-                      value={userData.gender} 
-                      onValueChange={(value) => handleInputChange('gender', value)}
-                      disabled={!isEditing}
-                    >
-                      <SelectTrigger className="disabled:opacity-70">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="masculino">Masculino</SelectItem>
-                        <SelectItem value="feminino">Feminino</SelectItem>
-                        <SelectItem value="outro">Outro</SelectItem>
-                        <SelectItem value="nao-informar">Prefiro não informar</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Biografia</Label>
-                  <Textarea
-                    id="bio"
-                    value={userData.bio}
-                    onChange={(e) => handleInputChange('bio', e.target.value)}
-                    disabled={!isEditing}
-                    className="disabled:opacity-70"
-                    placeholder="Conte um pouco sobre você..."
-                    rows={3}
+              {/* Personal Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="first_name">Nome</Label>
+                  <Input
+                    id="first_name"
+                    value={formData.first_name}
+                    onChange={(e) => handleInputChange('first_name', e.target.value)}
+                    required
                   />
                 </div>
-              </CardContent>
-            </Card>
+                
+                <div>
+                  <Label htmlFor="last_name">Sobrenome</Label>
+                  <Input
+                    id="last_name"
+                    value={formData.last_name}
+                    onChange={(e) => handleInputChange('last_name', e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
 
-            {/* Address Information */}
-            <Card className="lg:col-span-3 bg-card border-border/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-neon-cyan">
-                  <MapPin className="h-5 w-5" />
+              <div>
+                <Label htmlFor="username">Nome de Usuário</Label>
+                <Input
+                  id="username"
+                  value={formData.username}
+                  onChange={(e) => handleInputChange('username', e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="email" className="flex items-center">
+                  <Mail className="w-4 h-4 mr-1" />
+                  E-mail
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={user?.email || ''}
+                  disabled
+                  className="bg-muted"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  O e-mail não pode ser alterado por questões de segurança
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="phone" className="flex items-center">
+                  <Phone className="w-4 h-4 mr-1" />
+                  Telefone
+                </Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  placeholder="(11) 99999-9999"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="birth_date" className="flex items-center">
+                  <Calendar className="w-4 h-4 mr-1" />
+                  Data de Nascimento
+                </Label>
+                <Input
+                  id="birth_date"
+                  type="date"
+                  value={formData.birth_date}
+                  onChange={(e) => handleInputChange('birth_date', e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="bio">Biografia</Label>
+                <Textarea
+                  id="bio"
+                  value={formData.bio}
+                  onChange={(e) => handleInputChange('bio', e.target.value)}
+                  placeholder="Conte um pouco sobre você..."
+                  className="min-h-[100px]"
+                />
+              </div>
+
+              {/* Address */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium flex items-center">
+                  <MapPin className="w-5 h-5 mr-2" />
                   Endereço
-                </CardTitle>
-                <CardDescription>
-                  Informações de endereço para entrega e cobrança
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="street">Rua e Número</Label>
-                    <Input
-                      id="street"
-                      value={userData.address.street}
-                      onChange={(e) => handleInputChange('address.street', e.target.value)}
-                      disabled={!isEditing}
-                      className="disabled:opacity-70"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="neighborhood">Bairro</Label>
-                    <Input
-                      id="neighborhood"
-                      value={userData.address.neighborhood}
-                      onChange={(e) => handleInputChange('address.neighborhood', e.target.value)}
-                      disabled={!isEditing}
-                      className="disabled:opacity-70"
-                    />
-                  </div>
+                </h3>
+                
+                <div>
+                  <Label htmlFor="street">Rua</Label>
+                  <Input
+                    id="street"
+                    value={formData.address.street}
+                    onChange={(e) => handleInputChange('address.street', e.target.value)}
+                    placeholder="Rua, número, complemento"
+                  />
                 </div>
 
-                <div className="grid md:grid-cols-4 gap-4">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
                     <Label htmlFor="city">Cidade</Label>
                     <Input
                       id="city"
-                      value={userData.address.city}
+                      value={formData.address.city}
                       onChange={(e) => handleInputChange('address.city', e.target.value)}
-                      disabled={!isEditing}
-                      className="disabled:opacity-70"
                     />
                   </div>
-                  <div className="space-y-2">
+                  
+                  <div>
                     <Label htmlFor="state">Estado</Label>
                     <Input
                       id="state"
-                      value={userData.address.state}
+                      value={formData.address.state}
                       onChange={(e) => handleInputChange('address.state', e.target.value)}
-                      disabled={!isEditing}
-                      className="disabled:opacity-70"
-                      maxLength={2}
                     />
                   </div>
-                  <div className="space-y-2">
+                  
+                  <div>
                     <Label htmlFor="zipCode">CEP</Label>
                     <Input
                       id="zipCode"
-                      value={userData.address.zipCode}
+                      value={formData.address.zipCode}
                       onChange={(e) => handleInputChange('address.zipCode', e.target.value)}
-                      disabled={!isEditing}
-                      className="disabled:opacity-70"
-                      maxLength={9}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="country">País</Label>
-                    <Input
-                      id="country"
-                      value={userData.address.country}
-                      onChange={(e) => handleInputChange('address.country', e.target.value)}
-                      disabled={!isEditing}
-                      className="disabled:opacity-70"
+                      placeholder="00000-000"
                     />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </main>
-    </div>
+              </div>
+
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? 'Salvando...' : 'Salvar Alterações'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </Layout>
   );
-};
+}
 
 export default DadosPessoais;
