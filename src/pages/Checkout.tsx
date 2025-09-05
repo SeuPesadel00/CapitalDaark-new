@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../components/Layout';
+import Header from '@/components/Header';
 import { useCart } from '../context/CartContext';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -121,21 +121,22 @@ function Checkout() {
   }
 
   return (
-    <Layout>
-      <section className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8 text-center text-foreground">Finalizar Compra</h1>
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="container mx-auto px-6 py-8">
+        <h1 className="text-3xl md:text-4xl font-orbitron font-bold mb-8 text-center text-neon-cyan">Finalizar Compra</h1>
         
         <form onSubmit={handleFinalizarCompra} className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Formulários */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Endereço de Entrega */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  Endereço de Entrega
-                </CardTitle>
-              </CardHeader>
+            {/* Formulários */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Endereço de Entrega */}
+              <Card className="bg-card/80 backdrop-blur border-border/30">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-foreground">
+                    <MapPin className="w-5 h-5 text-neon-cyan" />
+                    Endereço de Entrega
+                  </CardTitle>
+                </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -253,14 +254,14 @@ function Checkout() {
               </CardContent>
             </Card>
 
-            {/* Métodos de Pagamento */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5" />
-                  Método de Pagamento
-                </CardTitle>
-              </CardHeader>
+              {/* Métodos de Pagamento */}
+              <Card className="bg-card/80 backdrop-blur border-border/30">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-foreground">
+                    <CreditCard className="w-5 h-5 text-neon-purple" />
+                    Método de Pagamento
+                  </CardTitle>
+                </CardHeader>
               <CardContent>
                 <RadioGroup value={metodoPagamento} onValueChange={setMetodoPagamento} className="space-y-4">
                   <div className="flex items-center space-x-2 p-4 border border-border rounded-lg hover:bg-muted/50">
@@ -377,15 +378,15 @@ function Checkout() {
             </Card>
           </div>
 
-          {/* Resumo do Pedido */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="w-5 h-5" />
-                  Resumo do Pedido
-                </CardTitle>
-              </CardHeader>
+            {/* Resumo do Pedido */}
+            <div className="space-y-6">
+              <Card className="bg-card/80 backdrop-blur border-border/30 sticky top-24">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-foreground">
+                    <Package className="w-5 h-5 text-neon-green" />
+                    Resumo do Pedido
+                  </CardTitle>
+                </CardHeader>
               <CardContent className="space-y-4">
                 {/* Produtos */}
                 <div className="space-y-3">
@@ -460,13 +461,18 @@ function Checkout() {
                   <li>🚚 Garantia de entrega</li>
                   <li>↩️ Política de devolução</li>
                 </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </form>
-      </section>
-    </Layout>
-  );
-}
+                </CardContent>
+              </Card>
+            </div>
+          </form>
+        </main>
+
+        <footer className="bg-card/50 border-t border-border/20 p-6 text-center mt-16">
+          <p className="text-muted-foreground">&copy; 2025 Capital Daark. Todos os direitos reservados.</p>
+          <p className="text-sm mt-2 text-muted-foreground">Construindo o futuro, hoje.</p>
+        </footer>
+      </div>
+    );
+  }
 
 export default Checkout;

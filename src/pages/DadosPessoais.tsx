@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import Layout from '../components/Layout';
+import Header from '@/components/Header';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -163,11 +163,12 @@ function DadosPessoais() {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Card>
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="container mx-auto px-6 py-8">
+        <Card className="max-w-4xl mx-auto bg-card/80 backdrop-blur border-border/30">
           <CardHeader>
-            <CardTitle className="text-2xl flex items-center">
+            <CardTitle className="text-2xl font-orbitron font-bold flex items-center text-neon-cyan">
               <User className="w-6 h-6 mr-2" />
               Dados Pessoais
             </CardTitle>
@@ -176,12 +177,12 @@ function DadosPessoais() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Profile Image */}
               <div className="flex flex-col items-center space-y-4">
-                <Avatar className="w-32 h-32">
+                <Avatar className="w-32 h-32 border-2 border-primary/30">
                   <AvatarImage 
                     src={profile?.profile_image_url} 
                     alt={profile?.username || 'Avatar'} 
                   />
-                  <AvatarFallback className="text-2xl">
+                  <AvatarFallback className="text-2xl bg-primary/10">
                     {(profile?.first_name?.[0] || '') + (profile?.last_name?.[0] || '')}
                   </AvatarFallback>
                 </Avatar>
@@ -195,9 +196,9 @@ function DadosPessoais() {
                     className="hidden"
                   />
                   <Label htmlFor="avatar-upload" className="cursor-pointer">
-                    <Button variant="outline" type="button" asChild>
+                    <Button variant="outline" type="button" asChild className="border-neon-cyan/30 hover:border-neon-cyan hover:bg-neon-cyan/10">
                       <span>
-                        <Upload className="w-4 h-4 mr-2" />
+                        <Upload className="w-4 h-4 mr-2 text-neon-cyan" />
                         Alterar Foto
                       </span>
                     </Button>
@@ -208,38 +209,41 @@ function DadosPessoais() {
               {/* Personal Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="first_name">Nome</Label>
+                  <Label htmlFor="first_name" className="text-primary">Nome</Label>
                   <Input
                     id="first_name"
                     value={formData.first_name}
                     onChange={(e) => handleInputChange('first_name', e.target.value)}
+                    className="bg-muted/30 border-border/30 focus:border-primary"
                     required
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="last_name">Sobrenome</Label>
+                  <Label htmlFor="last_name" className="text-primary">Sobrenome</Label>
                   <Input
                     id="last_name"
                     value={formData.last_name}
                     onChange={(e) => handleInputChange('last_name', e.target.value)}
+                    className="bg-muted/30 border-border/30 focus:border-primary"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="username">Nome de Usuário</Label>
+                <Label htmlFor="username" className="text-primary">Nome de Usuário</Label>
                 <Input
                   id="username"
                   value={formData.username}
                   onChange={(e) => handleInputChange('username', e.target.value)}
+                  className="bg-muted/30 border-border/30 focus:border-primary"
                   required
                 />
               </div>
 
               <div>
-                <Label htmlFor="email" className="flex items-center">
+                <Label htmlFor="email" className="flex items-center text-primary">
                   <Mail className="w-4 h-4 mr-1" />
                   E-mail
                 </Label>
@@ -248,7 +252,7 @@ function DadosPessoais() {
                   type="email"
                   value={user?.email || ''}
                   disabled
-                  className="bg-muted"
+                  className="bg-muted/50 opacity-50"
                 />
                 <p className="text-sm text-muted-foreground mt-1">
                   O e-mail não pode ser alterado por questões de segurança
@@ -256,7 +260,7 @@ function DadosPessoais() {
               </div>
 
               <div>
-                <Label htmlFor="phone" className="flex items-center">
+                <Label htmlFor="phone" className="flex items-center text-primary">
                   <Phone className="w-4 h-4 mr-1" />
                   Telefone
                 </Label>
@@ -266,11 +270,12 @@ function DadosPessoais() {
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   placeholder="(11) 99999-9999"
+                  className="bg-muted/30 border-border/30 focus:border-primary"
                 />
               </div>
 
               <div>
-                <Label htmlFor="birth_date" className="flex items-center">
+                <Label htmlFor="birth_date" className="flex items-center text-primary">
                   <Calendar className="w-4 h-4 mr-1" />
                   Data de Nascimento
                 </Label>
@@ -279,76 +284,90 @@ function DadosPessoais() {
                   type="date"
                   value={formData.birth_date}
                   onChange={(e) => handleInputChange('birth_date', e.target.value)}
+                  className="bg-muted/30 border-border/30 focus:border-primary"
                 />
               </div>
 
               <div>
-                <Label htmlFor="bio">Biografia</Label>
+                <Label htmlFor="bio" className="text-primary">Biografia</Label>
                 <Textarea
                   id="bio"
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   placeholder="Conte um pouco sobre você..."
-                  className="min-h-[100px]"
+                  className="min-h-[100px] bg-muted/30 border-border/30 focus:border-primary"
                 />
               </div>
 
               {/* Address */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium flex items-center">
+                <h3 className="text-lg font-medium flex items-center text-secondary">
                   <MapPin className="w-5 h-5 mr-2" />
                   Endereço
                 </h3>
                 
                 <div>
-                  <Label htmlFor="street">Rua</Label>
+                  <Label htmlFor="street" className="text-primary">Rua</Label>
                   <Input
                     id="street"
                     value={formData.address.street}
                     onChange={(e) => handleInputChange('address.street', e.target.value)}
                     placeholder="Rua, número, complemento"
+                    className="bg-muted/30 border-border/30 focus:border-primary"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <Label htmlFor="city">Cidade</Label>
+                    <Label htmlFor="city" className="text-primary">Cidade</Label>
                     <Input
                       id="city"
                       value={formData.address.city}
                       onChange={(e) => handleInputChange('address.city', e.target.value)}
+                      className="bg-muted/30 border-border/30 focus:border-primary"
                     />
                   </div>
                   
                   <div>
-                    <Label htmlFor="state">Estado</Label>
+                    <Label htmlFor="state" className="text-primary">Estado</Label>
                     <Input
                       id="state"
                       value={formData.address.state}
                       onChange={(e) => handleInputChange('address.state', e.target.value)}
+                      className="bg-muted/30 border-border/30 focus:border-primary"
                     />
                   </div>
                   
                   <div>
-                    <Label htmlFor="zipCode">CEP</Label>
+                    <Label htmlFor="zipCode" className="text-primary">CEP</Label>
                     <Input
                       id="zipCode"
                       value={formData.address.zipCode}
                       onChange={(e) => handleInputChange('address.zipCode', e.target.value)}
                       placeholder="00000-000"
+                      className="bg-muted/30 border-border/30 focus:border-primary"
                     />
                   </div>
                 </div>
               </div>
 
-              <Button type="submit" disabled={loading} className="w-full">
+              <Button 
+                type="submit" 
+                disabled={loading} 
+                className="w-full bg-gradient-primary hover:bg-gradient-secondary text-white font-medium shadow-lg hover:shadow-neon-cyan/30 transition-all duration-300"
+              >
                 {loading ? 'Salvando...' : 'Salvar Alterações'}
               </Button>
             </form>
           </CardContent>
         </Card>
-      </div>
-    </Layout>
+      </main>
+
+      <footer className="bg-card/50 border-t border-border/20 p-6 text-center mt-16">
+        <p className="text-muted-foreground">&copy; 2025 Capital Daark. Todos os direitos reservados.</p>
+        <p className="text-sm mt-2 text-muted-foreground">Construindo o futuro, hoje.</p>
+      </footer>
+    </div>
   );
 }
 

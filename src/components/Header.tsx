@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { ShoppingCart, User, Settings, UserCircle, LogOut, Menu, X } from 'lucide-react';
+import { ShoppingCart, User, Settings, UserCircle, LogOut, Menu, X, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
@@ -106,11 +106,25 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56 bg-card border-border/20">
                       <DropdownMenuItem
-                        onClick={() => navigate('/user-profile')}
+                        onClick={() => navigate('/dados-pessoais')}
                         className="cursor-pointer hover:bg-muted/50"
                       >
                         <UserCircle className="mr-2 h-4 w-4 text-neon-purple" />
-                        Meu Perfil
+                        Dados Pessoais
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => navigate('/payment-methods')}
+                        className="cursor-pointer hover:bg-muted/50"
+                      >
+                        <CreditCard className="mr-2 h-4 w-4 text-neon-green" />
+                        Formas de Pagamento
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => navigate('/account-settings')}
+                        className="cursor-pointer hover:bg-muted/50"
+                      >
+                        <Settings className="mr-2 h-4 w-4 text-neon-orange" />
+                        Configurações da Conta
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => navigate('/configuracoes')}
