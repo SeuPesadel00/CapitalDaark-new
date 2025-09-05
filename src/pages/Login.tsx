@@ -16,7 +16,7 @@ function Login() {
 
   useEffect(() => {
     if (user) {
-      navigate('/user-home');
+      navigate('/user-home', { replace: true });
     }
   }, [user, navigate]);
 
@@ -38,7 +38,7 @@ function Login() {
           title: "Login realizado com sucesso!",
           description: "Redirecionando...",
         });
-        navigate('/user-home');
+        navigate('/user-home', { replace: true });
       }
     } catch (error: any) {
       toast({

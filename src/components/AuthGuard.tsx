@@ -12,14 +12,18 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/login');
+      navigate('/login', { replace: true });
     }
   }, [user, loading, navigate]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="animate-pulse">
+          <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
       </div>
     );
   }

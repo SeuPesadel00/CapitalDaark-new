@@ -41,18 +41,30 @@ const AuthGuard = ({ children }: { children: JSX.Element }) => {
 };
 
 function App() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="animate-pulse">
+          <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <BrowserRouter>
       <Routes>
         {/* Redirect based on authentication status */}
-        <Route path="/" element={user ? <Navigate to="/user-home" /> : <Navigate to="/login" />} />
+        <Route path="/" element={user ? <Navigate to="/user-home" replace /> : <Navigate to="/login" replace />} />
 
         {/* Public Routes */}
-        <Route path="/login" element={!user ? <Login /> : <Navigate to="/user-home" />} />
-        <Route path="/register" element={!user ? <Register /> : <Navigate to="/user-home" />} />
-        <Route path="/recover-password" element={!user ? <RecoverPassword /> : <Navigate to="/user-home" />} />
+        <Route path="/login" element={!user ? <Login /> : <Navigate to="/user-home" replace />} />
+        <Route path="/register" element={!user ? <Register /> : <Navigate to="/user-home" replace />} />
+        <Route path="/recover-password" element={!user ? <RecoverPassword /> : <Navigate to="/user-home" replace />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
 
