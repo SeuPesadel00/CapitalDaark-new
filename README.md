@@ -23,7 +23,7 @@ Seja bem-vindo ao CapitalDaark, um portal digital futurista com uma estética cy
 - **bcryptjs:** Biblioteca para o hash seguro de senhas.
 
 ### Banco de Dados & Deploy
-- **MongoDB Atlas:** Banco de dados NoSQL baseado em nuvem, utilizado para armazenar os dados de usuários e produtos.
+- **MongoDB Atlas & Supabase:** Banco de dados NoSQL baseado em nuvem, utilizado para armazenar os dados de usuários e produtos.
 - **Render:** Plataforma de hospedagem para o backend (API).
 - **Netlify:** Plataforma de hospedagem para o frontend.
 
