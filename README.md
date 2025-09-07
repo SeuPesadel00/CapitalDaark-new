@@ -37,5 +37,5 @@ Seja bem-vindo ao CapitalDaark, um portal digital futurista com uma estética cy
 ## 👤 Autor
 Este projeto foi desenvolvido e configurado por: **Arthur Henrique Gomes de Oliveira**
 - [Linkedin](https://www.linkedin.com/public-profile/settings?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_self_edit_contact-info%3BSJdUMHUWR1OQZlbv63KPag%3D%3D)
-- [CapitalDaark](https://capitaldaarknew.netlify.app/)
-- [Curriculo Interativo](https://webcurriculoo.netlify.app/)
+- [CapitalDaark](https://capitaldaark.com.br)
+- [Curriculo Interativo](https://curriculo-interativo-arthur.vercel.app/)
