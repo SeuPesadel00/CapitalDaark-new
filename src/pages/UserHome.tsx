@@ -1,9 +1,9 @@
 import { AuthGuard } from '@/components/AuthGuard';
 import Header from '@/components/Header';
-import NewsSection from '@/components/NewsSection';
+import ModernNewsSection from '@/components/ModernNewsSection';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { User, Settings, CreditCard, ShoppingBag, Phone, Info } from 'lucide-react';
+import { User, Settings, ShoppingBag, Phone } from 'lucide-react';
 
 function UserHome() {
   const { profile, loading } = useAuth();
@@ -47,7 +47,9 @@ function UserHome() {
         </main>
 
         {/* Seção de Notícias */}
-        <NewsSection />
+        <div className="container mx-auto px-6 pb-8">
+          <ModernNewsSection />
+        </div>
 
         <footer className="bg-card/50 border-t border-border/20 p-6 text-center mt-16">
           <p className="text-muted-foreground">&copy; 2025 Capital Daark. Todos os direitos reservados.</p>
