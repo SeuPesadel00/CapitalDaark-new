@@ -144,7 +144,7 @@ function DadosPessoais() {
 
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ profile_image_url: data.publicUrl })
+        .update({ avatar_url: data.publicUrl })
         .eq('id', user?.id);
 
       if (updateError) throw updateError;
@@ -177,15 +177,15 @@ function DadosPessoais() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Profile Image */}
               <div className="flex flex-col items-center space-y-4">
-                <Avatar className="w-32 h-32 border-2 border-primary/30">
-                  <AvatarImage 
-                    src={profile?.profile_image_url} 
-                    alt={profile?.username || 'Avatar'} 
-                  />
-                  <AvatarFallback className="text-2xl bg-primary/10">
-                    {(profile?.first_name?.[0] || '') + (profile?.last_name?.[0] || '')}
-                  </AvatarFallback>
-                </Avatar>
+                 <Avatar className="w-32 h-32 border-2 border-primary/30">
+                   <AvatarImage 
+                     src={profile?.avatar_url} 
+                     alt={profile?.username || 'Avatar'} 
+                   />
+                   <AvatarFallback className="text-2xl bg-primary/10">
+                     {(profile?.first_name?.[0] || '') + (profile?.last_name?.[0] || '')}
+                   </AvatarFallback>
+                 </Avatar>
                 
                 <div>
                   <input

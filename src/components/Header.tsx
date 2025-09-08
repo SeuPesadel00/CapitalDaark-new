@@ -23,9 +23,8 @@ const Header = ({ hideNav = false }: HeaderProps) => {
   const { user, profile, signOut } = useAuth();
 
   const navItems = [
-    { label: 'Início', href: '/' },
+    { label: 'Início', href: '/user-home' },
     { label: 'Loja', href: '/loja' },
-    { label: 'Notícias', href: '/noticias' },
     { label: 'Sobre Nós', href: '/sobre' },
     { label: 'Contatos', href: '/contatos' },
   ];
@@ -41,10 +40,12 @@ const Header = ({ hideNav = false }: HeaderProps) => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <span className="text-2xl font-orbitron font-bold text-primary-foreground">C</span>
-            </div>
+          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/user-home')}>
+            <img 
+              src="/lovable-uploads/775ccaaf-4f81-4b36-97a0-969f5e8ea7c2.png" 
+              alt="Capital Daark Logo" 
+              className="w-10 h-10"
+            />
             <span className="text-2xl font-orbitron font-bold text-neon-cyan">
               Capital<span className="text-neon-purple">Daark</span>
             </span>
@@ -57,7 +58,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                 <Button
                   key={item.label}
                   variant="ghost"
-                  className="text-foreground hover:text-neon-cyan transition-colors font-medium"
+                  className="px-4 py-2 rounded-lg bg-card/50 backdrop-blur-sm border border-border/30 text-foreground hover:border-neon-cyan/50 hover:bg-neon-cyan/10 hover:text-neon-cyan transition-all duration-300 font-medium shadow-sm"
                   onClick={() => navigate(item.href)}
                 >
                   {item.label}
@@ -209,7 +210,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                 <Button
                   key={item.label}
                   variant="ghost"
-                  className="justify-start text-foreground hover:text-neon-cyan transition-colors"
+                  className="justify-start px-4 py-3 rounded-lg bg-card/50 backdrop-blur-sm border border-border/30 text-foreground hover:border-neon-cyan/50 hover:bg-neon-cyan/10 hover:text-neon-cyan transition-all duration-300 font-medium"
                   onClick={() => {
                     navigate(item.href);
                     setIsMobileMenuOpen(false);

@@ -73,7 +73,6 @@ function App() {
         <Route path="/loja" element={<AuthGuard><Loja /></AuthGuard>} />
         <Route path="/carrinho" element={<AuthGuard><Carrinho /></AuthGuard>} />
         <Route path="/checkout" element={<AuthGuard><Checkout /></AuthGuard>} />
-        <Route path="/noticias" element={<AuthGuard><Noticias /></AuthGuard>} />
         <Route path="/noticia/:id" element={<AuthGuard><NoticiaDetalhe /></AuthGuard>} />
         <Route path="/contatos" element={<AuthGuard><Contatos /></AuthGuard>} />
         <Route path="/sobre" element={<AuthGuard><Sobre /></AuthGuard>} />

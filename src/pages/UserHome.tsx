@@ -1,5 +1,6 @@
 import { AuthGuard } from '@/components/AuthGuard';
 import Header from '@/components/Header';
+import NewsSection from '@/components/NewsSection';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { User, Settings, CreditCard, ShoppingBag, Phone, Info } from 'lucide-react';
@@ -27,9 +28,16 @@ function UserHome() {
         <main className="container mx-auto px-6 py-8">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-orbitron font-bold mb-4 text-neon-cyan">
-                Bem-vindo, {profile?.first_name || 'Usuário'}!
-              </h1>
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <img 
+                  src="/lovable-uploads/7ab01ef0-41c3-4580-b28c-0c0c27d967ce.png" 
+                  alt="Capital Daark Mascot" 
+                  className="w-16 h-16 md:w-20 md:h-20"
+                />
+                <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-neon-cyan">
+                  Bem-vindo, {profile?.first_name || 'Usuário'}!
+                </h1>
+              </div>
               <p className="text-muted-foreground text-xl">
                 Acesse suas configurações, gerencie seu perfil e explore nossa plataforma.
               </p>
@@ -122,6 +130,9 @@ function UserHome() {
             </div>
           </div>
         </main>
+
+        {/* Seção de Notícias */}
+        <NewsSection />
 
         <footer className="bg-card/50 border-t border-border/20 p-6 text-center mt-16">
           <p className="text-muted-foreground">&copy; 2025 Capital Daark. Todos os direitos reservados.</p>
