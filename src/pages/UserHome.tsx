@@ -25,107 +25,22 @@ function UserHome() {
       <div className="min-h-screen bg-background">
         <Header />
         
-        <main className="container mx-auto px-6 py-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <div className="flex items-center justify-center gap-4 mb-4">
-                <img 
-                  src="/lovable-uploads/7ab01ef0-41c3-4580-b28c-0c0c27d967ce.png" 
-                  alt="Capital Daark Mascot" 
-                  className="w-16 h-16 md:w-20 md:h-20"
-                />
-                <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-neon-cyan">
+        <main className="container mx-auto px-4 py-6">
+          <div className="max-w-7xl mx-auto">
+            {/* Welcome Header */}
+            <div className="flex items-center gap-4 mb-8 p-6 bg-card/50 backdrop-blur-sm rounded-xl border border-border/20">
+              <img 
+                src="/lovable-uploads/f2993ceb-7c75-4bf7-84fd-dbec0ad7aba2.png" 
+                alt="Capital Daark Mascot" 
+                className="w-12 h-12 md:w-16 md:h-16"
+              />
+              <div>
+                <h1 className="text-2xl md:text-3xl font-orbitron font-bold text-neon-cyan">
                   Bem-vindo, {profile?.first_name || 'Usuário'}!
                 </h1>
-              </div>
-              <p className="text-muted-foreground text-xl">
-                Acesse suas configurações, gerencie seu perfil e explore nossa plataforma.
-              </p>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/30 p-6 shadow-lg hover:shadow-neon-cyan/10 transition-all duration-300 hover:transform hover:scale-[1.02]">
-                <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center mb-4">
-                  <User className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Meu Perfil</h3>
-                <p className="text-muted-foreground mb-4">Gerencie suas informações pessoais e foto de perfil.</p>
-                <Link 
-                  to="/dados-pessoais" 
-                  className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
-                >
-                  Acessar Perfil
-                </Link>
-              </div>
-              
-              <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/30 p-6 shadow-lg hover:shadow-neon-purple/10 transition-all duration-300 hover:transform hover:scale-[1.02]">
-                <div className="w-12 h-12 bg-gradient-secondary rounded-lg flex items-center justify-center mb-4">
-                  <Settings className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Configurações</h3>
-                <p className="text-muted-foreground mb-4">Ajuste suas preferências e configurações de conta.</p>
-                <Link 
-                  to="/configuracoes" 
-                  className="inline-flex items-center px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors font-medium"
-                >
-                  Configurar
-                </Link>
-              </div>
-              
-              <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/30 p-6 shadow-lg hover:shadow-neon-green/10 transition-all duration-300 hover:transform hover:scale-[1.02]">
-                <div className="w-12 h-12 bg-gradient-accent rounded-lg flex items-center justify-center mb-4">
-                  <CreditCard className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Pagamentos</h3>
-                <p className="text-muted-foreground mb-4">Gerencie seus métodos de pagamento e cartões.</p>
-                <Link 
-                  to="/payment-methods" 
-                  className="inline-flex items-center px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors font-medium"
-                >
-                  Gerenciar
-                </Link>
-              </div>
-              
-              <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/30 p-6 shadow-lg hover:shadow-neon-cyan/10 transition-all duration-300 hover:transform hover:scale-[1.02]">
-                <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center mb-4">
-                  <ShoppingBag className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Loja</h3>
-                <p className="text-muted-foreground mb-4">Explore nossos produtos e serviços exclusivos.</p>
-                <Link 
-                  to="/loja" 
-                  className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
-                >
-                  Ver Loja
-                </Link>
-              </div>
-              
-              <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/30 p-6 shadow-lg hover:shadow-neon-purple/10 transition-all duration-300 hover:transform hover:scale-[1.02]">
-                <div className="w-12 h-12 bg-gradient-secondary rounded-lg flex items-center justify-center mb-4">
-                  <Phone className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Contatos</h3>
-                <p className="text-muted-foreground mb-4">Entre em contato conosco para suporte.</p>
-                <Link 
-                  to="/contatos" 
-                  className="inline-flex items-center px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors font-medium"
-                >
-                  Contatar
-                </Link>
-              </div>
-              
-              <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/30 p-6 shadow-lg hover:shadow-neon-green/10 transition-all duration-300 hover:transform hover:scale-[1.02]">
-                <div className="w-12 h-12 bg-gradient-accent rounded-lg flex items-center justify-center mb-4">
-                  <Info className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Sobre Nós</h3>
-                <p className="text-muted-foreground mb-4">Conheça mais sobre a Capital Daark.</p>
-                <Link 
-                  to="/sobre" 
-                  className="inline-flex items-center px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors font-medium"
-                >
-                  Conhecer
-                </Link>
+                <p className="text-muted-foreground">
+                  Acompanhe as últimas notícias e tendências do mundo da tecnologia
+                </p>
               </div>
             </div>
           </div>

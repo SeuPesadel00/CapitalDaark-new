@@ -134,13 +134,15 @@ function DadosPessoais() {
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file);
+        .upload(`${user?.id}/${fileName}`, file, {
+          upsert: true
+        });
 
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage
         .from('avatars')
-        .getPublicUrl(fileName);
+        .getPublicUrl(`${user?.id}/${fileName}`);
 
       const { error: updateError } = await supabase
         .from('profiles')

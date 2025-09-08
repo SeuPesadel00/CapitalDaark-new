@@ -252,69 +252,128 @@ const NewsSection = () => {
   }, [loading, hasMore, displayedNews.length]);
 
   return (
-    <section id="news-section" className="py-16 bg-background">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-orbitron font-bold mb-4">
-            <span className="text-primary">Últimas</span>
-            <span className="text-secondary ml-2">Notícias</span>
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Fique por dentro das novidades e tendências que estão moldando o futuro
-          </p>
+    <section id="news-section" className="py-8 bg-background">
+      <div className="container mx-auto px-4">
+        {/* Main News Grid - UOL/Globo style */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Featured News - Large Card */}
+          {displayedNews[0] && (
+            <div className="lg:col-span-2">
+              <Card className="group overflow-hidden border-border/20 bg-card/50 backdrop-blur-sm h-full">
+                <div className="relative">
+                  <img
+                    src={displayedNews[0].image}
+                    alt={displayedNews[0].title}
+                    className="w-full h-64 lg:h-80 object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute top-4 left-4">
+                    <span className="px-3 py-1 bg-red-600 text-white text-sm font-bold rounded">
+                      PRINCIPAL
+                    </span>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                    <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2 leading-tight">
+                      {displayedNews[0].title}
+                    </h2>
+                    <p className="text-gray-200 text-sm mb-3 line-clamp-2">
+                      {displayedNews[0].excerpt}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-gray-300">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {displayedNews[0].date}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {displayedNews[0].readTime}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 cursor-pointer" onClick={() => navigate(`/noticia/${displayedNews[0].id}`)} />
+              </Card>
+            </div>
+          )}
+
+          {/* Secondary News - Right Column */}
+          <div className="space-y-4">
+            {displayedNews.slice(1, 4).map((news, index) => (
+              <Card 
+                key={news.id}
+                className="group overflow-hidden border-border/20 bg-card/50 backdrop-blur-sm cursor-pointer hover:shadow-lg transition-all duration-300"
+                onClick={() => navigate(`/noticia/${news.id}`)}
+              >
+                <div className="flex gap-3 p-4">
+                  <img
+                    src={news.image}
+                    alt={news.title}
+                    className="w-20 h-16 object-cover rounded flex-shrink-0 group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <span className="px-2 py-1 bg-primary/20 text-primary text-xs font-medium rounded mb-2 inline-block">
+                      {news.category}
+                    </span>
+                    <h3 className="font-semibold text-sm leading-tight mb-1 group-hover:text-primary transition-colors line-clamp-2">
+                      {news.title}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>{news.date}</span>
+                      <span>•</span>
+                      <span>{news.readTime}</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {displayedNews.map((news) => (
+        {/* More News Section */}
+        <div className="border-t border-border/20 pt-8">
+          <h3 className="text-xl font-bold mb-6 flex items-center text-foreground">
+            <span className="text-primary">Mais</span>
+            <span className="text-secondary ml-2">Notícias</span>
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {displayedNews.slice(4).map((news) => (
             <Card 
               key={news.id} 
-              className="group hover:shadow-lg transition-all duration-300 border-border/20 bg-card/50 backdrop-blur-sm overflow-hidden"
+              className="group hover:shadow-lg transition-all duration-300 border-border/20 bg-card/50 backdrop-blur-sm overflow-hidden cursor-pointer"
+              onClick={() => navigate(`/noticia/${news.id}`)}
             >
               <div className="relative overflow-hidden">
                 <img
                   src={news.image}
                   alt={news.title}
-                  className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-                <div className="absolute top-4 left-4">
-                  <span className="px-3 py-1 bg-primary/90 text-primary-foreground text-xs font-medium rounded-full">
+                <div className="absolute top-2 left-2">
+                  <span className="px-2 py-1 bg-primary/90 text-primary-foreground text-xs font-medium rounded">
                     {news.category}
                   </span>
                 </div>
               </div>
               
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
-                  <div className="flex items-center gap-1">
+              <CardContent className="p-3">
+                <h4 className="font-semibold text-sm leading-tight mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                  {news.title}
+                </h4>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     {news.date}
-                  </div>
-                  <div className="flex items-center gap-1">
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {news.readTime}
-                  </div>
+                  </span>
                 </div>
-                <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                  {news.title}
-                </CardTitle>
-              </CardHeader>
-              
-              <CardContent className="pt-0">
-                <CardDescription className="mb-4 text-sm leading-relaxed">
-                  {news.excerpt}
-                </CardDescription>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="group/btn border-primary/20 text-primary hover:bg-primary/10"
-                  onClick={() => navigate(`/noticia/${news.id}`)}
-                >
-                  Ler mais
-                  <ArrowRight className="ml-2 w-3 h-3 group-hover/btn:translate-x-1 transition-transform" />
-                </Button>
               </CardContent>
             </Card>
           ))}
+          </div>
         </div>
 
         {loading && (

@@ -42,7 +42,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
           {/* Logo */}
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/user-home')}>
             <img 
-              src="/lovable-uploads/775ccaaf-4f81-4b36-97a0-969f5e8ea7c2.png" 
+              src="/lovable-uploads/f2993ceb-7c75-4bf7-84fd-dbec0ad7aba2.png" 
               alt="Capital Daark Logo" 
               className="w-10 h-10"
             />
