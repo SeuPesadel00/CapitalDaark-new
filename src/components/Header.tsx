@@ -51,7 +51,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
             </span>
           </div>
 
-          {/* Desktop Navigation */}
+          {/* Navegação na área de trabalho */}
           {!hideNav && (
             <nav className="hidden md:flex items-center space-x-8">
               {navItems.map((item) => (
@@ -67,10 +67,10 @@ const Header = ({ hideNav = false }: HeaderProps) => {
             </nav>
           )}
 
-          {/* Desktop Actions */}
+          {/* Ações na área de trabalho */}
           {!hideNav && (
             <div className="hidden lg:flex items-center space-x-4">
-              {/* Cart Button */}
+              {/* Botão do carrinho */}
               <Button
                 variant="outline"
                 size="icon"
@@ -85,7 +85,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                 )}
               </Button>
 
-              {/* User Info and Profile */}
+              {/* Informações e perfil do usuário */}
               {user ? (
                 <div className="flex items-center space-x-3">
                   <span className="text-foreground font-medium">
@@ -166,7 +166,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
             </div>
           )}
 
-          {/* Mobile/Tablet Actions */}
+          {/* Ações para dispositivos móveis/tablets */}
           {!hideNav && (
             <div className="hidden md:flex lg:hidden items-center space-x-4">
               <Button
@@ -185,7 +185,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
             </div>
           )}
 
-          {/* Mobile Menu Button */}
+          {/* Botão de menu móvel */}
           {!hideNav && (
             <Button
               variant="ghost"
@@ -202,7 +202,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
           )}
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Navegação móvel */}
         {!hideNav && isMobileMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t border-border/20">
             <nav className="flex flex-col space-y-2 pt-4">

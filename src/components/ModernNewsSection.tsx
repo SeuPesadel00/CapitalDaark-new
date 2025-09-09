@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Clock, ArrowRight, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// Import das imagens
+// Importar imagens
 import newsTech from '@/assets/news-tech.jpg';
 import newsBusiness from '@/assets/news-business.jpg';
 import newsGaming from '@/assets/news-gaming.jpg';
@@ -119,28 +119,19 @@ const ModernNewsSection = () => {
   return (
     <section className="py-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* Cabeçalho */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <img 
-              src="/lovable-uploads/f2993ceb-7c75-4bf7-84fd-dbec0ad7aba2.png" 
-              alt="Capital Daark Mascot" 
-              className="w-10 h-10"
-            />
             <h2 className="text-2xl md:text-3xl font-orbitron font-bold">
               <span className="text-primary">Últimas</span>
               <span className="text-secondary ml-2">Notícias</span>
             </h2>
           </div>
-          <div className="flex items-center gap-2 text-primary">
-            <TrendingUp className="w-5 h-5" />
-            <span className="text-sm font-medium">Em Destaque</span>
-          </div>
         </div>
 
-        {/* Main Layout - Similar to UOL/Globo */}
+        {/* Layout principal - Semelhante ao UOL/Globo */}
         <div className="grid lg:grid-cols-3 gap-6 mb-8">
-          {/* Main Featured News */}
+          {/* Principais notícias em destaque */}
           {mainNews && (
             <div className="lg:col-span-2">
               <Card 
@@ -179,7 +170,7 @@ const ModernNewsSection = () => {
             </div>
           )}
 
-          {/* Secondary Featured News */}
+          {/* Notícias secundárias em destaque */}
           <div className="space-y-4">
             {secondaryFeatured.map((news) => (
               <Card 
@@ -212,7 +203,7 @@ const ModernNewsSection = () => {
           </div>
         </div>
 
-        {/* Regular News Grid */}
+        {/* Grade regular de notícias */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {regularNews.map((news) => (
             <Card 
@@ -244,7 +235,7 @@ const ModernNewsSection = () => {
           ))}
         </div>
 
-        {/* Load More Button */}
+        {/* Botão Carregar Mais */}
         <div className="text-center mt-8">
           <button
             onClick={loadMoreNews}

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ArrowRight, Calendar, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// Import das imagens
+// Importar imagens
 import newsTech from '@/assets/news-tech.jpg';
 import newsBusiness from '@/assets/news-business.jpg';
 import newsGaming from '@/assets/news-gaming.jpg';
@@ -254,9 +254,9 @@ const NewsSection = () => {
   return (
     <section id="news-section" className="py-8 bg-background">
       <div className="container mx-auto px-4">
-        {/* Main News Grid - UOL/Globo style */}
+        {/* Grade Principal de Notícias - estilo UOL/Globo */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Featured News - Large Card */}
+          {/* Notícias em destaque - Cartão grande */}
           {displayedNews[0] && (
             <div className="lg:col-span-2">
               <Card className="group overflow-hidden border-border/20 bg-card/50 backdrop-blur-sm h-full">
@@ -295,7 +295,7 @@ const NewsSection = () => {
             </div>
           )}
 
-          {/* Secondary News - Right Column */}
+          {/* Notícias Secundárias - Coluna da Direita */}
           <div className="space-y-4">
             {displayedNews.slice(1, 4).map((news, index) => (
               <Card 
@@ -328,7 +328,7 @@ const NewsSection = () => {
           </div>
         </div>
 
-        {/* More News Section */}
+        {/* Mais seção de notícias */}
         <div className="border-t border-border/20 pt-8">
           <h3 className="text-xl font-bold mb-6 flex items-center text-foreground">
             <span className="text-primary">Mais</span>

@@ -118,7 +118,7 @@ function DadosPessoais() {
       return;
     }
 
-    // Validate file type
+    // Validar tipo de arquivo
     if (!file.type.startsWith('image/')) {
       toast({
         title: "Formato inválido",
@@ -208,7 +208,7 @@ function DadosPessoais() {
                 </div>
               </div>
 
-              {/* Personal Information */}
+              {/* Informações pessoais */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="first_name" className="text-primary">Nome</Label>
@@ -301,7 +301,7 @@ function DadosPessoais() {
                 />
               </div>
 
-              {/* Address */}
+              {/* Endereço */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium flex items-center text-secondary">
                   <MapPin className="w-5 h-5 mr-2" />

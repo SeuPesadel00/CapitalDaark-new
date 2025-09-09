@@ -103,7 +103,7 @@ const Noticias = () => {
       <Header />
       
       <main className="container mx-auto px-6 py-8">
-        {/* Header */}
+        {/* Cabeçalho */}
         <div className="text-center mb-12">
           <Badge className="mb-4 bg-gradient-primary text-white px-4 py-2 text-sm font-medium">
             📰 Sempre atualizado
@@ -116,7 +116,7 @@ const Noticias = () => {
           </p>
         </div>
 
-        {/* Search and Filters */}
+        {/* Pesquisa e filtros */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/50 h-5 w-5" />
@@ -145,7 +145,7 @@ const Noticias = () => {
           </div>
         </div>
 
-        {/* Featured News */}
+        {/* Notícias em destaque */}
         <div className="mb-12">
           <h2 className="text-2xl font-orbitron font-bold text-neon-purple mb-6 flex items-center gap-2">
             <TrendingUp className="h-6 w-6" />
@@ -192,7 +192,7 @@ const Noticias = () => {
           </div>
         </div>
 
-        {/* Regular News Grid */}
+        {/* Grade regular de notícias */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredNews.map((news) => (
             <Card key={news.id} className="bg-card/80 backdrop-blur-sm border-border/30 hover:border-neon-purple/50 transition-all duration-300 hover:shadow-lg hover:shadow-neon-purple/10 group overflow-hidden">
@@ -237,7 +237,7 @@ const Noticias = () => {
           ))}
         </div>
 
-        {/* No results */}
+        {/* Nenhum resultado */}
         {filteredNews.length === 0 && (
           <div className="text-center py-12">
             <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">

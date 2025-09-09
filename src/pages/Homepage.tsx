@@ -31,7 +31,7 @@ const Homepage = () => {
       <Header />
       
       <main className="container mx-auto px-6 py-8">
-        {/* Hero Section */}
+        {/* Seção Hero */}
         <div className="text-center mb-16">
           <Badge className="mb-6 bg-gradient-primary text-white px-4 py-2 text-sm font-medium">
             🚀 Nova versão disponível
@@ -64,7 +64,7 @@ const Homepage = () => {
           </div>
         </div>
 
-        {/* Features Section */}
+        {/* Seção de recursos */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           {features.map((feature, index) => (
             <Card key={index} className="bg-card/80 backdrop-blur-sm border-border/30 hover:border-neon-cyan/50 transition-all duration-300 hover:shadow-lg hover:shadow-neon-cyan/10 group text-center">

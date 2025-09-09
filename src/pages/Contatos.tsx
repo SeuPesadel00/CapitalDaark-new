@@ -29,7 +29,7 @@ const Contatos = () => {
       return;
     }
 
-    // Simulate form submission
+    // Simular envio de formulário
     toast({
       title: "Mensagem enviada!",
       description: "Retornaremos em até 24 horas"
@@ -46,25 +46,25 @@ const Contatos = () => {
     {
       icon: Mail,
       title: "Email",
-      value: "contato@capitaldarrk.com",
+      value: "capitaldaark@gmail.com",
       description: "Resposta em até 24h"
     },
     {
       icon: Phone,
       title: "Telefone",
-      value: "+55 (11) 99999-0000",
+      value: "+55 (61) 98220-1177",
       description: "Seg a Sex, 9h às 18h"
     },
     {
       icon: MapPin,
       title: "Endereço",
-      value: "São Paulo, SP - Brasil",
+      value: "Brasília, DF - Brasil",
       description: "Zona Sul, Centro Tecnológico"
     },
     {
       icon: Clock,
       title: "Horário",
-      value: "24/7 Online",
+      value: "24hrs Online",
       description: "Suporte digital sempre ativo"
     }
   ];
@@ -74,7 +74,7 @@ const Contatos = () => {
       <Header />
       
       <main className="container mx-auto px-6 py-8">
-        {/* Header */}
+        {/* Cabeçalho */}
         <div className="text-center mb-12">
           <Badge className="mb-4 bg-gradient-primary text-white px-4 py-2 text-sm font-medium">
             💬 Estamos online
@@ -88,7 +88,7 @@ const Contatos = () => {
         </div>
 
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
+          {/* Formulário de contato */}
           <Card className="bg-card/80 backdrop-blur-sm border-border/30 shadow-lg">
             <CardHeader>
               <CardTitle className="text-2xl font-semibold text-neon-cyan flex items-center gap-2">
@@ -158,7 +158,7 @@ const Contatos = () => {
             </CardContent>
           </Card>
 
-          {/* Contact Info */}
+          {/* Informações de contato */}
           <div className="space-y-8">
             <div className="grid gap-6">
               {contactInfo.map((info, index) => (
@@ -177,7 +177,7 @@ const Contatos = () => {
               ))}
             </div>
 
-            {/* Additional Info */}
+            {/* Informações Adicionais */}
             <Card className="bg-gradient-accent rounded-xl p-6 text-center">
               <h3 className="text-xl font-semibold text-white mb-3">
                 Suporte Técnico Especializado

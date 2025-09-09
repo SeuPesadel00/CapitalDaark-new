@@ -61,7 +61,7 @@ function Login() {
             </h1>
             <p className="text-muted-foreground">Acesse sua conta para continuar</p>
           </div>
-          {/* Card de login com glass effect */}
+          {/* Cartão de login com efeito de vidro*/}
           <div className="bg-card rounded-2xl p-8 shadow-soft border border-border animate-scale-in">
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-4">

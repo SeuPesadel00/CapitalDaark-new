@@ -7,20 +7,20 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-dark">
-      {/* Animated background elements */}
+      {/* Elementos de fundo animados */}
       <div className="absolute inset-0 bg-gradient-to-r from-neon-cyan/5 via-transparent to-neon-purple/5"></div>
       <div className="absolute top-20 left-20 w-72 h-72 bg-neon-cyan/10 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-neon-purple/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
-          {/* Badge */}
+          {/* Distintivo */}
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-card/20 border border-neon-cyan/30 backdrop-blur-sm mb-8">
             <Zap className="w-4 h-4 text-neon-cyan mr-2" />
             <span className="text-sm font-medium text-neon-cyan">Nova versão disponível</span>
           </div>
 
-          {/* Main heading */}
+          {/* Título principal */}
           <h1 className="text-5xl md:text-7xl font-orbitron font-bold mb-6 leading-tight">
             <span className="text-neon-cyan">Capital</span>
             <span className="text-neon-purple">Daark</span>
@@ -30,13 +30,13 @@ const Hero = () => {
             </span>
           </h1>
 
-          {/* Description */}
+          {/* Descrição */}
           <p className="text-xl md:text-2xl text-foreground/70 mb-12 max-w-2xl mx-auto leading-relaxed">
             Explore nossa loja digital com produtos exclusivos, tecnologia de ponta e 
             experiência de compra revolucionária.
           </p>
 
-          {/* Action buttons */}
+          {/* Botões de ação */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
             <Button 
               size="lg" 
@@ -59,7 +59,7 @@ const Hero = () => {
             </Button>
           </div>
 
-          {/* Features */}
+          {/* Características */}
           <div className="grid md:grid-cols-3 gap-8 max-w-3xl mx-auto">
             <div className="text-center p-6 rounded-xl bg-card/20 border border-border/10 backdrop-blur-sm hover:bg-card/30 transition-all duration-300">
               <Shield className="w-8 h-8 text-neon-green mx-auto mb-4" />
@@ -80,7 +80,7 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Scroll indicator */}
+      {/* Indicador de rolagem */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
         <div className="w-6 h-10 border-2 border-neon-cyan/50 rounded-full flex justify-center">
           <div className="w-1 h-3 bg-neon-cyan rounded-full mt-2 animate-pulse"></div>

@@ -161,7 +161,7 @@ function Register() {
                   />
                 </div>
                 
-                {/* Terms and Privacy Acceptance */}
+                {/* Termos e Aceitação de Privacidade */}
                 <div className="space-y-3">
                   <div className="flex items-start space-x-2">
                     <Checkbox

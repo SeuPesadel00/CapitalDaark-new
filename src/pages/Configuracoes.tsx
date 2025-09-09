@@ -84,7 +84,7 @@ const Configuracoes = () => {
       return;
     }
 
-    // Password change logic here
+    // Lógica de alteração de senha aqui
     toast({
       title: "Sucesso",
       description: "Senha alterada com sucesso!"
@@ -94,7 +94,7 @@ const Configuracoes = () => {
   };
 
   const sendRecoveryCode = () => {
-    // Send recovery code logic
+    // Enviar lógica de código de recuperação
     toast({
       title: "Código Enviado",
       description: "Um código de autenticação foi enviado para seu email"
@@ -102,7 +102,7 @@ const Configuracoes = () => {
   };
 
   const saveSettings = () => {
-    // Save settings logic
+    // Salvar lógica de configurações
     toast({
       title: "Configurações Salvas",
       description: "Suas preferências foram atualizadas com sucesso!"
@@ -115,7 +115,7 @@ const Configuracoes = () => {
       
       <main className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
+          {/* Cabeçalho */}
           <div className="flex items-center gap-4 mb-8">
             <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center">
               <Settings className="h-6 w-6 text-white" />
@@ -146,7 +146,7 @@ const Configuracoes = () => {
               </TabsTrigger>
             </TabsList>
 
-            {/* General Settings */}
+            {/* Configurações Gerais */}
             <TabsContent value="general" className="space-y-6">
             <Card className="bg-card/80 backdrop-blur-sm border-border/30 shadow-lg hover:shadow-neon-cyan/10">
                 <CardHeader>
@@ -204,7 +204,7 @@ const Configuracoes = () => {
               </Card>
             </TabsContent>
 
-            {/* Security Settings */}
+            {/* Configurações de segurança */}
             <TabsContent value="security" className="space-y-6">
               <Card className="bg-card border-border/20">
                 <CardHeader>
@@ -328,7 +328,7 @@ const Configuracoes = () => {
               </Card>
             </TabsContent>
 
-            {/* Notifications Settings */}
+            {/* Configurações de notificações */}
             <TabsContent value="notifications" className="space-y-6">
               <Card className="bg-card border-border/20">
                 <CardHeader>
@@ -401,7 +401,7 @@ const Configuracoes = () => {
               </Card>
             </TabsContent>
 
-            {/* Appearance Settings */}
+            {/* Configurações de aparência */}
             <TabsContent value="appearance" className="space-y-6">
               <Card className="bg-card border-border/20">
                 <CardHeader>
@@ -445,7 +445,7 @@ const Configuracoes = () => {
             </TabsContent>
           </Tabs>
 
-          {/* Save Button */}
+          {/* Botão Salvar */}
           <div className="flex justify-end pt-6">
             <Button 
               onClick={saveSettings}

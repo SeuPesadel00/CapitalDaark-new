@@ -27,13 +27,8 @@ function UserHome() {
         
         <main className="container mx-auto px-4 py-6">
           <div className="max-w-7xl mx-auto">
-            {/* Welcome Header */}
+            {/* Cabeçalho de boas-vindas */}
             <div className="flex items-center gap-4 mb-8 p-6 bg-card/50 backdrop-blur-sm rounded-xl border border-border/20">
-              <img 
-                src="/lovable-uploads/f2993ceb-7c75-4bf7-84fd-dbec0ad7aba2.png" 
-                alt="Capital Daark Mascot" 
-                className="w-12 h-12 md:w-16 md:h-16"
-              />
               <div>
                 <h1 className="text-2xl md:text-3xl font-orbitron font-bold text-neon-cyan">
                   Bem-vindo, {profile?.first_name || 'Usuário'}!

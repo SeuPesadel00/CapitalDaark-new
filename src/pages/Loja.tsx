@@ -62,7 +62,7 @@ const Loja = () => {
     return matchesSearch && matchesCategory;
   });
 
-  // Infinite scroll: load more products when reaching the bottom
+  // Rolagem infinita: carregue mais produtos ao chegar ao fundo
   useEffect(() => {
     const handleScroll = () => {
       if (
@@ -96,8 +96,11 @@ const Loja = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-6 py-8">
-        {/* Header */}
+        {/* Cabeçalho */}
         <div className="text-center mb-12">
+           <Badge className="mb-6 bg-gradient-primary text-white px-4 py-2 text-sm font-medium">
+                      📦 Produtos a pronta entrega
+                    </Badge>
           <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-neon-cyan mb-4">
             Loja <span className="text-neon-purple">Digital</span>
           </h1>
@@ -106,7 +109,7 @@ const Loja = () => {
           </p>
         </div>
 
-        {/* Search and Filter */}
+        {/*Pesquisar e Filtrar */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/50 h-5 w-5" />
@@ -115,7 +118,7 @@ const Loja = () => {
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setVisibleCount(PRODUCTS_PER_LOAD); // Reset scroll on search
+                setVisibleCount(PRODUCTS_PER_LOAD); // Redefinir rolagem na pesquisa
               }}
               className="pl-10 bg-card border-border/30 focus:border-neon-cyan"
             />
@@ -128,7 +131,7 @@ const Loja = () => {
                 size="sm"
                 onClick={() => {
                   setSelectedCategory(category.id);
-                  setVisibleCount(PRODUCTS_PER_LOAD); // Reset scroll on filter
+                  setVisibleCount(PRODUCTS_PER_LOAD); // Redefinir rolagem no filtro
                 }}
                 className={selectedCategory === category.id 
                   ? "bg-gradient-primary" 
@@ -141,12 +144,12 @@ const Loja = () => {
           </div>
         </div>
 
-        {/* Products Grid */}
+        {/* Grade de Produtos */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.slice(0, visibleCount).map((product) => (
             <Card key={product.id} className="bg-card border-border/20 hover:border-neon-cyan/30 transition-all duration-300 hover:shadow-xl hover:shadow-neon-cyan/10 group">
               <CardHeader className="p-0 relative">
-                {/* Product Image */}
+                {/* Imagem do produto */}
                 <div className="aspect-square bg-muted rounded-t-lg relative overflow-hidden">
                   <img 
                     src={product.image} 
@@ -154,7 +157,7 @@ const Loja = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   
-                  {/* Badges */}
+                  {/* Emblemas */}
                   <div className="absolute top-3 left-3 flex flex-col gap-2">
                     {product.featured && (
                       <Badge className="bg-neon-purple text-white">Destaque</Badge>
@@ -167,7 +170,7 @@ const Loja = () => {
                     )}
                   </div>
 
-                  {/* Wishlist Button */}
+                  {/* Botão Lista de desejos */}
                   <Button
                     size="icon"
                     variant="ghost"
@@ -183,7 +186,7 @@ const Loja = () => {
                   {product.nome}
                 </h3>
                 
-                {/* Rating */}
+                {/* Avaliação */}
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex items-center">
                     <Star className="h-4 w-4 fill-neon-orange text-neon-orange" />
@@ -192,7 +195,7 @@ const Loja = () => {
                   <span className="text-sm text-foreground/60">({product.reviews} avaliações)</span>
                 </div>
 
-                {/* Price */}
+                {/* Preço */}
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-2xl font-bold text-neon-green">
                     R$ {product.price.toFixed(2)}
@@ -219,14 +222,14 @@ const Loja = () => {
           ))}
         </div>
 
-        {/* Loader for infinite scroll */}
+        {/* Carregador para rolagem infinita */}
         {visibleCount < filteredProducts.length && (
           <div ref={loaderRef} className="flex justify-center py-8">
             <span className="text-neon-cyan animate-pulse">Carregando mais produtos...</span>
           </div>
         )}
 
-        {/* No results */}
+        {/* Nenhum resultado */}
         {filteredProducts.length === 0 && (
           <div className="text-center py-12">
             <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">

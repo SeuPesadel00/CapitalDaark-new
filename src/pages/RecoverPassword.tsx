@@ -56,7 +56,7 @@ function RecoverPassword() {
   return (
     <Layout hideNav>
       <div className="w-full max-w-md px-4">
-          {/* Header com animação */}
+          {/* Cabeçalho com animação */}
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-accent mb-2">
               Recuperar Acesso
@@ -66,7 +66,7 @@ function RecoverPassword() {
             </p>
           </div>
 
-          {/* Card de recuperação com glass effect */}
+          {/* Cartao de recuperação com efeito de vidro */}
           <div className="bg-card rounded-2xl p-8 shadow-soft border border-border animate-scale-in">
             <form onSubmit={handleResetPassword} className="space-y-6">
               <div className="group">

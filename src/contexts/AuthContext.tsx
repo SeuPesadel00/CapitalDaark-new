@@ -30,14 +30,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // Configurar o ouvinte de estado de autenticação PRIMEIRO
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user profile using setTimeout to avoid deadlock
+          // Obter perfil de usuário usando setTimeout para evitar deadlock
           setTimeout(async () => {
             try {
               const { data: profile } = await supabase
@@ -58,13 +58,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // THEN check for existing session
+    // ENTÃO verifique se há uma sessão existente
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        // Also fetch profile for initial session
+        // Também busque o perfil para a sessão inicial
         setTimeout(async () => {
           try {
             const { data: profile } = await supabase

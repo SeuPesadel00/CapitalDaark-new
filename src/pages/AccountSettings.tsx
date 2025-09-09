@@ -144,7 +144,7 @@ function AccountSettings() {
 
   const handleDeleteAccount = async () => {
     try {
-      // Log activity before deletion
+      // Registrar atividade antes da exclusão
       await supabase.from('user_activity_log').insert({
         user_id: user?.id,
         activity_type: 'account_deletion_request',
@@ -178,7 +178,7 @@ function AccountSettings() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
-        {/* Notifications Settings */}
+        {/*Configurações de notificações */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -237,7 +237,7 @@ function AccountSettings() {
           </CardContent>
         </Card>
 
-        {/* Security Settings */}
+        {/* Configurações de segurança */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -313,7 +313,7 @@ function AccountSettings() {
           </CardContent>
         </Card>
 
-        {/* Danger Zone */}
+        {/* Zona de perigo */}
         <Card className="border-destructive">
           <CardHeader>
             <CardTitle className="flex items-center text-destructive">
@@ -360,7 +360,7 @@ function AccountSettings() {
           </CardContent>
         </Card>
 
-        {/* Terms and Privacy */}
+        {/* Termos e privacidade */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
