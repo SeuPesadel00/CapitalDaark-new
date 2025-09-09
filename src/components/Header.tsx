@@ -114,21 +114,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                         Dados Pessoais
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => navigate('/payment-methods')}
-                        className="cursor-pointer hover:bg-muted/50"
-                      >
-                        <CreditCard className="mr-2 h-4 w-4 text-neon-green" />
-                        Formas de Pagamento
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate('/account-settings')}
-                        className="cursor-pointer hover:bg-muted/50"
-                      >
-                        <Settings className="mr-2 h-4 w-4 text-neon-orange" />
-                        Configurações da Conta
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate('/configuracoes')}
+                        onClick={() => navigate('/configuracoes-unificadas')}
                         className="cursor-pointer hover:bg-muted/50"
                       >
                         <Settings className="mr-2 h-4 w-4 text-neon-cyan" />
@@ -235,11 +221,23 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                   className="flex-1 border-neon-purple/30 hover:border-neon-purple"
                   onClick={() => {
                     setIsMobileMenuOpen(false);
-                    navigate('/');
+                    navigate('/dados-pessoais');
                   }}
                 >
                   <User className="h-4 w-4 mr-2 text-neon-purple" />
                   Perfil
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-neon-cyan/30 hover:border-neon-cyan"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    navigate('/configuracoes-unificadas');
+                  }}
+                >
+                  <Settings className="h-4 w-4 mr-2 text-neon-cyan" />
+                  Configurações
                 </Button>
                   <Button
                     variant="outline"

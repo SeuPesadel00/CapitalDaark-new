@@ -6,7 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import UserHome from './pages/UserHome';
 import Loja from './pages/Loja';
-import Configuracoes from './pages/Configuracoes';
+import ConfiguracoesUnificadas from './pages/ConfiguracoesUnificadas';
 import DadosPessoais from './pages/DadosPessoais';
 import NoticiaDetalhe from './pages/NoticiaDetalhe';
 import Homepage from './pages/Homepage'; 
@@ -76,7 +76,7 @@ function App() {
         <Route path="/noticia/:id" element={<AuthGuard><NoticiaDetalhe /></AuthGuard>} />
         <Route path="/contatos" element={<AuthGuard><Contatos /></AuthGuard>} />
         <Route path="/sobre" element={<AuthGuard><Sobre /></AuthGuard>} />
-        <Route path="/configuracoes" element={<AuthGuard><Configuracoes /></AuthGuard>} />
+        <Route path="/configuracoes-unificadas" element={<AuthGuard><ConfiguracoesUnificadas /></AuthGuard>} />
         <Route path="/dados-pessoais" element={<AuthGuard><DadosPessoais /></AuthGuard>} />
         <Route path="/payment-methods" element={<AuthGuard><PaymentMethods /></AuthGuard>} />
         <Route path="/account-settings" element={<AuthGuard><AccountSettings /></AuthGuard>} />

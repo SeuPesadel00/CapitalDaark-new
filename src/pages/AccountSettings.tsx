@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import Layout from '@/components/Layout';
+import Header from '@/components/Header';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -167,17 +167,19 @@ function AccountSettings() {
 
   if (loading) {
     return (
-      <Layout>
+      <div className="min-h-screen bg-background">
+        <Header />
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
         {/*Configurações de notificações */}
         <Card>
           <CardHeader>
@@ -382,8 +384,8 @@ function AccountSettings() {
             </p>
           </CardContent>
         </Card>
-      </div>
-    </Layout>
+      </main>
+    </div>
   );
 }
 

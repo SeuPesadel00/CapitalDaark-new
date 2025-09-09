@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import Layout from '@/components/Layout';
+import Header from '@/components/Header';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -155,8 +155,9 @@ function PaymentMethods() {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-2xl">Métodos de Pagamento</CardTitle>
@@ -327,8 +328,8 @@ function PaymentMethods() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </Layout>
+      </main>
+    </div>
   );
 }
 
