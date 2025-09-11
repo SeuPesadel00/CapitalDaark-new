@@ -67,32 +67,6 @@ const Sobre = () => {
           </p>
         </div>
 
-        {/* Nossa Missão */}
-        <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/30 p-12 text-center mb-16">
-          <h2 className="text-3xl font-orbitron font-bold text-neon-purple mb-6">
-            Nossa Missão
-          </h2>
-          {/* Aplicação da nova estilização aqui */}
-          <p className="text-xl max-w-4xl mx-auto leading-relaxed text-neon-cyan/80 drop-shadow-lg shadow-neon-cyan/20">
-            Existimos para ser um farol na escuridão digital, fornecendo informação de alta voltagem sobre as últimas inovações, 
-            cibersegurança e oportunidades de mercado. Através de um ambiente descentralizado, permitimos que os usuários se conectem e conversem, 
-            transformando cada notícia em um fórum pulsante e cada interação em uma nova possibilidade.
-          </p>
-        </div>
-
-        {/* Criador: */}
-        <div className="bg-card/20 backdrop-blur-sm rounded-2xl border border-border/30 p-12 text-center mb-16">
-          <h2 className="text-3xl font-orbitron font-bold text-neon-purple mb-6">
-            Criador: Arthur Henrique
-          </h2>
-          {/* Aplicação da nova estilização aqui */}
-          <p className="text-xl max-w-4xl mx-auto leading-relaxed text-neon-cyan/80 drop-shadow-lg shadow-neon-cyan/20">
-            O projeto é resultado de uma jornada pessoal e profissional. Aos 27 anos, Arthur é um Analista de Sistemas experiente, com 8 anos de atuação no mercado 
-            mas com a alma de um programador e a visão de um investidor. Como um entusiasta e investidor de Bitcoin , ele traduz a paixão por tecnologia em código. 
-            Atualmente, Arthur segue sua busca por conhecimento em Ciência da Computação e como desenvolvedor Full-stack, impulsionando o Capital Daark a cada linha de código.
-          </p>
-        </div>
-
         {/* Grade de recursos */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {features.map((feature, index) => (
