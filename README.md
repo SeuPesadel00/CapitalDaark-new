@@ -34,8 +34,20 @@ Seja bem-vindo ao CapitalDaark, um portal digital futurista com uma estética cy
 - **Loja de Produtos:** Um espaço com produtos de alta tecnologia, demonstrando funcionalidades de um e-commerce.
 - **Gerenciamento de Estado:** Utilização de localStorage para armazenar tokens de autenticação e dados de usuário de forma segura.
 
-## 👤 Autor
-Este projeto foi desenvolvido e configurado por: **Arthur Henrique Gomes de Oliveira**
-- [Linkedin](https://www.linkedin.com/public-profile/settings?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_self_edit_contact-info%3BSJdUMHUWR1OQZlbv63KPag%3D%3D)
-- [CapitalDaark](https://capitaldaark.com.br)
-- [Curriculo Interativo](https://curriculo-interativo-arthur.vercel.app/)
+## 👨‍💻 Autor
+
+Este projeto foi desenvolvido e configurado por: Arthur Henrique Gomes de Oliveira
+
+**Projetos:**
+
+* [Fluxo de Caixa](https://github.com/SeuPesadel00/Fluxo-de-Caixa)
+* [Curriculo Interativo](https://github.com/SeuPesadel00/Curriculo-Interativo)
+* [Caramelo Real](https://github.com/SeuPesadel00/CarameloReal)
+* [Portifolio Sofia](https://github.com/SeuPesadel00/Portfolio-SofiaOliveira)
+
+**Contatos:**
+
+* [Meu curriculo](https://curriculo-interativo-arthur.vercel.app/)
+* [LinkedIn](https://www.linkedin.com/in/arthur-henriquee/)
+* [GitHub](https://github.com/SeuPesadel00)
+* [WhatsApp](https://wa.me/5561981076848)
