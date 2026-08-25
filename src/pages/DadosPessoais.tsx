@@ -22,6 +22,7 @@ function DadosPessoais() {
     bio: '',
     phone: '',
     birth_date: '',
+    cpf: '',
     address: {
       street: '',
       city: '',
@@ -40,6 +41,7 @@ function DadosPessoais() {
         bio: profile.bio || '',
         phone: profile.phone || '',
         birth_date: profile.birth_date || '',
+        cpf: profile.cpf || '',
         address: profile.address || {
           street: '',
           city: '',
@@ -83,6 +85,7 @@ function DadosPessoais() {
           bio: formData.bio,
           phone: formData.phone,
           birth_date: formData.birth_date || null,
+          cpf: formData.cpf,
           address: formData.address
         })
         .eq('id', user?.id);
@@ -286,6 +289,18 @@ function DadosPessoais() {
                   type="date"
                   value={formData.birth_date}
                   onChange={(e) => handleInputChange('birth_date', e.target.value)}
+                  className="bg-muted/30 border-border/30 focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="cpf" className="text-primary">CPF</Label>
+                <Input
+                  id="cpf"
+                  value={formData.cpf}
+                  onChange={(e) => handleInputChange('cpf', e.target.value)}
+                  placeholder="000.000.000-00"
+                  maxLength={14}
                   className="bg-muted/30 border-border/30 focus:border-primary"
                 />
               </div>

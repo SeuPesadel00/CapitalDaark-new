@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
+import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -45,6 +46,7 @@ interface CartaoData {
 
 function Checkout() {
   const { produtos, limparCarrinho } = useCart();
+  const { profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -68,9 +70,25 @@ function Checkout() {
     cvv: ''
   });
 
+  useEffect(() => {
+    if (profile) {
+      setEndereco(prev => ({
+        ...prev,
+        nome: profile.first_name ? `${profile.first_name} ${profile.last_name || ''}`.trim() : prev.nome,
+        telefone: profile.phone || prev.telefone,
+        cpf: profile.cpf || prev.cpf,
+        cep: profile.address?.zipCode || prev.cep,
+        endereco: profile.address?.street || prev.endereco,
+        cidade: profile.address?.city || prev.cidade,
+        estado: profile.address?.state || prev.estado,
+      }));
+    }
+  }, [profile]);
+
   const subtotal = produtos.reduce((acc, p) => acc + p.preco * p.quantidade, 0);
   const frete = subtotal > 200 ? 0 : 15.90;
-  const impostos = subtotal * 0.05; // 5% de impostos
+  // Imposto ICMS Distrito Federal (17%)
+  const impostos = subtotal * 0.17; 
   const total = subtotal + frete + impostos;
 
   const handleFinalizarCompra = (e: React.FormEvent) => {
@@ -426,7 +444,10 @@ function Checkout() {
                   </div>
                   
                   <div className="flex justify-between text-sm">
-                    <span>Impostos e taxas</span>
+                    <span className="flex items-center gap-1">
+                      <Shield className="w-4 h-4 text-neon-purple" />
+                      Impostos (ICMS DF - 17%)
+                    </span>
                     <span>R$ {impostos.toFixed(2)}</span>
                   </div>
                 </div>
@@ -455,11 +476,11 @@ function Checkout() {
                   <Shield className="w-5 h-5" />
                   Compra Protegida
                 </h3>
-                <ul className="text-sm text-muted-foreground space-y-2">
-                  <li>🔒 Transação 100% segura</li>
-                  <li>📋 Dados protegidos por SSL</li>
-                  <li>🚚 Garantia de entrega</li>
-                  <li>↩️ Política de devolução</li>
+                <ul className="text-sm text-muted-foreground space-y-3 mt-4">
+                  <li className="flex items-center"><Shield className="w-5 h-5 mr-2 text-neon-green" /> Criptografia Ponta a Ponta (SSL 256-bits)</li>
+                  <li className="flex items-center"><Shield className="w-5 h-5 mr-2 text-neon-green" /> Certificação LGPD Total</li>
+                  <li className="flex items-center"><Shield className="w-5 h-5 mr-2 text-neon-green" /> Os dados sensíveis do cartão são tokenizados pela operadora (não são armazenados em nossos servidores)</li>
+                  <li className="flex items-center"><Package className="w-5 h-5 mr-2 text-neon-cyan" /> Rastreamento Garantido na Entrega</li>
                 </ul>
                 </CardContent>
               </Card>
