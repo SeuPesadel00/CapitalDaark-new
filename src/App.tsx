@@ -14,6 +14,7 @@ const DadosPessoais = lazy(() => import('./pages/DadosPessoais'));
 const NoticiaDetalhe = lazy(() => import('./pages/NoticiaDetalhe'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
 const RecoverPassword = lazy(() => import('./pages/RecoverPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const PaymentMethods = lazy(() => import('./pages/PaymentMethods'));
@@ -64,6 +65,7 @@ function App() {
           <Route path="/login" element={!user ? <Login /> : <Navigate to="/user-home" replace />} />
           <Route path="/register" element={!user ? <Register /> : <Navigate to="/user-home" replace />} />
           <Route path="/recover-password" element={!user ? <RecoverPassword /> : <Navigate to="/user-home" replace />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/noticias" element={<Noticias />} />

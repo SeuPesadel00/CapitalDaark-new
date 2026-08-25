@@ -3,12 +3,15 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Calendar, Clock, Search, TrendingUp, Zap, Eye } from 'lucide-react';
-import { useState } from 'react';
+import { Calendar, Clock, Search, TrendingUp, Zap, Eye, Loader2, Link as LinkIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { FeedItem, fetchNewsFeeds, shuffleArray } from '@/utils/feedUtils';
 
 const Noticias = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [newsList, setNewsList] = useState<FeedItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const categories = [
     { id: 'all', name: 'Todas', color: 'bg-gradient-primary' },
@@ -18,80 +21,25 @@ const Noticias = () => {
     { id: 'business', name: 'Negócios', color: 'bg-neon-orange' }
   ];
 
-  const featuredNews = [
-    {
-      id: 1,
-      title: "IA Revoluciona o E-commerce: Personalização em Tempo Real",
-      excerpt: "Algoritmos avançados agora conseguem prever preferências dos usuários com 95% de precisão, transformando a experiência de compra online.",
-      category: "ai",
-      date: "2025-03-01",
-      readTime: "5 min",
-      views: "12.5K",
-      image: "/api/placeholder/400/250",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Gaming Next-Gen: Ray Tracing em Tempo Real para Todos",
-      excerpt: "Nova tecnologia torna gráficos cinematográficos acessíveis em hardware mainstream, democratizando a experiência visual premium.",
-      category: "gaming",
-      date: "2025-02-28",
-      readTime: "7 min",
-      views: "8.9K",
-      image: "/api/placeholder/400/250",
-      featured: true
-    }
-  ];
+  useEffect(() => {
+    const loadNews = async () => {
+      setLoading(true);
+      const news = await fetchNewsFeeds();
+      setNewsList(shuffleArray(news)); // Já carrega embaralhado garantindo vitrines unicas
+      setLoading(false);
+    };
+    loadNews();
+  }, []);
 
-  const regularNews = [
-    {
-      id: 3,
-      title: "Computação Quântica: Marco Histórico Alcançado",
-      excerpt: "Primeiro computador quântico comercial supera barreira dos 1000 qubits estáveis.",
-      category: "tech",
-      date: "2025-02-27",
-      readTime: "4 min",
-      views: "15.2K",
-      image: "/api/placeholder/300/200"
-    },
-    {
-      id: 4,
-      title: "Blockchain 3.0: Sustentabilidade e Eficiência",
-      excerpt: "Nova geração de blockchain reduz consumo energético em 99% mantendo segurança máxima.",
-      category: "tech",
-      date: "2025-02-26",
-      readTime: "6 min",
-      views: "9.8K",
-      image: "/api/placeholder/300/200"
-    },
-    {
-      id: 5,
-      title: "Realidade Virtual: Metaverso Corporativo Cresce 300%",
-      excerpt: "Empresas investem massivamente em espaços virtuais para reuniões e colaboração.",
-      category: "business",
-      date: "2025-02-25",
-      readTime: "5 min",
-      views: "7.3K",
-      image: "/api/placeholder/300/200"
-    },
-    {
-      id: 6,
-      title: "Chips Neurais: Interface Cérebro-Computador Aprovada",
-      excerpt: "Primeira interface comercial para controle de dispositivos por pensamento recebe aprovação.",
-      category: "ai",
-      date: "2025-02-24",
-      readTime: "8 min",
-      views: "18.7K",
-      image: "/api/placeholder/300/200"
-    }
-  ];
-
-  const filteredNews = regularNews.filter(news => {
-    const matchesSearch = news.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         news.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredNews = newsList.filter(news => {
+    const matchesSearch = (news.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (news.content || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || news.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const featuredNews = filteredNews.slice(0, 2);
+  const regularNewsList = filteredNews.slice(2);
 
   const getCategoryColor = (categoryId: string) => {
     const category = categories.find(cat => cat.id === categoryId);
@@ -146,7 +94,15 @@ const Noticias = () => {
         </div>
 
         {/* Notícias em destaque */}
-        <div className="mb-12">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+            <Loader2 className="h-10 w-10 animate-spin mb-4" />
+            <p>Sincronizando feed de notícias da rede mundial...</p>
+          </div>
+        ) : (
+          <>
+            {featuredNews.length > 0 && (
+              <div className="mb-12">
           <h2 className="text-2xl font-orbitron font-bold text-neon-purple mb-6 flex items-center gap-2">
             <TrendingUp className="h-6 w-6" />
             Destaques
@@ -155,11 +111,15 @@ const Noticias = () => {
             {featuredNews.map((news) => (
               <Card key={news.id} className="bg-card/80 backdrop-blur-sm border-border/30 hover:border-neon-cyan/50 transition-all duration-300 hover:shadow-lg hover:shadow-neon-cyan/10 group overflow-hidden">
                 <div className="aspect-video bg-muted relative overflow-hidden">
-                  <div className="w-full h-full bg-gradient-primary opacity-20"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Zap className="h-16 w-16 text-neon-cyan" />
+                  {news.image_url ? (
+                    <img src={news.image_url} alt={news.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-primary opacity-20"></div>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    {!news.image_url && <Zap className="h-16 w-16 text-neon-cyan" />}
                   </div>
-                  <Badge className={`absolute top-4 left-4 ${getCategoryColor(news.category)} text-white`}>
+                  <Badge className={`absolute top-4 left-4 ${getCategoryColor(news.category || 'tech')} text-white`}>
                     {categories.find(cat => cat.id === news.category)?.name}
                   </Badge>
                 </div>
@@ -168,7 +128,7 @@ const Noticias = () => {
                     {news.title}
                   </h3>
                   <p className="text-foreground/70 mb-4 line-clamp-3">
-                    {news.excerpt}
+                    {news.content}
                   </p>
                   <div className="flex items-center justify-between text-sm text-foreground/60">
                     <div className="flex items-center gap-4">
@@ -176,14 +136,13 @@ const Noticias = () => {
                         <Calendar className="h-4 w-4" />
                         {new Date(news.date).toLocaleDateString('pt-BR')}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {news.readTime}
-                      </span>
+                      <Button variant="ghost" size="sm" className="h-6 p-0 text-neon-cyan hover:text-white" onClick={() => window.open(news.link, '_blank')}>
+                        Ler artigo original <LinkIcon className="h-3 w-3 ml-1"/>
+                      </Button>
                     </div>
                     <span className="flex items-center gap-1 text-neon-green">
                       <Eye className="h-4 w-4" />
-                      {news.views}
+                      {Math.floor(Math.random() * 20) + 1}K
                     </span>
                   </div>
                 </CardContent>
@@ -191,21 +150,28 @@ const Noticias = () => {
             ))}
           </div>
         </div>
+            )}
 
-        {/* Grade regular de notícias */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredNews.map((news) => (
-            <Card key={news.id} className="bg-card/80 backdrop-blur-sm border-border/30 hover:border-neon-purple/50 transition-all duration-300 hover:shadow-lg hover:shadow-neon-purple/10 group overflow-hidden">
-              <div className="aspect-video bg-muted relative overflow-hidden">
-                <div className="w-full h-full bg-gradient-secondary opacity-20"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">
-                      {categories.find(cat => cat.id === news.category)?.name[0]}
-                    </span>
-                  </div>
-                </div>
-                <Badge className={`absolute top-3 left-3 ${getCategoryColor(news.category)} text-white text-xs`}>
+            {/* Grade regular de notícias */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {regularNewsList.map((news) => (
+                <Card key={news.id} className="bg-card/80 backdrop-blur-sm border-border/30 hover:border-neon-purple/50 transition-all duration-300 hover:shadow-lg hover:shadow-neon-purple/10 group overflow-hidden">
+                  <div className="aspect-video bg-muted relative overflow-hidden">
+                    {news.image_url ? (
+                      <img src={news.image_url} alt={news.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-secondary opacity-20"></div>
+                    )}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      {!news.image_url && (
+                        <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">
+                            {categories.find(cat => cat.id === news.category)?.name[0] || 'N'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <Badge className={`absolute top-3 left-3 ${getCategoryColor(news.category || 'tech')} text-white text-xs`}>
                   {categories.find(cat => cat.id === news.category)?.name}
                 </Badge>
               </div>
@@ -213,39 +179,40 @@ const Noticias = () => {
                 <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-neon-purple transition-colors line-clamp-2">
                   {news.title}
                 </h3>
-                <p className="text-foreground/70 text-sm mb-3 line-clamp-2">
-                  {news.excerpt}
-                </p>
-                <div className="flex items-center justify-between text-xs text-foreground/60">
-                  <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(news.date).toLocaleDateString('pt-BR')}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {news.readTime}
+                  <p className="text-foreground/70 text-sm mb-3 line-clamp-2">
+                    {news.content}
+                  </p>
+                  <div className="flex items-center justify-between text-xs text-foreground/60 mt-auto pt-4">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(news.date).toLocaleDateString('pt-BR')}
+                      </span>
+                      <Button variant="ghost" size="sm" className="h-5 p-0 text-neon-purple hover:text-white ml-2" onClick={() => window.open(news.link, '_blank')}>
+                        Ler <LinkIcon className="h-3 w-3 ml-1"/>
+                      </Button>
+                    </div>
+                    <span className="flex items-center gap-1 text-neon-green">
+                      <Eye className="h-3 w-3" />
+                      {Math.floor(Math.random() * 10) + 1}K
                     </span>
                   </div>
-                  <span className="flex items-center gap-1 text-neon-green">
-                    <Eye className="h-3 w-3" />
-                    {news.views}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Nenhum resultado */}
-        {filteredNews.length === 0 && (
-          <div className="text-center py-12">
-            <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="h-10 w-10 text-foreground/50" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">Nenhuma notícia encontrada</h3>
-            <p className="text-foreground/60">Tente ajustar os filtros ou termo de busca</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
+
+          {/* Nenhum resultado */}
+          {filteredNews.length === 0 && (
+            <div className="text-center py-12">
+              <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="h-10 w-10 text-foreground/50" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">Nenhuma notícia encontrada</h3>
+              <p className="text-foreground/60">Tente ajustar os filtros ou termo de busca</p>
+            </div>
+          )}
+        </>
         )}
       </main>
     </div>

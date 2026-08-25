@@ -10,12 +10,18 @@ function Register() {
   const [username, setUsername] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  
+  // Controle de OTP
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [otp, setOtp] = useState('');
+  
   const navigate = useNavigate();
-  const { signUp, user } = useAuth();
+  const { signUp, verifyOtp, user } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -43,6 +49,7 @@ function Register() {
         username,
         first_name: firstName,
         last_name: lastName,
+        phone,
         terms_accepted: termsAccepted,
         privacy_accepted: privacyAccepted
       });
@@ -55,12 +62,10 @@ function Register() {
         });
       } else {
         toast({
-          title: "Conta criada com sucesso!",
-          description: "Verifique seu e-mail para confirmar a conta.",
+          title: "Código enviado!",
+          description: "Verifique seu e-mail para pegar o código de 6 dígitos.",
         });
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
+        setIsVerifyingOtp(true);
       }
     } catch (error: any) {
       toast({
@@ -73,17 +78,86 @@ function Register() {
     }
   };
 
+  const handleVerifyOtp = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (otp.length !== 6) {
+      toast({
+        title: "Código inválido",
+        description: "O código deve ter 6 dígitos.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { error } = await verifyOtp(email, otp);
+      if (error) {
+        toast({
+          title: "Erro na verificação",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Conta verificada!",
+          description: "Seja bem-vindo(a)!",
+        });
+        // o AuthContext detectará a nova sessão e redirecionará para /user-home
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: "Falha de conexão com o servidor.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Layout hideNav>
       <div className="w-full max-w-md px-4">
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-secondary mb-2">
-              Junte-se a Nós
+              {isVerifyingOtp ? 'Verificar E-mail' : 'Junte-se a Nós'}
             </h1>
-            <p className="text-muted-foreground">Crie sua conta e comece sua jornada</p>
+            <p className="text-muted-foreground">
+              {isVerifyingOtp 
+                ? 'Digite o código de 6 dígitos enviado para seu e-mail' 
+                : 'Crie sua conta e comece sua jornada'}
+            </p>
           </div>
           <div className="bg-card rounded-2xl p-8 shadow-soft border border-border animate-scale-in">
-            <form onSubmit={handleRegister} className="space-y-6">
+            {isVerifyingOtp ? (
+              <form onSubmit={handleVerifyOtp} className="space-y-6">
+                <div className="group">
+                  <label htmlFor="otp" className="text-sm font-medium text-secondary block mb-2">
+                    Código de Verificação (OTP)
+                  </label>
+                  <input
+                    type="text"
+                    id="otp"
+                    name="otp"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-secondary focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-secondary/70 text-center tracking-[0.5em] font-mono text-xl"
+                    placeholder="123456"
+                    maxLength={6}
+                    required
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  disabled={loading || otp.length !== 6}
+                  className="w-full bg-secondary text-secondary-foreground font-semibold py-3 px-6 rounded-xl hover:bg-secondary/90 transition-all duration-300 shadow-soft border border-secondary/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Verificando...' : 'Verificar e Entrar'}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleRegister} className="space-y-6">
               <div className="space-y-4">
                 <div className="group">
                   <label htmlFor="email" className="text-sm font-medium text-secondary block mb-2">
@@ -146,6 +220,21 @@ function Register() {
                   />
                 </div>
                 <div className="group">
+                  <label htmlFor="phone" className="text-sm font-medium text-secondary block mb-2">
+                    Telefone (Obrigatório)
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-secondary focus:ring-2 focus:ring-ring/20 transition-all duration-300 hover:border-secondary/70"
+                    placeholder="(11) 99999-9999"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                </div>
+                <div className="group">
                   <label htmlFor="password" className="text-sm font-medium text-secondary block mb-2">
                     Senha
                   </label>
@@ -204,6 +293,7 @@ function Register() {
                 {loading ? 'Criando Conta...' : 'Criar Minha Conta'}
               </button>
             </form>
+            )}
             <div className="mt-8">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">

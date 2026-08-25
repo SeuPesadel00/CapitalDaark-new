@@ -98,6 +98,16 @@ function Checkout() {
 
   useEffect(() => {
     if (profile) {
+      if (!profile.phone) {
+        toast({
+          title: "Telefone obrigatório",
+          description: "Para finalizar compras, precisamos de um telefone de contato. Atualize seu perfil.",
+          variant: "destructive"
+        });
+        navigate('/dados-pessoais');
+        return;
+      }
+
       setEndereco(prev => ({
         ...prev,
         nome: profile.first_name ? `${profile.first_name} ${profile.last_name || ''}`.trim() : prev.nome,

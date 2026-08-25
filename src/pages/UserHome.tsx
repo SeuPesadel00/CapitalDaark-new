@@ -21,26 +21,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-interface FeedItem {
-  type: 'post' | 'news';
-  id: string; // ID do Supabase ou URL para RSS
-  user_id?: string; // ID do criador original (para posts)
-  title?: string;
-  content?: string;
-  image_url?: string | null;
-  date: Date;
-  author?: string;
-  avatar_url?: string | null;
-  link?: string;
-  category?: string;
-  likes_count: number;
-  has_liked: boolean;
-}
-
-const RSS_FEEDS = [
-  { url: 'https://g1.globo.com/rss/g1/tecnologia/', category: 'Tecnologia' },
-  { url: 'https://br.cointelegraph.com/rss', category: 'Criptomoedas' }
-];
+import { FeedItem, fetchNewsFeeds, shuffleArray } from '@/utils/feedUtils';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -113,45 +94,9 @@ function UserHome() {
       }));
 
       // 2. Buscar Notícias RSS
-      // Dica: A API RSS2JSON é cacheada, por isso o Paginamento via RSS geralmente traz os mesmos ultimos itens. 
-      // Por isso, para não encher de lixo replicado, limitaremos a buscar notícias novas apenas no "page 1" ou no pull-to-refresh
       let formattedNews: FeedItem[] = [];
       if (pageNum === 1) {
-        const newsPromises = RSS_FEEDS.map(async (feed) => {
-          try {
-            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${feed.url}`);
-            const data = await response.json();
-            if (data.items) {
-              return data.items.slice(0, 8).map((item: any) => {
-                let imageUrl = item.thumbnail || item.enclosure?.link;
-                if (!imageUrl && item.description) {
-                  const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
-                  if (imgMatch) imageUrl = imgMatch[1];
-                }
-
-                return {
-                  type: 'news',
-                  id: item.link,
-                  title: item.title,
-                  content: item.description.replace(/<[^>]+>/g, '').substring(0, 180) + '...',
-                  image_url: imageUrl || 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=800',
-                  date: new Date(item.pubDate),
-                  link: item.link,
-                  category: feed.category,
-                  likes_count: 0,
-                  has_liked: false
-                };
-              });
-            }
-            return [];
-          } catch (e) {
-            console.error(`Erro feed ${feed.category}`, e);
-            return [];
-          }
-        });
-
-        const newsResults = await Promise.all(newsPromises);
-        formattedNews = newsResults.flat();
+        formattedNews = await fetchNewsFeeds();
 
         if (formattedNews.length > 0 && user) {
           const links = formattedNews.map(n => n.id);
@@ -172,9 +117,16 @@ function UserHome() {
 
       // Merge & Sort
       if (pageNum === 1) {
-        // Zera tudo e embaralha novos posts e novas noticias
-        const mergedTimeline = [...formattedPosts, ...formattedNews].sort((a, b) => b.date.getTime() - a.date.getTime());
-        setFeedData(mergedTimeline);
+        // EMBARALHAMENTO DO FEED INICIAL PARA EVITAR REPETIÇÃO:
+        // Mantemos os 2 posts mais recentes de usuários da plataforma estritamente no topo para priorizar o conteúdo da comunidade
+        const sortedPosts = [...formattedPosts].sort((a, b) => b.date.getTime() - a.date.getTime());
+        const topPosts = sortedPosts.slice(0, 2);
+        
+        // O restante dos posts antigos se mistura de forma completamente aleatória com as notícias RSS embaralhadas
+        const restOfPosts = sortedPosts.slice(2);
+        const shuffledMix = shuffleArray([...restOfPosts, ...formattedNews]);
+        
+        setFeedData([...topPosts, ...shuffledMix]);
       } else {
         // Se for página > 1, estamos descendo, apenas anexe os novos posts mais antigos
         setFeedData(prev => {
