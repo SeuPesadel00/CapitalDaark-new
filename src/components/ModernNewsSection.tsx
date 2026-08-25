@@ -98,22 +98,57 @@ const allNewsData = [
 ];
 
 const ModernNewsSection = () => {
-  const navigate = useNavigate();
-  const [displayedNews, setDisplayedNews] = useState(allNewsData.slice(0, 8));
-  const [loading, setLoading] = useState(false);
+  const [displayedNews, setDisplayedNews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        // Feeds reais do G1 e Yahoo Brasil
+        const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://g1.globo.com/rss/g1/tecnologia/');
+        const data = await response.json();
+        
+        if (data.items) {
+          const mappedNews = data.items.map((item: any, index: number) => {
+            // Tenta extrair imagem da tag img na descrição se não houver thumbnail direto
+            let imageUrl = item.thumbnail || item.enclosure?.link;
+            if (!imageUrl && item.description) {
+              const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
+              if (imgMatch) imageUrl = imgMatch[1];
+            }
+            
+            return {
+              id: index.toString(),
+              title: item.title,
+              excerpt: item.description.replace(/<[^>]+>/g, '').substring(0, 150) + '...',
+              image: imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800',
+              date: new Date(item.pubDate).toLocaleDateString('pt-BR'),
+              readTime: '3 min',
+              category: 'Tecnologia',
+              featured: index < 3,
+              link: item.link
+            };
+          });
+          
+          setDisplayedNews(mappedNews);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar notícias RSS:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchNews();
+  }, []);
 
   const featuredNews = displayedNews.filter(news => news.featured);
   const regularNews = displayedNews.filter(news => !news.featured);
   const mainNews = featuredNews[0];
-  const secondaryFeatured = featuredNews.slice(1);
+  const secondaryFeatured = featuredNews.slice(1, 3);
 
   const loadMoreNews = () => {
-    if (loading) return;
-    setLoading(true);
-    
-    setTimeout(() => {
-      setLoading(false);
-    }, 800);
+    // Exemplo simulado de carregar mais
   };
 
   return (
@@ -136,7 +171,7 @@ const ModernNewsSection = () => {
             <div className="lg:col-span-2">
               <Card 
                 className="group cursor-pointer overflow-hidden border-border/20 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-500"
-                onClick={() => navigate(`/noticia/${mainNews.id}`)}
+                onClick={() => window.open(mainNews.link, '_blank')}
               >
                 <div className="relative">
                   <img
@@ -176,7 +211,7 @@ const ModernNewsSection = () => {
               <Card 
                 key={news.id}
                 className="group cursor-pointer overflow-hidden border-border/20 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300"
-                onClick={() => navigate(`/noticia/${news.id}`)}
+                onClick={() => window.open(news.link, '_blank')}
               >
                 <div className="flex gap-4 p-4">
                   <img
@@ -209,7 +244,7 @@ const ModernNewsSection = () => {
             <Card 
               key={news.id}
               className="group cursor-pointer overflow-hidden border-border/20 bg-card/30 backdrop-blur-sm hover:shadow-lg hover:bg-card/50 transition-all duration-300"
-              onClick={() => navigate(`/noticia/${news.id}`)}
+              onClick={() => window.open(news.link, '_blank')}
             >
               <img
                 src={news.image}
