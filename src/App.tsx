@@ -23,6 +23,7 @@ const Sobre = lazy(() => import('./pages/Sobre'));
 const Noticias = lazy(() => import('./pages/Noticias'));
 const Carrinho = lazy(() => import('./pages/Carrinho'));
 const Checkout = lazy(() => import('./pages/Checkout'));
+const Notifications = lazy(() => import('./pages/Notifications'));
 
 // Componente de Loading unificado
 const LoadingScreen = () => (
@@ -80,6 +81,7 @@ function App() {
           <Route path="/payment-methods" element={<AuthGuard><PaymentMethods /></AuthGuard>} />
           <Route path="/account-settings" element={<AuthGuard><AccountSettings /></AuthGuard>} />
           <Route path="/usuario/:username" element={<AuthGuard><UserProfile /></AuthGuard>} />
+          <Route path="/notificacoes" element={<AuthGuard><Notifications /></AuthGuard>} />
           
         </Routes>
       </Suspense>

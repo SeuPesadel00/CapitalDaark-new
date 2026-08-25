@@ -7,7 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { ShoppingCart, User, Settings, UserCircle, LogOut, Home, Compass } from 'lucide-react';
+import { ShoppingCart, User, Settings, UserCircle, LogOut, Home, Compass, Bell } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
@@ -22,6 +23,31 @@ const Header = ({ hideNav = false }: HeaderProps) => {
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
   
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Busca inicial das notificações não lidas
+  useEffect(() => {
+    if (!user) return;
+    const fetchUnread = async () => {
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('recipient_id', user.id)
+        .eq('read', false);
+      if (count !== null) setUnreadCount(count);
+    };
+    fetchUnread();
+
+    // Escutar por novas notificações em tempo real
+    const channel = supabase.channel('realtime_notifications')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${user.id}` }, 
+      (payload) => {
+        setUnreadCount(prev => prev + 1);
+      }).subscribe();
+      
+    return () => { supabase.removeChannel(channel); }
+  }, [user]);
+
   // Detecção se o teclado está aberto (para esconder a bottom bar no Android)
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   
@@ -84,6 +110,15 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                 </nav>
 
                 <div className="flex items-center space-x-4 border-l border-border/30 pl-4">
+                  <Button variant="outline" size="icon" className="relative border-neon-purple/30 hover:border-neon-purple rounded-full" onClick={() => navigate('/notificacoes')}>
+                    <Bell className="h-5 w-5 text-neon-purple" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-neon-cyan text-black text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold animate-pulse shadow-[0_0_10px_rgba(0,255,255,0.8)]">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </Button>
+                  
                   <Button variant="outline" size="icon" className="relative border-neon-cyan/30 hover:border-neon-cyan rounded-full" onClick={() => navigate('/carrinho')}>
                     <ShoppingCart className="h-5 w-5 text-neon-cyan" />
                     {totalItensCarrinho > 0 && (
@@ -172,10 +207,23 @@ const Header = ({ hideNav = false }: HeaderProps) => {
               className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors relative ${isActive('/carrinho') ? 'text-neon-cyan' : 'text-muted-foreground hover:text-gray-300'}`}
             >
               <ShoppingCart className="w-6 h-6" strokeWidth={isActive('/carrinho') ? 2.5 : 2} />
-              <span className="text-[10px] font-medium">Carrinho</span>
+              <span className="text-[10px] font-medium hidden sm:block">Carrinho</span>
               {totalItensCarrinho > 0 && (
-                <span className="absolute top-1 right-3 bg-neon-cyan text-black text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                <span className="absolute top-1 right-1 sm:right-3 bg-neon-cyan text-black text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
                   {totalItensCarrinho}
+                </span>
+              )}
+            </button>
+            
+            <button 
+              onClick={() => navigate('/notificacoes')} 
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors relative ${isActive('/notificacoes') ? 'text-neon-purple' : 'text-muted-foreground hover:text-gray-300'}`}
+            >
+              <Bell className="w-6 h-6" strokeWidth={isActive('/notificacoes') ? 2.5 : 2} />
+              <span className="text-[10px] font-medium hidden sm:block">Alertas</span>
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 sm:right-3 bg-neon-cyan text-black text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold animate-pulse shadow-[0_0_10px_rgba(0,255,255,0.8)]">
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </button>

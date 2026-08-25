@@ -309,8 +309,21 @@ function UserHome() {
     if (!user) return;
     try {
       if (item.type === 'post') {
-        if (item.has_liked) await supabase.from('post_likes').delete().match({ user_id: user.id, post_id: item.id });
-        else await supabase.from('post_likes').insert({ user_id: user.id, post_id: item.id });
+        if (item.has_liked) {
+          await supabase.from('post_likes').delete().match({ user_id: user.id, post_id: item.id });
+        } else {
+          await supabase.from('post_likes').insert({ user_id: user.id, post_id: item.id });
+          
+          // Disparar Notificação (Se não for curtir o próprio post)
+          if (item.user_id && item.user_id !== user.id) {
+            await supabase.from('notifications').insert({
+              recipient_id: item.user_id,
+              sender_id: user.id,
+              type: 'like_post',
+              post_id: item.id
+            });
+          }
+        }
       } else {
         if (item.has_liked) await supabase.from('news_likes').delete().match({ user_id: user.id, news_link: item.id });
         else await supabase.from('news_likes').insert({ user_id: user.id, news_link: item.id, news_title: item.title });
