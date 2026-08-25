@@ -63,6 +63,32 @@ function Checkout() {
     estado: '',
     cpf: ''
   });
+
+  const buscarCep = async (cepBuscado: string) => {
+    const cepLimpo = cepBuscado.replace(/\D/g, '');
+    if (cepLimpo.length !== 8) return;
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+      const data = await response.json();
+      
+      if (!data.erro) {
+        setEndereco(prev => ({
+          ...prev,
+          endereco: data.logradouro || prev.endereco,
+          bairro: data.bairro || prev.bairro,
+          cidade: data.localidade || prev.cidade,
+          estado: data.uf || prev.estado
+        }));
+        toast({
+          title: "Endereço encontrado",
+          description: "Os campos foram preenchidos magicamente usando o seu CEP!"
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao buscar CEP", error);
+    }
+  };
   const [cartao, setCartao] = useState<CartaoData>({
     numero: '',
     nome: '',
@@ -185,7 +211,13 @@ function Checkout() {
                     <Input
                       id="cep"
                       value={endereco.cep}
-                      onChange={(e) => setEndereco({...endereco, cep: e.target.value})}
+                      onChange={(e) => {
+                        const novoCep = e.target.value;
+                        setEndereco({...endereco, cep: novoCep});
+                        if (novoCep.replace(/\D/g, '').length === 8) {
+                          buscarCep(novoCep);
+                        }
+                      }}
                       placeholder="00000-000"
                       maxLength={9}
                       required

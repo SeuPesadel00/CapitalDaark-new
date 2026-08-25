@@ -71,6 +71,34 @@ function DadosPessoais() {
     }
   };
 
+  const buscarCep = async (cepBuscado: string) => {
+    const cepLimpo = cepBuscado.replace(/\D/g, '');
+    if (cepLimpo.length !== 8) return;
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+      const data = await response.json();
+      
+      if (!data.erro) {
+        setFormData(prev => ({
+          ...prev,
+          address: {
+            ...prev.address,
+            street: data.logradouro || prev.address.street,
+            city: data.localidade || prev.address.city,
+            state: data.uf || prev.address.state
+          }
+        }));
+        toast({
+          title: "Endereço encontrado",
+          description: "Os campos foram preenchidos via CEP."
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao buscar CEP", error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -360,8 +388,15 @@ function DadosPessoais() {
                     <Input
                       id="zipCode"
                       value={formData.address.zipCode}
-                      onChange={(e) => handleInputChange('address.zipCode', e.target.value)}
+                      onChange={(e) => {
+                        const novoCep = e.target.value;
+                        handleInputChange('address.zipCode', novoCep);
+                        if (novoCep.replace(/\D/g, '').length === 8) {
+                          buscarCep(novoCep);
+                        }
+                      }}
                       placeholder="00000-000"
+                      maxLength={9}
                       className="bg-muted/30 border-border/30 focus:border-primary"
                     />
                   </div>
