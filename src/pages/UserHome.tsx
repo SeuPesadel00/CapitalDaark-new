@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   User, Image as ImageIcon, Send, Clock, Heart, RefreshCw, X, Link as LinkIcon, 
-  Newspaper, Flame, MoreVertical, Trash2, Pencil, Check
+  Newspaper, Flame, MoreVertical, Trash2, Pencil, Check, Loader2
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { toast } from 'sonner'; // Assumindo que você usa sonner, comum no shadcn
 
 interface FeedItem {
   type: 'post' | 'news';
@@ -43,6 +42,8 @@ const RSS_FEEDS = [
   { url: 'https://br.cointelegraph.com/rss', category: 'Criptomoedas' }
 ];
 
+const ITEMS_PER_PAGE = 10;
+
 function UserHome() {
   const { user, profile, loading } = useAuth();
   
@@ -54,27 +55,49 @@ function UserHome() {
   const [feedData, setFeedData] = useState<FeedItem[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
+  // Controle do Infinite Scroll (Paginamento)
+  const [page, setPage] = useState(1);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const observerTarget = useRef(null);
+  
   // Estado de Edição
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchTimeline = useCallback(async (isPullToRefresh = false) => {
-    if (isPullToRefresh) setIsRefreshing(true);
+  const fetchTimeline = useCallback(async (isPullToRefresh = false, pageNum = 1) => {
+    if (isPullToRefresh) {
+      setIsRefreshing(true);
+      setPage(1);
+      pageNum = 1;
+    } else if (pageNum > 1) {
+      setIsLoadingMore(true);
+    }
 
     try {
-      // 1. Buscar Posts
-      const { data: postsData, error: postsError } = await supabase
+      // 1. Buscar Posts do Supabase com Paginação
+      const from = (pageNum - 1) * ITEMS_PER_PAGE;
+      const to = (pageNum * ITEMS_PER_PAGE) - 1;
+
+      const { data: postsData, error: postsError, count } = await supabase
         .from('social_posts')
         .select(`
           *,
           profiles (first_name, last_name, avatar_url),
           post_likes (user_id)
-        `)
-        .order('created_at', { ascending: false });
+        `, { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       if (postsError) throw postsError;
+      
+      if (count !== null && to >= count) {
+        setHasMorePosts(false);
+      } else {
+        setHasMorePosts(true);
+      }
 
       const formattedPosts: FeedItem[] = (postsData || []).map((post: any) => ({
         type: 'post',
@@ -90,81 +113,119 @@ function UserHome() {
       }));
 
       // 2. Buscar Notícias RSS
+      // Dica: A API RSS2JSON é cacheada, por isso o Paginamento via RSS geralmente traz os mesmos ultimos itens. 
+      // Por isso, para não encher de lixo replicado, limitaremos a buscar notícias novas apenas no "page 1" ou no pull-to-refresh
       let formattedNews: FeedItem[] = [];
-      const newsPromises = RSS_FEEDS.map(async (feed) => {
-        try {
-          const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${feed.url}`);
-          const data = await response.json();
-          if (data.items) {
-            return data.items.slice(0, 15).map((item: any) => {
-              let imageUrl = item.thumbnail || item.enclosure?.link;
-              if (!imageUrl && item.description) {
-                const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
-                if (imgMatch) imageUrl = imgMatch[1];
-              }
+      if (pageNum === 1) {
+        const newsPromises = RSS_FEEDS.map(async (feed) => {
+          try {
+            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${feed.url}`);
+            const data = await response.json();
+            if (data.items) {
+              return data.items.slice(0, 8).map((item: any) => {
+                let imageUrl = item.thumbnail || item.enclosure?.link;
+                if (!imageUrl && item.description) {
+                  const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
+                  if (imgMatch) imageUrl = imgMatch[1];
+                }
 
+                return {
+                  type: 'news',
+                  id: item.link,
+                  title: item.title,
+                  content: item.description.replace(/<[^>]+>/g, '').substring(0, 180) + '...',
+                  image_url: imageUrl || 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=800',
+                  date: new Date(item.pubDate),
+                  link: item.link,
+                  category: feed.category,
+                  likes_count: 0,
+                  has_liked: false
+                };
+              });
+            }
+            return [];
+          } catch (e) {
+            console.error(`Erro feed ${feed.category}`, e);
+            return [];
+          }
+        });
+
+        const newsResults = await Promise.all(newsPromises);
+        formattedNews = newsResults.flat();
+
+        if (formattedNews.length > 0 && user) {
+          const links = formattedNews.map(n => n.id);
+          const { data: newsLikesData } = await supabase.from('news_likes').select('*').in('news_link', links);
+            
+          if (newsLikesData) {
+            formattedNews = formattedNews.map(news => {
+              const likesForThisNews = newsLikesData.filter(l => l.news_link === news.id);
               return {
-                type: 'news',
-                id: item.link,
-                title: item.title,
-                content: item.description.replace(/<[^>]+>/g, '').substring(0, 180) + '...',
-                image_url: imageUrl || 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=800',
-                date: new Date(item.pubDate),
-                link: item.link,
-                category: feed.category,
-                likes_count: 0,
-                has_liked: false
+                ...news,
+                likes_count: likesForThisNews.length,
+                has_liked: likesForThisNews.some(l => l.user_id === user.id)
               };
             });
           }
-          return [];
-        } catch (e) {
-          console.error(`Erro feed ${feed.category}`, e);
-          return [];
-        }
-      });
-
-      const newsResults = await Promise.all(newsPromises);
-      formattedNews = newsResults.flat();
-
-      if (formattedNews.length > 0 && user) {
-        const links = formattedNews.map(n => n.id);
-        const { data: newsLikesData } = await supabase.from('news_likes').select('*').in('news_link', links);
-          
-        if (newsLikesData) {
-          formattedNews = formattedNews.map(news => {
-            const likesForThisNews = newsLikesData.filter(l => l.news_link === news.id);
-            return {
-              ...news,
-              likes_count: likesForThisNews.length,
-              has_liked: likesForThisNews.some(l => l.user_id === user.id)
-            };
-          });
         }
       }
 
       // Merge & Sort
-      const mergedTimeline = [...formattedPosts, ...formattedNews].sort((a, b) => b.date.getTime() - a.date.getTime());
-      setFeedData(mergedTimeline);
+      if (pageNum === 1) {
+        // Zera tudo e embaralha novos posts e novas noticias
+        const mergedTimeline = [...formattedPosts, ...formattedNews].sort((a, b) => b.date.getTime() - a.date.getTime());
+        setFeedData(mergedTimeline);
+      } else {
+        // Se for página > 1, estamos descendo, apenas anexe os novos posts mais antigos
+        setFeedData(prev => {
+          // Usa Map para evitar chaves/ids duplicados caso o usuário puxe algo que já estava lá
+          const newItemsMap = new Map(prev.map(item => [item.id, item]));
+          formattedPosts.forEach(post => newItemsMap.set(post.id, post));
+          return Array.from(newItemsMap.values()).sort((a, b) => b.date.getTime() - a.date.getTime());
+        });
+      }
     } catch (error) {
       console.error("Erro timeline", error);
     } finally {
       setIsRefreshing(false);
+      setIsLoadingMore(false);
     }
   }, [user]);
 
+  // Carregamento Inicial
   useEffect(() => {
-    if (user) fetchTimeline();
+    if (user) fetchTimeline(true, 1);
   }, [user, fetchTimeline]);
 
-  // Pull-To-Refresh Detection
+  // Lógica do Intersection Observer para INFINITE SCROLL
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMorePosts && !isLoadingMore && !isRefreshing) {
+          setPage(prev => {
+            const next = prev + 1;
+            fetchTimeline(false, next);
+            return next;
+          });
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (observerTarget.current) observer.observe(observerTarget.current);
+    
+    return () => {
+      if (observerTarget.current) observer.unobserve(observerTarget.current);
+    };
+  }, [observerTarget, hasMorePosts, isLoadingMore, isRefreshing, fetchTimeline]);
+
+  // Lógica de Pull-To-Refresh no Mobile
   useEffect(() => {
     let startY = 0;
     const handleTouchStart = (e: TouchEvent) => { startY = e.touches[0].clientY; };
     const handleTouchEnd = (e: TouchEvent) => {
       if (window.scrollY === 0) {
         const endY = e.changedTouches[0].clientY;
-        if (endY - startY > 150) fetchTimeline(true);
+        if (endY - startY > 150) fetchTimeline(true, 1);
       }
     };
     
@@ -209,7 +270,8 @@ function UserHome() {
       setPostContent('');
       setPostImage(null);
       setImagePreview(null);
-      fetchTimeline();
+      // Ao postar algo novo, volta pra página 1
+      fetchTimeline(true, 1);
     } catch (error) {
       console.error("Erro ao publicar:", error);
     } finally {
@@ -219,11 +281,8 @@ function UserHome() {
 
   const handleDeletePost = async (postId: string) => {
     try {
-      // Deleta do Supabase (A tabela de likes apagará automaticamente via CASCADE)
       const { error } = await supabase.from('social_posts').delete().eq('id', postId);
       if (error) throw error;
-      
-      // Remove otimisticamente da tela
       setFeedData(current => current.filter(item => item.id !== postId));
     } catch (error) {
       console.error("Erro ao excluir", error);
@@ -239,8 +298,6 @@ function UserHome() {
     try {
       const { error } = await supabase.from('social_posts').update({ content: editContent }).eq('id', postId);
       if (error) throw error;
-
-      // Atualiza otimisticamente
       setFeedData(current => current.map(item => item.id === postId ? { ...item, content: editContent } : item));
       setEditingPostId(null);
     } catch (error) {
@@ -372,7 +429,7 @@ function UserHome() {
                           </div>
                         </div>
 
-                        {/* Menu Três Pontinhos (Só aparece se o usuário for o dono do post) */}
+                        {/* Menu Três Pontinhos */}
                         {item.user_id === user?.id && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -392,7 +449,7 @@ function UserHome() {
                         )}
                       </div>
                       
-                      {/* Conteúdo do Post (ou Modo Edição) */}
+                      {/* Conteúdo do Post */}
                       <div className="px-4 py-3 text-sm text-gray-200 whitespace-pre-wrap">
                         {editingPostId === item.id ? (
                           <div className="space-y-2">
@@ -457,8 +514,19 @@ function UserHome() {
                   </Card>
                 )
               ))}
+              
+              {/* SENSOR DO FIM DA PÁGINA (INFINITE SCROLL) */}
+              <div ref={observerTarget} className="py-6 flex justify-center items-center">
+                {isLoadingMore ? (
+                  <div className="flex items-center text-muted-foreground">
+                    <Loader2 className="w-5 h-5 animate-spin mr-2" /> Carregando memórias da rede...
+                  </div>
+                ) : !hasMorePosts && feedData.length > 0 ? (
+                  <p className="text-muted-foreground text-sm">Você chegou ao fim da conexão conhecida.</p>
+                ) : null}
+              </div>
+
             </div>
-            
           </div>
         </main>
       </div>
