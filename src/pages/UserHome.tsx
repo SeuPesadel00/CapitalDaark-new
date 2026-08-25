@@ -521,8 +521,8 @@ function UserHome() {
                   <div className="flex items-center text-muted-foreground">
                     <Loader2 className="w-5 h-5 animate-spin mr-2" /> Carregando memórias da rede...
                   </div>
-                ) : !hasMorePosts && feedData.length > 0 ? (
-                  <p className="text-muted-foreground text-sm">Você chegou ao fim da conexão conhecida.</p>
+                ) : !hasMorePosts && page > 1 ? (
+                  <p className="text-muted-foreground text-sm">Fim da linha do tempo. Crie novas memórias.</p>
                 ) : null}
               </div>
 

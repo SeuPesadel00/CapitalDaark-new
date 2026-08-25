@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Upload, User, Mail, Phone, MapPin, Calendar, Heart, Flame, ExternalLink, MessageSquare } from 'lucide-react';
+import { Upload, User, Mail, Phone, MapPin, Calendar, Heart, Flame, ExternalLink, MessageSquare, RefreshCw } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
