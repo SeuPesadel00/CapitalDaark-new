@@ -10,15 +10,12 @@ import {
 import { ShoppingCart, User, Settings, UserCircle, LogOut, Home, Compass, Bell } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
 
 interface HeaderProps {
   hideNav?: boolean;
 }
 
 const Header = ({ hideNav = false }: HeaderProps) => {
-  const { produtos } = useCart();
-  const totalItensCarrinho = produtos.reduce((acc, p) => acc + p.quantidade, 0);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
@@ -78,7 +75,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
   return (
     <>
       {/* HEADER TOP (Desktop & Mobile Minimalista) */}
-      <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-md border-b border-border/20 shadow-sm">
+      <header className="sticky top-0 z-40 bg-background border-b border-border/50 shadow-md">
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
@@ -115,15 +112,6 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                     {unreadCount > 0 && (
                       <span className="absolute -top-1 -right-1 bg-neon-cyan text-black text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold animate-pulse shadow-[0_0_10px_rgba(0,255,255,0.8)]">
                         {unreadCount > 9 ? '9+' : unreadCount}
-                      </span>
-                    )}
-                  </Button>
-                  
-                  <Button variant="outline" size="icon" className="relative border-neon-cyan/30 hover:border-neon-cyan rounded-full" onClick={() => navigate('/carrinho')}>
-                    <ShoppingCart className="h-5 w-5 text-neon-cyan" />
-                    {totalItensCarrinho > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-neon-cyan text-black text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
-                        {totalItensCarrinho}
                       </span>
                     )}
                   </Button>
@@ -200,19 +188,6 @@ const Header = ({ hideNav = false }: HeaderProps) => {
             >
               <Compass className="w-6 h-6" strokeWidth={isActive('/loja') ? 2.5 : 2} />
               <span className="text-[10px] font-medium">Loja</span>
-            </button>
-
-            <button 
-              onClick={() => navigate('/carrinho')} 
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors relative ${isActive('/carrinho') ? 'text-neon-cyan' : 'text-muted-foreground hover:text-gray-300'}`}
-            >
-              <ShoppingCart className="w-6 h-6" strokeWidth={isActive('/carrinho') ? 2.5 : 2} />
-              <span className="text-[10px] font-medium hidden sm:block">Carrinho</span>
-              {totalItensCarrinho > 0 && (
-                <span className="absolute top-1 right-1 sm:right-3 bg-neon-cyan text-black text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
-                  {totalItensCarrinho}
-                </span>
-              )}
             </button>
             
             <button 

@@ -24,8 +24,6 @@ const AccountSettings = lazy(() => import('./pages/AccountSettings'));
 const Contatos = lazy(() => import('./pages/Contatos'));
 const Sobre = lazy(() => import('./pages/Sobre'));
 const Noticias = lazy(() => import('./pages/Noticias'));
-const Carrinho = lazy(() => import('./pages/Carrinho'));
-const Checkout = lazy(() => import('./pages/Checkout'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const AdminAfiliados = lazy(() => import('./pages/AdminAfiliados'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -74,8 +72,6 @@ function App() {
 
             <Route path="/user-home" element={<AuthGuard><UserHome /></AuthGuard>} />
             <Route path="/loja" element={<AuthGuard><Loja /></AuthGuard>} />
-            <Route path="/carrinho" element={<AuthGuard><Carrinho /></AuthGuard>} />
-            <Route path="/checkout" element={<AuthGuard><Checkout /></AuthGuard>} />
             <Route path="/noticia/:id" element={<AuthGuard><NoticiaDetalhe /></AuthGuard>} />
             <Route path="/contatos" element={<AuthGuard><Contatos /></AuthGuard>} />
             <Route path="/sobre" element={<AuthGuard><Sobre /></AuthGuard>} />

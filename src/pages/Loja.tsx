@@ -117,7 +117,7 @@ const Loja = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-6 pt-8 pb-28">
         {/* Cabeçalho */}
         <div className="text-center mb-12">
            <Badge className="mb-6 bg-gradient-primary text-white px-4 py-2 text-sm font-medium flex items-center gap-2 mx-auto w-fit">
