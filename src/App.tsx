@@ -24,6 +24,7 @@ const AccountSettings = lazy(() => import('./pages/AccountSettings'));
 const Noticias = lazy(() => import('./pages/Noticias'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const AdminAfiliados = lazy(() => import('./pages/AdminAfiliados'));
+const Messages = lazy(() => import('./pages/Messages'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const queryClient = new QueryClient();
@@ -77,6 +78,8 @@ function App() {
             <Route path="/account-settings" element={<AuthGuard><AccountSettings /></AuthGuard>} />
             <Route path="/usuario/:username" element={<AuthGuard><UserProfile /></AuthGuard>} />
             <Route path="/notificacoes" element={<AuthGuard><Notifications /></AuthGuard>} />
+            <Route path="/mensagens" element={<AuthGuard><Messages /></AuthGuard>} />
+            <Route path="/mensagens/:id" element={<AuthGuard><Messages /></AuthGuard>} />
             <Route path="/admin/ofertas" element={<AuthGuard><AdminAfiliados /></AuthGuard>} />
             
             <Route path="*" element={<NotFound />} />

@@ -1,3 +1,6 @@
+import { format, differenceInDays, formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
 export interface FeedItem {
   type: 'post' | 'news';
   id: string; // ID do Supabase ou URL para RSS
@@ -12,6 +15,24 @@ export interface FeedItem {
   category?: string;
   likes_count: number;
   has_liked: boolean;
+  comments?: any[];
+}
+
+export function formatSocialDate(dateInput: Date | string) {
+  const date = new Date(dateInput);
+  const days = differenceInDays(new Date(), date);
+  
+  if (days < 1) {
+    // Retorna "há X minutos" ou "há X horas"
+    return formatDistanceToNow(date, { addSuffix: true, locale: ptBR });
+  } else if (days < 30) {
+    // Retorna "Há X dias"
+    return `Há ${days} dia${days > 1 ? 's' : ''}`;
+  } else {
+    // Retorna "16 de agosto" ou "16 de agosto de 2023" se for ano anterior
+    const isCurrentYear = date.getFullYear() === new Date().getFullYear();
+    return format(date, isCurrentYear ? "d 'de' MMMM" : "d 'de' MMMM 'de' yyyy", { locale: ptBR });
+  }
 }
 
 export const RSS_FEEDS = [
@@ -41,44 +62,61 @@ export function shuffleArray<T>(array: T[]): T[] {
   return newArray;
 }
 
-export async function fetchNewsFeeds(): Promise<FeedItem[]> {
-  // Sorteamos fontes diferentes a cada F5 para dar variedade imensa sem explodir o limite gratuito da API (Rate Limit 429)
-  const techFeeds = shuffleArray(RSS_FEEDS.filter(f => f.category === 'tech')).slice(0, 2);
-  const businessFeeds = shuffleArray(RSS_FEEDS.filter(f => f.category === 'business')).slice(0, 1);
-  const gamingFeeds = shuffleArray(RSS_FEEDS.filter(f => f.category === 'gaming')).slice(0, 1);
-  const aiFeeds = shuffleArray(RSS_FEEDS.filter(f => f.category === 'ai')).slice(0, 1);
-  
-  const selectedFeeds = [...techFeeds, ...businessFeeds, ...gamingFeeds, ...aiFeeds];
+export async function fetchNewsFeeds(page: number = 1): Promise<FeedItem[]> {
+  // Sorteamos 4 fontes diferentes por página para garantir rolagem infinita de notícias variadas
+  const shuffled = shuffleArray(RSS_FEEDS);
+  const selectedFeeds = shuffled.slice(0, 4);
 
   const newsPromises = selectedFeeds.map(async (feed) => {
     try {
-      // Usando cachebuster simples para forçar dados mais novos
-      const cacheBuster = `&t=${new Date().getTime()}`;
-      const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${feed.url}${cacheBuster}`);
-      const data = await response.json();
-      if (data.items) {
-        return data.items.slice(0, 15).map((item: any) => {
-          let imageUrl = item.thumbnail || item.enclosure?.link;
-          if (!imageUrl && item.description) {
-            const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
-            if (imgMatch) imageUrl = imgMatch[1];
-          }
+      const encodedUrl = encodeURIComponent(feed.url);
+      // Usando allorigins como proxy CORS gratuito para baixar o XML puro sem limites chatos
+      const response = await fetch(`https://api.allorigins.win/raw?url=${encodedUrl}`);
+      const text = await response.text();
+      
+      const parser = new window.DOMParser();
+      const xml = parser.parseFromString(text, "text/xml");
+      
+      const items = Array.from(xml.querySelectorAll("item")).slice(0, 5); // 5 notícias de cada
 
-          return {
-            type: 'news',
-            id: item.link,
-            title: item.title,
-            content: item.description.replace(/<[^>]+>/g, '').substring(0, 180) + '...',
-            image_url: imageUrl || 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=800',
-            date: new Date(item.pubDate),
-            link: item.link,
-            category: feed.category,
-            likes_count: 0,
-            has_liked: false
-          } as FeedItem;
-        });
-      }
-      return [];
+      return items.map((item) => {
+        const title = item.querySelector("title")?.textContent || "";
+        const link = item.querySelector("link")?.textContent || "";
+        const pubDate = item.querySelector("pubDate")?.textContent || new Date().toISOString();
+        let description = item.querySelector("description")?.textContent || "";
+        
+        let imageUrl = "";
+        
+        const mediaContent = item.getElementsByTagNameNS("*", "content")[0];
+        if (mediaContent && mediaContent.getAttribute("url")) {
+          imageUrl = mediaContent.getAttribute("url") || "";
+        }
+        
+        if (!imageUrl) {
+           const enclosure = item.querySelector("enclosure");
+           if (enclosure && enclosure.getAttribute("url")) imageUrl = enclosure.getAttribute("url") || "";
+        }
+
+        if (!imageUrl && description) {
+          const imgMatch = description.match(/<img[^>]+src="([^">]+)"/);
+          if (imgMatch) imageUrl = imgMatch[1];
+        }
+
+        description = description.replace(/<[^>]+>/g, '').substring(0, 180) + '...';
+
+        return {
+          type: 'news',
+          id: link,
+          title,
+          content: description,
+          image_url: imageUrl || 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=800',
+          date: new Date(pubDate),
+          link: link,
+          category: feed.category,
+          likes_count: 0,
+          has_liked: false
+        } as FeedItem;
+      });
     } catch (e) {
       console.error(`Erro ao buscar feed ${feed.category}`, e);
       return [];

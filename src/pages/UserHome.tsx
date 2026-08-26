@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { AuthGuard } from '@/components/AuthGuard';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   User, Image as ImageIcon, Send, Clock, Heart, RefreshCw, X, Link as LinkIcon, 
-  Newspaper, Flame, MoreVertical, Trash2, Pencil, Check, Loader2
+  Newspaper, Flame, MoreVertical, Trash2, Pencil, Check, Loader2, MessageCircle
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,14 +19,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
-import { FeedItem, fetchNewsFeeds, shuffleArray } from '@/utils/feedUtils';
+import { FeedItem, fetchNewsFeeds, shuffleArray, formatSocialDate } from '@/utils/feedUtils';
 
 const ITEMS_PER_PAGE = 10;
 
 function UserHome() {
+  const navigate = useNavigate();
   const { user, profile, loading } = useAuth();
   
   const [postContent, setPostContent] = useState('');
@@ -42,9 +42,15 @@ function UserHome() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const observerTarget = useRef(null);
   
-  // Estado de Edição
+  // Estado de Edição de POST
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
+
+  // Estados de Comentários
+  const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editCommentContent, setEditCommentContent] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -58,7 +64,7 @@ function UserHome() {
     }
 
     try {
-      // 1. Buscar Posts do Supabase com Paginação
+      // 1. Buscar Posts do Supabase com Paginação e COMENTÁRIOS
       const from = (pageNum - 1) * ITEMS_PER_PAGE;
       const to = (pageNum * ITEMS_PER_PAGE) - 1;
 
@@ -66,8 +72,9 @@ function UserHome() {
         .from('social_posts')
         .select(`
           *,
-          profiles (first_name, last_name, avatar_url),
-          post_likes (user_id)
+          profiles (first_name, last_name, avatar_url, username),
+          post_likes (user_id),
+          post_comments (id, content, created_at, user_id, profiles(first_name, last_name, username, avatar_url))
         `, { count: 'exact' })
         .order('created_at', { ascending: false })
         .range(from, to);
@@ -88,31 +95,37 @@ function UserHome() {
         image_url: post.image_url,
         date: new Date(post.created_at),
         author: `${post.profiles?.first_name || 'Usuário'} ${post.profiles?.last_name || ''}`,
+        username: post.profiles?.username,
         avatar_url: post.profiles?.avatar_url,
         likes_count: post.post_likes?.length || 0,
-        has_liked: post.post_likes?.some((like: any) => like.user_id === user?.id) || false
+        has_liked: post.post_likes?.some((like: any) => like.user_id === user?.id) || false,
+        comments: (post.post_comments || []).sort((a:any, b:any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
       }));
 
-      // 2. Buscar Notícias RSS
+      // 2. Buscar Notícias RSS (Agora para todas as páginas)
       let formattedNews: FeedItem[] = [];
-      if (pageNum === 1) {
-        formattedNews = await fetchNewsFeeds();
+      formattedNews = await fetchNewsFeeds(pageNum);
 
-        if (formattedNews.length > 0 && user) {
-          const links = formattedNews.map(n => n.id);
-          const { data: newsLikesData } = await supabase.from('news_likes').select('*').in('news_link', links);
-            
-          if (newsLikesData) {
-            formattedNews = formattedNews.map(news => {
-              const likesForThisNews = newsLikesData.filter(l => l.news_link === news.id);
-              return {
-                ...news,
-                likes_count: likesForThisNews.length,
-                has_liked: likesForThisNews.some(l => l.user_id === user.id)
-              };
-            });
-          }
-        }
+      if (formattedNews.length > 0 && user) {
+        const links = formattedNews.map(n => n.id);
+        
+        // Buscar likes e comentários das notícias
+        const [newsLikesData, newsCommentsData] = await Promise.all([
+          supabase.from('news_likes').select('*').in('news_link', links),
+          supabase.from('news_comments').select('id, news_link, content, created_at, user_id, profiles(first_name, last_name, username, avatar_url)').in('news_link', links)
+        ]);
+          
+        formattedNews = formattedNews.map(news => {
+          const likesForThisNews = newsLikesData.data?.filter(l => l.news_link === news.id) || [];
+          const commentsForThisNews = newsCommentsData.data?.filter(c => c.news_link === news.id) || [];
+          
+          return {
+            ...news,
+            likes_count: likesForThisNews.length,
+            has_liked: likesForThisNews.some(l => l.user_id === user.id),
+            comments: commentsForThisNews.sort((a:any, b:any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+          };
+        });
       }
 
       // 3. Buscar ANÚNCIOS (Ofertas da Loja em destaque)
@@ -127,31 +140,29 @@ function UserHome() {
             content: `Confira essa super oferta rastreada pelo nosso sistema com o menor preço.`,
             image_url: ad.image,
             link: '/loja',
-            date: new Date(ad.created_at || new Date()), // Propriedade obrigatória para não quebrar o formatDistanceToNow
+            date: new Date(ad.created_at || new Date()),
             category: 'Patrocinado',
             likes_count: Math.floor(Math.random() * 100),
-            has_liked: false
+            has_liked: false,
+            comments: []
           }));
         }
       }
 
       // Merge & Sort
       if (pageNum === 1) {
-        // Mantemos os 2 posts mais recentes de usuários da plataforma estritamente no topo para priorizar o conteúdo da comunidade
         const sortedPosts = [...formattedPosts].sort((a, b) => b.date.getTime() - a.date.getTime());
         const topPosts = sortedPosts.slice(0, 2);
-        
-        // O restante se mistura com notícias e ANÚNCIOS PATROCINADOS
         const restOfPosts = sortedPosts.slice(2);
         const shuffledMix = shuffleArray([...restOfPosts, ...formattedNews, ...sponsorAds]);
-        
         setFeedData([...topPosts, ...shuffledMix]);
       } else {
-        // Se for página > 1, estamos descendo, apenas anexe os novos posts mais antigos
         setFeedData(prev => {
-          // Usa Map para evitar chaves/ids duplicados caso o usuário puxe algo que já estava lá
           const newItemsMap = new Map(prev.map(item => [item.id, item]));
+          // Adiciona posts antigos
           formattedPosts.forEach(post => newItemsMap.set(post.id, post));
+          // Adiciona novas notícias da rolagem infinita
+          formattedNews.forEach(news => newItemsMap.set(news.id, news));
           return Array.from(newItemsMap.values()).sort((a, b) => b.date.getTime() - a.date.getTime());
         });
       }
@@ -165,14 +176,19 @@ function UserHome() {
 
   // Carregamento Inicial
   useEffect(() => {
-    if (user) fetchTimeline(true, 1);
+    if (user) {
+      fetchTimeline(true, 1);
+      import('@/lib/cryptoUtils').then(m => m.initializeUserKeys(user.id));
+    }
   }, [user, fetchTimeline]);
 
   // Lógica do Intersection Observer para INFINITE SCROLL
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
-        if (entries[0].isIntersecting && hasMorePosts && !isLoadingMore && !isRefreshing) {
+        // Agora verificamos se está carregando. O 'hasMorePosts' servia só pro Supabase, 
+        // mas como queremos notícias infinitas, tiramos essa trava pra continuar rolando
+        if (entries[0].isIntersecting && !isLoadingMore && !isRefreshing) {
           setPage(prev => {
             const next = prev + 1;
             fetchTimeline(false, next);
@@ -187,27 +203,7 @@ function UserHome() {
     return () => {
       if (observerTarget.current) observer.unobserve(observerTarget.current);
     };
-  }, [observerTarget, hasMorePosts, isLoadingMore, isRefreshing, fetchTimeline]);
-
-  // Lógica de Pull-To-Refresh no Mobile
-  useEffect(() => {
-    let startY = 0;
-    const handleTouchStart = (e: TouchEvent) => { startY = e.touches[0].clientY; };
-    const handleTouchEnd = (e: TouchEvent) => {
-      if (window.scrollY === 0) {
-        const endY = e.changedTouches[0].clientY;
-        if (endY - startY > 150) fetchTimeline(true, 1);
-      }
-    };
-    
-    window.addEventListener('touchstart', handleTouchStart);
-    window.addEventListener('touchend', handleTouchEnd);
-    return () => {
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [fetchTimeline]);
-
+  }, [observerTarget, isLoadingMore, isRefreshing, fetchTimeline]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -241,7 +237,6 @@ function UserHome() {
       setPostContent('');
       setPostImage(null);
       setImagePreview(null);
-      // Ao postar algo novo, volta pra página 1
       fetchTimeline(true, 1);
     } catch (error) {
       console.error("Erro ao publicar:", error);
@@ -284,16 +279,6 @@ function UserHome() {
           await supabase.from('post_likes').delete().match({ user_id: user.id, post_id: item.id });
         } else {
           await supabase.from('post_likes').insert({ user_id: user.id, post_id: item.id });
-          
-          // Disparar Notificação (Se não for curtir o próprio post)
-          if (item.user_id && item.user_id !== user.id) {
-            await supabase.from('notifications').insert({
-              recipient_id: item.user_id,
-              sender_id: user.id,
-              type: 'like_post',
-              post_id: item.id
-            });
-          }
         }
       } else {
         if (item.has_liked) await supabase.from('news_likes').delete().match({ user_id: user.id, news_link: item.id });
@@ -305,6 +290,175 @@ function UserHome() {
     } catch (error) {
       console.error("Erro ao curtir", error);
     }
+  };
+
+  // --- LÓGICA DE COMENTÁRIOS ---
+  const toggleComments = (itemId: string) => {
+    setExpandedComments(prev => ({ ...prev, [itemId]: !prev[itemId] }));
+  };
+
+  const handleCommentSubmit = async (item: FeedItem) => {
+    if (!user) return;
+    const text = commentInputs[item.id];
+    if (!text || !text.trim()) return;
+
+    try {
+      let insertedComment: any = null;
+
+      if (item.type === 'post') {
+        const { data, error } = await supabase.from('post_comments').insert({
+          post_id: item.id,
+          user_id: user.id,
+          content: text.trim()
+        }).select('id, content, created_at, user_id, profiles(first_name, last_name, username, avatar_url)').single();
+        if (error) throw error;
+        insertedComment = data;
+      } else {
+        const { data, error } = await supabase.from('news_comments').insert({
+          news_link: item.id,
+          user_id: user.id,
+          content: text.trim()
+        }).select('id, news_link, content, created_at, user_id, profiles(first_name, last_name, username, avatar_url)').single();
+        if (error) throw error;
+        insertedComment = data;
+      }
+
+      setFeedData(current => current.map(f => f.id === item.id ? {
+        ...f, comments: [...(f.comments || []), insertedComment]
+      } : f));
+      
+      setCommentInputs(prev => ({ ...prev, [item.id]: '' }));
+    } catch (error) {
+      console.error("Erro ao comentar", error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string, item: FeedItem) => {
+    try {
+      if (item.type === 'post') {
+        await supabase.from('post_comments').delete().eq('id', commentId);
+      } else {
+        await supabase.from('news_comments').delete().eq('id', commentId);
+      }
+      setFeedData(current => current.map(f => f.id === item.id ? {
+        ...f, comments: f.comments?.filter(c => c.id !== commentId)
+      } : f));
+    } catch (error) {
+      console.error("Erro ao excluir comentário", error);
+    }
+  };
+
+  const startEditingComment = (comment: any) => {
+    setEditingCommentId(comment.id);
+    setEditCommentContent(comment.content);
+  };
+
+  const handleSaveCommentEdit = async (commentId: string, item: FeedItem) => {
+    try {
+      if (item.type === 'post') {
+        await supabase.from('post_comments').update({ content: editCommentContent }).eq('id', commentId);
+      } else {
+        await supabase.from('news_comments').update({ content: editCommentContent }).eq('id', commentId);
+      }
+      setFeedData(current => current.map(f => f.id === item.id ? {
+        ...f, comments: f.comments?.map(c => c.id === commentId ? { ...c, content: editCommentContent } : c)
+      } : f));
+      setEditingCommentId(null);
+    } catch (error) {
+      console.error("Erro ao editar comentário", error);
+    }
+  };
+
+  const renderComments = (item: FeedItem) => {
+    if (!expandedComments[item.id]) return null;
+    
+    return (
+      <div className="bg-background/40 border-t border-border/10 p-4 space-y-4">
+        {/* Lista de Comentários */}
+        <div className="space-y-3">
+          {item.comments && item.comments.length > 0 ? (
+            item.comments.map(comment => (
+              <div key={comment.id} className="flex gap-3 items-start group">
+                <div className="w-8 h-8 rounded-full bg-secondary overflow-hidden shrink-0">
+                  {comment.profiles?.avatar_url ? (
+                    <img src={comment.profiles.avatar_url} className="w-full h-full object-cover"/>
+                  ) : (
+                    <User className="w-full h-full p-1.5 text-primary" />
+                  )}
+                </div>
+                <div className="flex-1 bg-card border border-border/30 rounded-2xl rounded-tl-none p-3 relative">
+                  <div className="flex justify-between items-start mb-1">
+                    <div className="flex items-baseline gap-2">
+                      <p className="font-semibold text-xs text-white">
+                        {comment.profiles?.first_name || 'Usuário'} {comment.profiles?.last_name || ''}
+                      </p>
+                      <span className="text-[10px] text-muted-foreground">
+                        {formatSocialDate(comment.created_at)}
+                      </span>
+                    </div>
+                    {/* Menu Três Pontinhos do Comentário */}
+                    {comment.user_id === user?.id && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-white absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <MoreVertical className="h-3 w-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-card/95 border-border/20 text-xs">
+                          <DropdownMenuItem onClick={() => startEditingComment(comment)} className="cursor-pointer hover:bg-muted">
+                            <Pencil className="mr-2 h-3 w-3" /> Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeleteComment(comment.id, item)} className="cursor-pointer hover:bg-destructive/20 text-destructive">
+                            <Trash2 className="mr-2 h-3 w-3" /> Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
+                  
+                  {editingCommentId === comment.id ? (
+                    <div className="space-y-2 mt-2">
+                      <Input 
+                        value={editCommentContent} 
+                        onChange={(e) => setEditCommentContent(e.target.value)}
+                        className="bg-background border-primary/50 focus-visible:ring-primary h-8 text-xs"
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => setEditingCommentId(null)}>Cancelar</Button>
+                        <Button size="sm" className="h-6 text-xs bg-primary text-black" onClick={() => handleSaveCommentEdit(comment.id, item)}>
+                          <Check className="w-3 h-3 mr-1"/> Salvar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-xs text-muted-foreground py-2">Nenhum comentário ainda. Seja o primeiro!</div>
+          )}
+        </div>
+
+        {/* Input para novo comentário */}
+        <div className="flex gap-2 items-center pt-2">
+          <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/40 overflow-hidden shrink-0">
+            {profile?.avatar_url ? <img src={profile.avatar_url} className="w-full h-full object-cover" /> : <User className="w-full h-full p-1.5 text-primary" />}
+          </div>
+          <Input 
+            value={commentInputs[item.id] || ''}
+            onChange={(e) => setCommentInputs(prev => ({ ...prev, [item.id]: e.target.value }))}
+            placeholder="Escreva um comentário..."
+            className="flex-1 bg-background border-border/50 focus-visible:ring-primary h-9 text-sm"
+            onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit(item)}
+          />
+          <Button size="icon" className="h-9 w-9 bg-primary text-black hover:bg-primary/90 shrink-0" onClick={() => handleCommentSubmit(item)}>
+            <Send className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   if (loading) return (
@@ -320,23 +474,9 @@ function UserHome() {
       <div className="min-h-screen bg-background">
         <Header />
         
-        {/* Banner Cyberpunk */}
-        <div className="bg-card/40 border-b border-border/20 py-8 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neon-cyan via-background to-background"></div>
-          <div className="container mx-auto px-4 text-center relative z-10">
-            <h1 className="text-2xl md:text-4xl font-orbitron font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple mb-4">
-              CAPITAL DAARK
-            </h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-sm md:text-base">
-              A comunidade imbatível. Libertária, descentralizada e focada no futuro.
-            </p>
-          </div>
-        </div>
-        
         <main className="container mx-auto px-2 md:px-6 py-6 pb-28">
           <div className="max-w-3xl mx-auto space-y-6">
             
-            {/* Pull to Refresh */}
             {isRefreshing && (
               <div className="flex justify-center py-4">
                 <div className="bg-primary/20 text-primary px-4 py-2 rounded-full flex items-center gap-2 shadow-[0_0_15px_rgba(0,255,255,0.3)] animate-pulse">
@@ -358,7 +498,7 @@ function UserHome() {
                     <Input 
                       value={postContent}
                       onChange={(e) => setPostContent(e.target.value)}
-                      placeholder={`Dissemine a ideia, ${profile?.first_name || 'anarquista'}...`}
+                      placeholder={`Compartilhe uma atualização com a rede, ${profile?.first_name || 'membro'}...`}
                       className="bg-background/80 border-border/50 focus-visible:ring-primary shadow-inner"
                       onKeyDown={(e) => e.key === 'Enter' && handlePublish()}
                     />
@@ -403,17 +543,22 @@ function UserHome() {
                   <Card key={item.id} className="border-border/20 bg-card overflow-hidden hover:border-primary/30 transition-colors">
                     <CardContent className="p-0">
                       <div className="p-4 flex justify-between items-start bg-background/30">
-                        <div className="flex gap-3 items-center">
+                        <div 
+                          className="flex gap-3 items-center cursor-pointer hover:bg-white/5 p-1 -m-1 rounded-lg transition-colors"
+                          onClick={() => {
+                            const searchParam = item.username || item.author?.split(' ')[0];
+                            if (searchParam) navigate(`/usuario/${searchParam}`);
+                          }}
+                        >
                           <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 overflow-hidden">
                             {item.avatar_url ? <img src={item.avatar_url} className="w-full h-full object-cover"/> : <User className="w-full h-full p-2 text-primary"/>}
                           </div>
                           <div>
-                            <p className="font-semibold text-sm text-white">{item.author}</p>
-                            <p className="text-xs text-muted-foreground">{formatDistanceToNow(item.date, { addSuffix: true, locale: ptBR })}</p>
+                            <p className="font-semibold text-sm text-white hover:underline">{item.author}</p>
+                            <p className="text-xs text-muted-foreground">{formatSocialDate(item.date)}</p>
                           </div>
                         </div>
 
-                        {/* Menu Três Pontinhos */}
                         {item.user_id === user?.id && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -433,7 +578,6 @@ function UserHome() {
                         )}
                       </div>
                       
-                      {/* Conteúdo do Post */}
                       <div className="px-4 py-3 text-sm text-gray-200 whitespace-pre-wrap">
                         {editingPostId === item.id ? (
                           <div className="space-y-2">
@@ -457,18 +601,47 @@ function UserHome() {
                       {item.image_url && <img src={item.image_url} alt="Post media" className="w-full max-h-96 object-cover border-y border-border/20" />}
                       
                       <div className="p-3 bg-background/20 flex gap-2">
-                        <Button variant="ghost" size="sm" className={`flex-1 ${item.has_liked ? 'text-neon-cyan' : 'text-muted-foreground'}`} onClick={() => handleLike(item)}>
-                          <Flame className={`w-4 h-4 mr-2 ${item.has_liked ? 'fill-neon-cyan' : ''}`} /> {item.likes_count > 0 ? item.likes_count : 'Gostar'}
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className={`flex-1 group transition-all duration-300 ease-out ${
+                            item.has_liked 
+                              ? 'text-orange-500 bg-orange-500/10 hover:bg-orange-500/20 shadow-[inset_0_0_10px_rgba(249,115,22,0.1)]' 
+                              : 'text-muted-foreground hover:text-orange-400 hover:bg-white/5'
+                          }`} 
+                          onClick={() => handleLike(item)}
+                        >
+                          <Flame 
+                            className={`w-5 h-5 mr-2 transition-all duration-500 ${
+                              item.has_liked 
+                                ? 'fill-orange-500 text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.8)] scale-110' 
+                                : 'group-hover:scale-110'
+                            }`} 
+                          /> 
+                          <span className={`${item.has_liked ? 'font-bold' : ''}`}>
+                            {item.likes_count > 0 ? item.likes_count : 'Gostar'}
+                          </span>
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-muted-foreground flex-1">Comentar</Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-muted-foreground flex-1 hover:bg-white/5 hover:text-white transition-colors"
+                          onClick={() => toggleComments(item.id)}
+                        >
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          {item.comments && item.comments.length > 0 ? `${item.comments.length} Comentários` : 'Comentar'}
+                        </Button>
                       </div>
+
+                      {/* Seção de Comentários */}
+                      {renderComments(item)}
                     </CardContent>
                   </Card>
                 ) : (
                   // ----- NOTÍCIA RSS -----
-                  <Card key={item.id} className="border-neon-purple/20 bg-card/60 backdrop-blur-sm overflow-hidden hover:border-neon-purple/50 transition-colors cursor-pointer relative group">
+                  <Card key={item.id} className="border-border/30 bg-card/80 backdrop-blur-sm overflow-hidden hover:border-primary/50 transition-colors cursor-pointer relative group shadow-sm">
                     <div className="absolute top-0 right-0 p-2 z-10">
-                      <Badge variant="outline" className="bg-background/80 text-neon-purple border-neon-purple/50">
+                      <Badge variant="outline" className="bg-background/90 text-primary border-primary/30 backdrop-blur-md">
                         <Newspaper className="w-3 h-3 mr-1" /> {item.category}
                       </Badge>
                     </div>
@@ -483,18 +656,45 @@ function UserHome() {
                         <h3 className="font-bold text-lg mb-2 text-white group-hover:text-neon-purple transition-colors line-clamp-2">{item.title}</h3>
                         <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{item.content}</p>
                         <div className="flex items-center text-xs text-muted-foreground">
-                          <Clock className="w-3 h-3 mr-1" /> {formatDistanceToNow(item.date, { addSuffix: true, locale: ptBR })}
+                          <Clock className="w-3 h-3 mr-1" /> {formatSocialDate(item.date)}
                         </div>
                       </CardContent>
                     </div>
-                    <div className="p-3 border-t border-border/10 bg-background/20 flex gap-2">
-                        <Button variant="ghost" size="sm" className={`flex-1 ${item.has_liked ? 'text-neon-purple' : 'text-muted-foreground hover:text-neon-purple'}`} onClick={(e) => { e.stopPropagation(); handleLike(item); }}>
-                          <Heart className={`w-4 h-4 mr-2 ${item.has_liked ? 'fill-neon-purple' : ''}`} /> {item.likes_count > 0 ? item.likes_count : 'Inspirador'}
+                      <div className="p-3 border-t border-border/10 bg-background/20 flex gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className={`flex-1 group transition-all duration-300 ease-out ${
+                            item.has_liked 
+                              ? 'text-neon-purple bg-neon-purple/10 hover:bg-neon-purple/20 shadow-[inset_0_0_10px_rgba(188,19,254,0.1)]' 
+                              : 'text-muted-foreground hover:text-neon-purple hover:bg-white/5'
+                          }`} 
+                          onClick={(e) => { e.stopPropagation(); handleLike(item); }}
+                        >
+                          <Heart 
+                            className={`w-5 h-5 mr-2 transition-all duration-500 ${
+                              item.has_liked 
+                                ? 'fill-neon-purple text-neon-purple drop-shadow-[0_0_8px_rgba(188,19,254,0.8)] scale-110' 
+                                : 'group-hover:scale-110'
+                            }`} 
+                          /> 
+                          <span className={`${item.has_liked ? 'font-bold' : ''}`}>
+                            {item.likes_count > 0 ? item.likes_count : 'Inspirador'}
+                          </span>
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-neon-purple flex-1" onClick={() => window.open(item.link, '_blank')}>
-                          <LinkIcon className="w-4 h-4 mr-2" /> Ler Artigo
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-muted-foreground hover:text-neon-purple flex-1 hover:bg-white/5 transition-colors" 
+                          onClick={() => toggleComments(item.id)}
+                        >
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          {item.comments && item.comments.length > 0 ? `${item.comments.length} Comentários` : 'Comentar'}
                         </Button>
                       </div>
+
+                      {/* Seção de Comentários */}
+                      {renderComments(item)}
                   </Card>
                 )
               ))}
