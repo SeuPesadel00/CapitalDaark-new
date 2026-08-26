@@ -127,6 +127,7 @@ function UserHome() {
             content: `Confira essa super oferta rastreada pelo nosso sistema com o menor preço.`,
             image_url: ad.image,
             link: '/loja',
+            date: new Date(ad.created_at || new Date()), // Propriedade obrigatória para não quebrar o formatDistanceToNow
             category: 'Patrocinado',
             likes_count: Math.floor(Math.random() * 100),
             has_liked: false
