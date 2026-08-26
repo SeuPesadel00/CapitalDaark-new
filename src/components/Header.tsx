@@ -233,20 +233,6 @@ const Header = ({ hideNav = false }: HeaderProps) => {
               )}
             </button>
 
-            <button 
-              onClick={() => navigate('/dados-pessoais')} 
-              className="flex flex-col items-center justify-center w-full h-full space-y-1"
-            >
-              <div className={`w-7 h-7 rounded-full border-2 overflow-hidden flex items-center justify-center bg-background ${isActive('/dados-pessoais') || isActive('/configuracoes-unificadas') ? 'border-neon-cyan shadow-[0_0_10px_rgba(0,255,255,0.4)]' : 'border-muted-foreground/30'}`}>
-                {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-4 h-4 text-muted-foreground" />
-                )}
-              </div>
-              <span className={`text-[10px] font-medium ${isActive('/dados-pessoais') ? 'text-neon-cyan' : 'text-muted-foreground'}`}>Perfil</span>
-            </button>
-
           </div>
         </nav>
       )}
