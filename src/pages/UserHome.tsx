@@ -115,38 +115,27 @@ function UserHome() {
         }
       }
 
+      // 3. Buscar ANÚNCIOS (Ofertas da Loja em destaque)
+      let sponsorAds: FeedItem[] = [];
+      if (pageNum === 1) {
+        const { data: adsData } = await supabase.from('affiliate_products').select('*').eq('featured', true).limit(5);
+        if (adsData) {
+          sponsorAds = adsData.map((ad: any) => ({
+            type: 'news',
+            id: `sponsor_${ad.id}`,
+            title: `🔥 OFERTA: ${ad.nome}`,
+            content: `Confira essa super oferta rastreada pelo nosso sistema com o menor preço.`,
+            image_url: ad.image,
+            link: '/loja',
+            category: 'Patrocinado',
+            likes_count: Math.floor(Math.random() * 100),
+            has_liked: false
+          }));
+        }
+      }
+
       // Merge & Sort
       if (pageNum === 1) {
-        // EMBARALHAMENTO DO FEED INICIAL PARA EVITAR REPETIÇÃO:
-        
-        // Criando alguns anúncios nativos para monetizar o feed
-        const sponsorAds: FeedItem[] = [
-          {
-            type: 'news',
-            id: 'sponsor_1',
-            title: '🔥 Comparador de Preços: Menor preço no Smartphone Quantum Pro',
-            content: 'Nossa inteligência artificial rastreou o menor preço entre Amazon, Shopee e Mercado Livre. Confira a oferta na nossa Central!',
-            image_url: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800',
-            date: new Date(),
-            link: '/loja',
-            category: 'Patrocinado',
-            likes_count: 53,
-            has_liked: false
-          },
-          {
-            type: 'news',
-            id: 'sponsor_2',
-            title: '🔥 Achadinhos: Headset Gamer 7.1',
-            content: 'Acabamos de achar um bug de preço na Shopee para este produto. Corre antes que acabe.',
-            image_url: 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=800',
-            date: new Date(new Date().getTime() - 1000 * 60 * 30),
-            link: '/loja',
-            category: 'Patrocinado',
-            likes_count: 12,
-            has_liked: false
-          }
-        ];
-
         // Mantemos os 2 posts mais recentes de usuários da plataforma estritamente no topo para priorizar o conteúdo da comunidade
         const sortedPosts = [...formattedPosts].sort((a, b) => b.date.getTime() - a.date.getTime());
         const topPosts = sortedPosts.slice(0, 2);
