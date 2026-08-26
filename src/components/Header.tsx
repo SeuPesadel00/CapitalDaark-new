@@ -66,8 +66,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
   const navItems = [
     { label: 'Início', href: '/user-home' },
     { label: 'Loja', href: '/loja' },
-    { label: 'Sobre Nós', href: '/sobre' },
-    { label: 'Contatos', href: '/contatos' },
+    { label: 'Suporte VIP', href: 'https://wa.me/5511999999999?text=Olá, preciso de suporte na plataforma Capital Daark.' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -99,7 +98,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                         ? 'bg-neon-cyan/10 text-neon-cyan border-b-2 border-neon-cyan rounded-b-none' 
                         : 'text-foreground hover:bg-card/80 hover:text-neon-cyan'
                       }`}
-                      onClick={() => navigate(item.href)}
+                      onClick={() => item.href.startsWith('http') ? window.open(item.href, '_blank') : navigate(item.href)}
                     >
                       {item.label}
                     </Button>

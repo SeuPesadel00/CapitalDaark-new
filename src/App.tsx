@@ -21,8 +21,6 @@ const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const PaymentMethods = lazy(() => import('./pages/PaymentMethods'));
 const AccountSettings = lazy(() => import('./pages/AccountSettings'));
-const Contatos = lazy(() => import('./pages/Contatos'));
-const Sobre = lazy(() => import('./pages/Sobre'));
 const Noticias = lazy(() => import('./pages/Noticias'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const AdminAfiliados = lazy(() => import('./pages/AdminAfiliados'));
@@ -73,8 +71,6 @@ function App() {
             <Route path="/user-home" element={<AuthGuard><UserHome /></AuthGuard>} />
             <Route path="/loja" element={<AuthGuard><Loja /></AuthGuard>} />
             <Route path="/noticia/:id" element={<AuthGuard><NoticiaDetalhe /></AuthGuard>} />
-            <Route path="/contatos" element={<AuthGuard><Contatos /></AuthGuard>} />
-            <Route path="/sobre" element={<AuthGuard><Sobre /></AuthGuard>} />
             <Route path="/configuracoes-unificadas" element={<AuthGuard><ConfiguracoesUnificadas /></AuthGuard>} />
             <Route path="/dados-pessoais" element={<AuthGuard><DadosPessoais /></AuthGuard>} />
             <Route path="/payment-methods" element={<AuthGuard><PaymentMethods /></AuthGuard>} />
