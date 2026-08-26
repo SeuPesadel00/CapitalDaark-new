@@ -70,53 +70,34 @@ export async function fetchNewsFeeds(page: number = 1): Promise<FeedItem[]> {
   const newsPromises = selectedFeeds.map(async (feed) => {
     try {
       const encodedUrl = encodeURIComponent(feed.url);
-      // Usando allorigins como proxy CORS gratuito para baixar o XML puro sem limites chatos
-      const response = await fetch(`https://api.allorigins.win/raw?url=${encodedUrl}`);
-      const text = await response.text();
+      const cacheBuster = `&t=${new Date().getTime()}`;
+      // Retornando para a API rss2json.com pois o allorigins estava sofrendo bloqueio do Cloudflare
+      const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodedUrl}${cacheBuster}`);
+      const data = await response.json();
       
-      const parser = new window.DOMParser();
-      const xml = parser.parseFromString(text, "text/xml");
-      
-      const items = Array.from(xml.querySelectorAll("item")).slice(0, 5); // 5 notícias de cada
+      if (data.items) {
+        return data.items.slice(0, 15).map((item: any) => {
+          let imageUrl = item.thumbnail || item.enclosure?.link;
+          if (!imageUrl && item.description) {
+            const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
+            if (imgMatch) imageUrl = imgMatch[1];
+          }
 
-      return items.map((item) => {
-        const title = item.querySelector("title")?.textContent || "";
-        const link = item.querySelector("link")?.textContent || "";
-        const pubDate = item.querySelector("pubDate")?.textContent || new Date().toISOString();
-        let description = item.querySelector("description")?.textContent || "";
-        
-        let imageUrl = "";
-        
-        const mediaContent = item.getElementsByTagNameNS("*", "content")[0];
-        if (mediaContent && mediaContent.getAttribute("url")) {
-          imageUrl = mediaContent.getAttribute("url") || "";
-        }
-        
-        if (!imageUrl) {
-           const enclosure = item.querySelector("enclosure");
-           if (enclosure && enclosure.getAttribute("url")) imageUrl = enclosure.getAttribute("url") || "";
-        }
-
-        if (!imageUrl && description) {
-          const imgMatch = description.match(/<img[^>]+src="([^">]+)"/);
-          if (imgMatch) imageUrl = imgMatch[1];
-        }
-
-        description = description.replace(/<[^>]+>/g, '').substring(0, 180) + '...';
-
-        return {
-          type: 'news',
-          id: link,
-          title,
-          content: description,
-          image_url: imageUrl || 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=800',
-          date: new Date(pubDate),
-          link: link,
-          category: feed.category,
-          likes_count: 0,
-          has_liked: false
-        } as FeedItem;
-      });
+          return {
+            type: 'news',
+            id: item.link,
+            title: item.title,
+            content: item.description.replace(/<[^>]+>/g, '').substring(0, 180) + '...',
+            image_url: imageUrl || 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=800',
+            date: new Date(item.pubDate),
+            link: item.link,
+            category: feed.category,
+            likes_count: 0,
+            has_liked: false
+          } as FeedItem;
+        });
+      }
+      return [];
     } catch (e) {
       console.error(`Erro ao buscar feed ${feed.category}`, e);
       return [];
