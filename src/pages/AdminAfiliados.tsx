@@ -1,20 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Pencil, Trash2, X, PlusCircle } from 'lucide-react';
 
 const AdminAfiliados = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [produtos, setProdutos] = useState<any[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
+  const initialFormState = {
     nome: '',
     category: 'electronics',
     image: '',
@@ -27,9 +29,24 @@ const AdminAfiliados = () => {
     link_shopee: '',
     price_meli: '',
     link_meli: ''
-  });
+  };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const [formData, setFormData] = useState(initialFormState);
+
+  const loadProdutos = async () => {
+    setFetching(true);
+    const { data, error } = await supabase.from('affiliate_products').select('*').order('created_at', { ascending: false });
+    if (!error && data) {
+      setProdutos(data);
+    }
+    setFetching(false);
+  };
+
+  useEffect(() => {
+    loadProdutos();
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -45,42 +62,33 @@ const AdminAfiliados = () => {
         rating: Number(formData.rating),
         reviews: Number(formData.reviews),
         featured: formData.featured,
-        price_amazon: formData.price_amazon ? Number(formData.price_amazon.replace(',', '.')) : null,
+        price_amazon: formData.price_amazon ? Number(String(formData.price_amazon).replace(',', '.')) : null,
         link_amazon: formData.link_amazon || null,
-        price_shopee: formData.price_shopee ? Number(formData.price_shopee.replace(',', '.')) : null,
+        price_shopee: formData.price_shopee ? Number(String(formData.price_shopee).replace(',', '.')) : null,
         link_shopee: formData.link_shopee || null,
-        price_meli: formData.price_meli ? Number(formData.price_meli.replace(',', '.')) : null,
+        price_meli: formData.price_meli ? Number(String(formData.price_meli).replace(',', '.')) : null,
         link_meli: formData.link_meli || null
       };
 
-      const { error } = await supabase.from('affiliate_products').insert(payload);
-      
-      if (error) throw error;
+      if (editingId) {
+        // Atualizar
+        const { error } = await supabase.from('affiliate_products').update(payload).eq('id', editingId);
+        if (error) throw error;
+        toast({ title: "Atualizado!", description: "Produto modificado com sucesso." });
+      } else {
+        // Criar Novo
+        const { error } = await supabase.from('affiliate_products').insert(payload);
+        if (error) throw error;
+        toast({ title: "Sucesso!", description: "Produto de afiliado inserido no banco de dados." });
+      }
 
-      toast({
-        title: "Sucesso!",
-        description: "Produto de afiliado inserido no banco de dados com sucesso.",
-      });
-
-      // Reset form
-      setFormData({
-        nome: '',
-        category: 'electronics',
-        image: '',
-        rating: 5.0,
-        reviews: 150,
-        featured: false,
-        price_amazon: '',
-        link_amazon: '',
-        price_shopee: '',
-        link_shopee: '',
-        price_meli: '',
-        link_meli: ''
-      });
+      setFormData(initialFormState);
+      setEditingId(null);
+      loadProdutos();
     } catch (err: any) {
       toast({
         variant: "destructive",
-        title: "Erro ao inserir",
+        title: "Erro ao salvar",
         description: err.message,
       });
     } finally {
@@ -88,18 +96,73 @@ const AdminAfiliados = () => {
     }
   };
 
+  const handleEdit = (prod: any) => {
+    setEditingId(prod.id);
+    setFormData({
+      nome: prod.nome || '',
+      category: prod.category || 'electronics',
+      image: prod.image || '',
+      rating: prod.rating || 5.0,
+      reviews: prod.reviews || 150,
+      featured: prod.featured || false,
+      price_amazon: prod.price_amazon ? String(prod.price_amazon) : '',
+      link_amazon: prod.link_amazon || '',
+      price_shopee: prod.price_shopee ? String(prod.price_shopee) : '',
+      link_shopee: prod.link_shopee || '',
+      price_meli: prod.price_meli ? String(prod.price_meli) : '',
+      link_meli: prod.link_meli || ''
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Tem certeza que deseja excluir este produto permanentemente?')) return;
+    
+    try {
+      const { error } = await supabase.from('affiliate_products').delete().eq('id', id);
+      if (error) throw error;
+      toast({ title: "Excluído", description: "O produto foi removido da loja." });
+      loadProdutos();
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Erro", description: err.message });
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setFormData(initialFormState);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container max-w-4xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-orbitron font-bold text-neon-purple mb-8">
-          Painel de Administração (Afiliados)
-        </h1>
+      <main className="container max-w-5xl mx-auto px-6 py-12">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-orbitron font-bold text-neon-purple">
+            Painel de Administração
+          </h1>
+          {editingId && (
+            <Button variant="outline" onClick={cancelEdit} className="border-neon-purple text-neon-purple hover:bg-neon-purple/20">
+              <PlusCircle className="mr-2 h-4 w-4" /> Novo Cadastro
+            </Button>
+          )}
+        </div>
         
-        <form onSubmit={handleSubmit} className="bg-card p-6 rounded-xl border border-border shadow-lg space-y-8">
+        {/* FORMULÁRIO */}
+        <form onSubmit={handleSubmit} className={`p-6 rounded-xl border shadow-lg space-y-8 mb-12 ${editingId ? 'bg-primary/5 border-primary/40' : 'bg-card border-border'}`}>
+          <div className="flex items-center justify-between border-b border-border/50 pb-4">
+            <h2 className="text-2xl font-bold text-white">
+              {editingId ? '✏️ Editando Produto' : '📦 Novo Produto de Afiliado'}
+            </h2>
+            {editingId && (
+              <Button type="button" variant="ghost" size="sm" onClick={cancelEdit} className="text-muted-foreground hover:text-white">
+                <X className="mr-2 h-4 w-4" /> Cancelar Edição
+              </Button>
+            )}
+          </div>
           
           <div className="space-y-4">
-            <h2 className="text-xl text-neon-cyan border-b border-border/50 pb-2">Detalhes do Produto</h2>
+            <h3 className="text-lg text-neon-cyan pb-2">Detalhes Principais</h3>
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="nome">Nome do Produto *</Label>
@@ -124,13 +187,18 @@ const AdminAfiliados = () => {
             <div className="space-y-2">
               <Label htmlFor="image">URL da Imagem *</Label>
               <Input required id="image" name="image" value={formData.image} onChange={handleChange} placeholder="https://amazon.com/.../img.jpg" />
+              {formData.image && (
+                <div className="mt-2 p-2 bg-black/40 rounded inline-block">
+                  <img src={formData.image} alt="Preview" className="h-16 object-contain" />
+                </div>
+              )}
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
                <div className="flex items-center justify-between p-4 border border-border rounded-lg bg-background/50">
                 <div className="space-y-0.5">
                   <Label>Destacar no Feed?</Label>
-                  <p className="text-sm text-muted-foreground">Isso fará o produto aparecer como Oferta na Home (UserHome).</p>
+                  <p className="text-sm text-muted-foreground">Isso fará o produto aparecer como Oferta na Home.</p>
                 </div>
                 <Switch 
                   checked={formData.featured}
@@ -141,10 +209,10 @@ const AdminAfiliados = () => {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-xl text-orange-500 border-b border-border/50 pb-2">Amazon</h2>
+            <h3 className="text-lg text-orange-500 pb-2">Amazon</h3>
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="price_amazon">Preço Atual (Apenas números/pontos)</Label>
+                <Label htmlFor="price_amazon">Preço Atual</Label>
                 <Input id="price_amazon" name="price_amazon" type="number" step="0.01" value={formData.price_amazon} onChange={handleChange} placeholder="Ex: 199.90" />
               </div>
               <div className="space-y-2 md:col-span-2">
@@ -155,7 +223,7 @@ const AdminAfiliados = () => {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-xl text-red-500 border-b border-border/50 pb-2">Shopee</h2>
+            <h3 className="text-lg text-red-500 pb-2">Shopee</h3>
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="price_shopee">Preço Atual</Label>
@@ -169,7 +237,7 @@ const AdminAfiliados = () => {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-xl text-yellow-500 border-b border-border/50 pb-2">Mercado Livre</h2>
+            <h3 className="text-lg text-yellow-500 pb-2">Mercado Livre</h3>
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="price_meli">Preço Atual</Label>
@@ -182,11 +250,52 @@ const AdminAfiliados = () => {
             </div>
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full bg-gradient-primary text-lg py-6">
-            {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Publicar Oferta no Sistema"}
+          <Button type="submit" disabled={loading} className="w-full bg-gradient-primary text-lg py-6 shadow-lg shadow-primary/30">
+            {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (editingId ? "Salvar Alterações" : "Publicar Nova Oferta")}
           </Button>
 
         </form>
+
+        {/* LISTAGEM DE PRODUTOS */}
+        <div>
+          <h2 className="text-2xl font-bold text-white mb-6 border-b border-border/50 pb-2">Catálogo Ativo</h2>
+          
+          {fetching ? (
+            <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary w-8 h-8" /></div>
+          ) : produtos.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground border border-dashed border-border rounded-lg">
+              Nenhum produto cadastrado no banco de dados.
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {produtos.map(prod => (
+                <div key={prod.id} className="bg-card border border-border/50 rounded-lg p-4 flex gap-4 items-start relative group hover:border-primary/50 transition-colors">
+                  <img src={prod.image} alt={prod.nome} className="w-20 h-20 object-cover rounded bg-muted" />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-white truncate" title={prod.nome}>{prod.nome}</h4>
+                    <p className="text-xs text-muted-foreground capitalize mb-2">{prod.category}</p>
+                    
+                    <div className="flex gap-2">
+                      {prod.price_amazon && <span className="text-[10px] bg-orange-500/20 text-orange-500 px-2 py-0.5 rounded">AMZ</span>}
+                      {prod.price_shopee && <span className="text-[10px] bg-red-500/20 text-red-500 px-2 py-0.5 rounded">SHO</span>}
+                      {prod.price_meli && <span className="text-[10px] bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded">MELI</span>}
+                    </div>
+                  </div>
+                  
+                  {/* Botões de Ação */}
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur rounded shadow-lg p-1 flex border border-border">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:text-blue-300 hover:bg-blue-400/20" onClick={() => handleEdit(prod)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-400/20" onClick={() => handleDelete(prod.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
