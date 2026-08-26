@@ -195,7 +195,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
               className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors relative ${isActive('/notificacoes') ? 'text-neon-purple' : 'text-muted-foreground hover:text-gray-300'}`}
             >
               <Bell className="w-6 h-6" strokeWidth={isActive('/notificacoes') ? 2.5 : 2} />
-              <span className="text-[10px] font-medium hidden sm:block">Alertas</span>
+              <span className="text-[10px] font-medium">Alertas</span>
               {unreadCount > 0 && (
                 <span className="absolute top-1 right-1 sm:right-3 bg-neon-cyan text-black text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold animate-pulse shadow-[0_0_10px_rgba(0,255,255,0.8)]">
                   {unreadCount > 9 ? '9+' : unreadCount}
