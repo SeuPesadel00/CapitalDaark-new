@@ -3,36 +3,72 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Search, Star, Heart } from 'lucide-react';
+import { Search, Star, Heart, ExternalLink, Flame, CheckCircle2 } from 'lucide-react';
 import Header from '@/components/Header';
-import { useCart } from '../context/CartContext';
 import { useToast } from '../hooks/use-toast';
-import { Link } from 'react-router-dom';
 
-const TOTAL_PRODUCTS = 200;
-const PRODUCTS_PER_LOAD = 24;
+const TOTAL_PRODUCTS = 40;
+const PRODUCTS_PER_LOAD = 12;
 
-function generateProducts() {
+export interface AffiliateProduct {
+  id: number;
+  nome: string;
+  category: string;
+  image: string;
+  rating: number;
+  reviews: number;
+  prices: {
+    amazon: { price: number; link: string; original?: number };
+    shopee: { price: number; link: string; original?: number };
+    mercadolivre: { price: number; link: string; original?: number };
+  };
+  bestPrice: number;
+  bestStore: 'amazon' | 'shopee' | 'mercadolivre';
+  featured: boolean;
+}
+
+function generateProducts(): AffiliateProduct[] {
   const categories = ['electronics', 'gaming', 'wearables', 'computers'];
   const names = [
-    'Quantum Pro', 'Neon Gaming', 'Cyber Watch', 'UltraBook', 'PixelCam', 'SoundMax', 'VR Vision', 'NanoDrone'
+    'Smartphone Quantum Pro 5G', 'Headset Neon Gaming 7.1', 'Smartwatch Cyber Watch 3', 
+    'Laptop UltraBook M2', 'Câmera PixelCam 4K', 'Caixa SoundMax Bluetooth', 
+    'Óculos VR Vision Pro', 'NanoDrone Dobrável'
   ];
   const products = [];
   for (let i = 1; i <= TOTAL_PRODUCTS; i++) {
     const category = categories[i % categories.length];
     const name = names[i % names.length];
+    
+    // Simula preços para as 3 lojas
+    const basePrice = Math.round(500 + Math.random() * 5000);
+    const pAmazon = basePrice + Math.round(Math.random() * 100 - 50);
+    const pShopee = basePrice + Math.round(Math.random() * 100 - 60); // Geralmente mais barato
+    const pMeli = basePrice + Math.round(Math.random() * 100 - 40);
+
+    const prices = {
+      amazon: { price: pAmazon, link: 'https://amazon.com.br' },
+      shopee: { price: pShopee, link: 'https://shopee.com.br' },
+      mercadolivre: { price: pMeli, link: 'https://mercadolivre.com.br' }
+    };
+
+    // Descobrir qual o menor preço para o crachá
+    let bestStore: 'amazon' | 'shopee' | 'mercadolivre' = 'amazon';
+    let bestPrice = pAmazon;
+
+    if (pShopee < bestPrice) { bestPrice = pShopee; bestStore = 'shopee'; }
+    if (pMeli < bestPrice) { bestPrice = pMeli; bestStore = 'mercadolivre'; }
+
     products.push({
       id: i,
       nome: `${name} #${i}`,
-      price: Math.round(500 + Math.random() * 5000),
-      originalPrice: Math.random() > 0.5 ? Math.round(500 + Math.random() * 5000) : null,
       category,
-      image: '/placeholder.svg',
+      image: `https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80`, // placeholder bonito
       rating: +(4 + Math.random()).toFixed(1),
-      reviews: Math.floor(Math.random() * 300),
-      discount: Math.random() > 0.5 ? Math.floor(Math.random() * 30) : 0,
-      inStock: Math.random() > 0.1,
-      featured: Math.random() > 0.7
+      reviews: Math.floor(Math.random() * 300) + 10,
+      prices,
+      bestPrice,
+      bestStore,
+      featured: Math.random() > 0.8
     });
   }
   return products;
@@ -41,15 +77,14 @@ function generateProducts() {
 const allProducts = generateProducts();
 
 const categories = [
-  { id: 'all', name: 'Todos' },
+  { id: 'all', name: 'Todas as Ofertas' },
   { id: 'electronics', name: 'Eletrônicos' },
   { id: 'gaming', name: 'Gaming' },
   { id: 'wearables', name: 'Wearables' },
-  { id: 'computers', name: 'Computadores' }
+  { id: 'computers', name: 'Informática' }
 ];
 
 const Loja = () => {
-  const { adicionarProduto } = useCart();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -78,17 +113,10 @@ const Loja = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [filteredProducts.length]);
 
-  const handleAddToCart = (product: any) => {
-    adicionarProduto({
-      id: product.id,
-      nome: product.nome,
-      preco: product.price,
-      quantidade: 1
-    });
-    
+  const handleLinkClick = (storeName: string, product: AffiliateProduct) => {
     toast({
-      title: "Produto adicionado!",
-      description: `${product.nome} foi adicionado ao seu carrinho.`,
+      title: "Redirecionando de forma segura...",
+      description: `Abrindo ${product.nome} no site oficial da ${storeName}.`,
     });
   };
 
@@ -98,14 +126,14 @@ const Loja = () => {
       <main className="container mx-auto px-6 py-8">
         {/* Cabeçalho */}
         <div className="text-center mb-12">
-           <Badge className="mb-6 bg-gradient-primary text-white px-4 py-2 text-sm font-medium">
-                      📦 Produtos a pronta entrega
-                    </Badge>
+           <Badge className="mb-6 bg-gradient-primary text-white px-4 py-2 text-sm font-medium flex items-center gap-2 mx-auto w-fit">
+              <Flame className="w-4 h-4" /> Comparador de Preços em Tempo Real
+            </Badge>
           <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-neon-cyan mb-4">
-            Loja <span className="text-neon-purple">Digital</span>
+            Central de <span className="text-neon-purple">Ofertas</span>
           </h1>
           <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
-            Descubra produtos incríveis com tecnologia de ponta e design futurista
+            Nós rastreamos os maiores sites do Brasil para você sempre comprar pelo menor preço com segurança.
           </p>
         </div>
 
@@ -160,29 +188,20 @@ const Loja = () => {
                   {/* Emblemas */}
                   <div className="absolute top-3 left-3 flex flex-col gap-2">
                     {product.featured && (
-                      <Badge className="bg-neon-purple text-white">Destaque</Badge>
-                    )}
-                    {product.discount > 0 && (
-                      <Badge className="bg-destructive text-white">-{product.discount}%</Badge>
-                    )}
-                    {!product.inStock && (
-                      <Badge variant="secondary" className="bg-muted text-foreground">Esgotado</Badge>
+                      <Badge className="bg-neon-purple text-white">Imperdível</Badge>
                     )}
                   </div>
 
-                  {/* Botão Lista de desejos */}
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="absolute top-3 right-3 bg-black/20 backdrop-blur-sm hover:bg-black/40 text-white"
-                  >
-                    <Heart className="h-4 w-4" />
-                  </Button>
+                  <div className="absolute bottom-3 right-3">
+                     <Badge className="bg-green-600 font-bold text-white shadow-lg text-xs flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3"/> Melhor Preço: {product.bestStore}
+                     </Badge>
+                  </div>
                 </div>
               </CardHeader>
 
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-2 text-foreground group-hover:text-neon-cyan transition-colors">
+              <CardContent className="p-4 flex-grow">
+                <h3 className="font-semibold text-lg mb-2 text-foreground group-hover:text-neon-cyan transition-colors line-clamp-2">
                   {product.nome}
                 </h3>
                 
@@ -194,28 +213,36 @@ const Loja = () => {
                   </div>
                   <span className="text-sm text-foreground/60">({product.reviews} avaliações)</span>
                 </div>
-
-                {/* Preço */}
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-2xl font-bold text-neon-green">
-                    R$ {product.price.toFixed(2)}
-                  </span>
-                  {product.originalPrice && (
-                    <span className="text-sm text-foreground/50 line-through">
-                      R$ {product.originalPrice.toFixed(2)}
-                    </span>
-                  )}
-                </div>
               </CardContent>
 
-              <CardFooter className="p-4 pt-0">
+              <CardFooter className="p-4 pt-0 flex flex-col gap-2">
+                <p className="text-xs text-foreground/50 text-left w-full">Comparativo:</p>
+                
                 <Button 
-                  className="w-full bg-gradient-primary hover:bg-gradient-secondary disabled:opacity-50"
-                  onClick={() => handleAddToCart(product)}
-                  disabled={!product.inStock}
+                  className={`w-full justify-between hover:scale-105 transition-transform ${product.bestStore === 'amazon' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-card border border-orange-500/30'}`}
+                  variant={product.bestStore === 'amazon' ? 'default' : 'outline'}
+                  onClick={() => { handleLinkClick('Amazon', product); window.open(product.prices.amazon.link, '_blank'); }}
                 >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  {product.inStock ? 'Adicionar ao Carrinho' : 'Produto Esgotado'}
+                  <span className="flex items-center gap-2">Amazon</span>
+                  <span className="font-bold">R$ {product.prices.amazon.price.toFixed(2)}</span>
+                </Button>
+
+                <Button 
+                  className={`w-full justify-between hover:scale-105 transition-transform ${product.bestStore === 'shopee' ? 'bg-red-500 hover:bg-red-600' : 'bg-card border border-red-500/30'}`}
+                  variant={product.bestStore === 'shopee' ? 'default' : 'outline'}
+                  onClick={() => { handleLinkClick('Shopee', product); window.open(product.prices.shopee.link, '_blank'); }}
+                >
+                  <span className="flex items-center gap-2">Shopee</span>
+                  <span className="font-bold">R$ {product.prices.shopee.price.toFixed(2)}</span>
+                </Button>
+
+                <Button 
+                  className={`w-full justify-between hover:scale-105 transition-transform ${product.bestStore === 'mercadolivre' ? 'bg-yellow-500 hover:bg-yellow-600 text-black' : 'bg-card border border-yellow-500/30 text-yellow-500'}`}
+                  variant={product.bestStore === 'mercadolivre' ? 'default' : 'outline'}
+                  onClick={() => { handleLinkClick('Mercado Livre', product); window.open(product.prices.mercadolivre.link, '_blank'); }}
+                >
+                  <span className="flex items-center gap-2">Mercado Livre</span>
+                  <span className="font-bold">R$ {product.prices.mercadolivre.price.toFixed(2)}</span>
                 </Button>
               </CardFooter>
             </Card>
