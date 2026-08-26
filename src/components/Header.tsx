@@ -156,12 +156,43 @@ const Header = ({ hideNav = false }: HeaderProps) => {
               </div>
             )}
             
-            {/* Mobile Ações Rápidas de Topo (se deslogado) */}
-            {!hideNav && !user && (
-              <div className="md:hidden">
-                <Button size="sm" onClick={() => navigate('/login')} className="bg-primary/20 text-primary border border-primary/50 rounded-full h-8 px-4">
-                  Entrar
-                </Button>
+            {/* Ações Mobile Topo (Avatar c/ Dropdown ou Entrar) */}
+            {!hideNav && (
+              <div className="flex md:hidden items-center">
+                {user ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon" className="border-neon-cyan/30 hover:border-neon-cyan rounded-full overflow-hidden p-0 w-9 h-9">
+                        {profile?.avatar_url ? (
+                          <img src={profile.avatar_url} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+                            {profile?.first_name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
+                          </div>
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56 bg-card/95 backdrop-blur-xl border-border/20 shadow-2xl shadow-neon-purple/10 mt-2">
+                      <div className="px-2 py-2 border-b border-border/20 mb-2">
+                        <p className="font-semibold text-sm truncate">Olá, {profile?.first_name || 'Anarquista'}</p>
+                        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      </div>
+                      <DropdownMenuItem onClick={() => navigate('/dados-pessoais')} className="cursor-pointer hover:bg-primary/20 hover:text-primary transition-colors py-3">
+                        <UserCircle className="mr-2 h-5 w-5" /> Meu Perfil
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/configuracoes-unificadas')} className="cursor-pointer hover:bg-neon-cyan/20 hover:text-neon-cyan transition-colors py-3">
+                        <Settings className="mr-2 h-5 w-5" /> Configurações
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout} className="cursor-pointer hover:bg-destructive/20 text-destructive mt-2 transition-colors py-3">
+                        <LogOut className="mr-2 h-5 w-5" /> Sair da Rede
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Button size="sm" onClick={() => navigate('/login')} className="bg-primary/20 text-primary border border-primary/50 rounded-full h-8 px-4">
+                    Entrar
+                  </Button>
+                )}
               </div>
             )}
           </div>
