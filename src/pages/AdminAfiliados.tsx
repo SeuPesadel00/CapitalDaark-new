@@ -67,9 +67,11 @@ const AdminAfiliados = () => {
       
       setFormData(prev => ({
         ...prev,
-        nome: data.title || prev.nome,
-        image: data.image || prev.image,
-        // Tentar inferir a loja e colocar o preço e link nela
+        // Só substitui o nome e imagem se ainda estiverem vazios
+        nome: prev.nome ? prev.nome : (data.title || ''),
+        image: prev.image ? prev.image : (data.image || ''),
+        
+        // Tentar inferir a loja e colocar o preço e link nela (mantendo os dados anteriores das outras lojas intactos)
         price_amazon: magicUrl.includes('amazon') && data.price ? data.price : prev.price_amazon,
         link_amazon: magicUrl.includes('amazon') ? magicUrl : prev.link_amazon,
         
