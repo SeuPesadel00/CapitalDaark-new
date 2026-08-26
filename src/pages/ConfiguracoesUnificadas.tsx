@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/components/ui/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Trash2, Shield, Bell, Mail, Settings, Eye, EyeOff, Key, CreditCard, Plus } from 'lucide-react';
+import { Trash2, Shield, Bell, Mail, Settings, Eye, EyeOff, Key, CreditCard, Plus, LogOut, Headset } from 'lucide-react';
 
 // Interface para preferências do usuário
 interface PreferenciasUsuario {
@@ -726,7 +726,45 @@ function ConfiguracoesUnificadas() {
 
           {/* Aba de Conta */}
           <TabsContent value="conta" className="space-y-6">
-            <Card className="border-destructive">
+            
+            <Card className="bg-card/80 backdrop-blur-sm border-border/30">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Headset className="w-5 h-5 mr-2" />
+                  Central de Atendimento
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Precisa de ajuda com sua conta, assinaturas ou recursos da plataforma? Nosso suporte VIP está disponível direto no WhatsApp.
+                </p>
+                <Button asChild className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto font-bold border border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+                  <a href="https://wa.me/5561982201177?text=Olá, preciso de suporte na plataforma Capital Daark." target="_blank" rel="noopener noreferrer">
+                    Falar com Suporte VIP
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/80 backdrop-blur-sm border-border/30">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <LogOut className="w-5 h-5 mr-2" />
+                  Sessão
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Deseja desconectar sua conta deste dispositivo?
+                </p>
+                <Button variant="outline" className="w-full sm:w-auto border-border/50 hover:bg-destructive/20 hover:text-destructive transition-colors" onClick={() => signOut()}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sair da Conta (Logout)
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-destructive bg-card/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center text-destructive">
                   <Trash2 className="w-5 h-5 mr-2" />
