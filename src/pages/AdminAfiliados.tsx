@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
-import { Loader2, Pencil, Trash2, X, PlusCircle } from 'lucide-react';
+import { Loader2, Pencil, Trash2, X, PlusCircle, Wand2 } from 'lucide-react';
 
 const AdminAfiliados = () => {
   const { toast } = useToast();
@@ -15,6 +15,10 @@ const AdminAfiliados = () => {
   const [fetching, setFetching] = useState(true);
   const [produtos, setProdutos] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  
+  // Scraping States
+  const [magicUrl, setMagicUrl] = useState('');
+  const [scraping, setScraping] = useState(false);
 
   const initialFormState = {
     nome: '',
@@ -47,6 +51,43 @@ const AdminAfiliados = () => {
   useEffect(() => {
     loadProdutos();
   }, []);
+
+  const handleScrape = async () => {
+    if (!magicUrl) {
+      toast({ variant: 'destructive', title: 'URL Inválida', description: 'Cole um link antes de puxar os dados.' });
+      return;
+    }
+    
+    setScraping(true);
+    try {
+      const response = await fetch(`/api/scrape?url=${encodeURIComponent(magicUrl)}`);
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.error || 'Erro ao extrair dados da página.');
+      
+      setFormData(prev => ({
+        ...prev,
+        nome: data.title || prev.nome,
+        image: data.image || prev.image,
+        // Tentar inferir a loja e colocar o preço e link nela
+        price_amazon: magicUrl.includes('amazon') && data.price ? data.price : prev.price_amazon,
+        link_amazon: magicUrl.includes('amazon') ? magicUrl : prev.link_amazon,
+        
+        price_aliexpress: magicUrl.includes('aliexpress') && data.price ? data.price : prev.price_aliexpress,
+        link_aliexpress: magicUrl.includes('aliexpress') ? magicUrl : prev.link_aliexpress,
+        
+        price_shopee: magicUrl.includes('shopee') && data.price ? data.price : prev.price_shopee,
+        link_shopee: magicUrl.includes('shopee') ? magicUrl : prev.link_shopee,
+      }));
+      
+      toast({ title: "Mágica Feita! 🪄", description: "Os dados foram preenchidos automaticamente." });
+      setMagicUrl(''); // Limpar input
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Falha no Robô', description: error.message });
+    } finally {
+      setScraping(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -166,6 +207,32 @@ const AdminAfiliados = () => {
               </Button>
             )}
           </div>
+          
+          {/* BARRA MÁGICA DE EXTRAÇÃO */}
+          {!editingId && (
+            <div className="bg-gradient-to-r from-neon-purple/20 to-transparent p-4 rounded-lg border border-neon-purple/30 mb-6">
+              <h3 className="text-neon-purple font-semibold mb-2 flex items-center">
+                <Wand2 className="w-4 h-4 mr-2" /> Puxador Mágico (Auto-Preenchimento)
+              </h3>
+              <p className="text-sm text-muted-foreground mb-3">Cole o link da Amazon ou AliExpress abaixo e o robô preencherá a imagem e o título para você.</p>
+              <div className="flex gap-2">
+                <Input 
+                  placeholder="https://amzn.to/..." 
+                  value={magicUrl} 
+                  onChange={(e) => setMagicUrl(e.target.value)}
+                  className="bg-background"
+                />
+                <Button 
+                  type="button" 
+                  onClick={handleScrape} 
+                  disabled={scraping}
+                  className="bg-neon-purple hover:bg-neon-purple/80 text-white"
+                >
+                  {scraping ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Puxar Dados'}
+                </Button>
+              </div>
+            </div>
+          )}
           
           <div className="space-y-4">
             <h3 className="text-lg text-neon-cyan pb-2">Detalhes Principais</h3>
