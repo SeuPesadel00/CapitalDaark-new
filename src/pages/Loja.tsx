@@ -222,8 +222,7 @@ const Loja = () => {
                 <div className="grid grid-cols-2 gap-2 w-full">
                   {product.prices.amazon.price > 0 && (
                     <Button 
-                      size="sm"
-                      className={`w-full hover:scale-105 transition-transform flex flex-col items-center justify-center py-3 gap-1 ${product.bestStore === 'amazon' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'bg-card border border-orange-500/30 text-orange-500 hover:bg-orange-500/10'}`}
+                      className={`h-auto min-h-[50px] w-full hover:scale-105 transition-transform flex flex-col items-center justify-center py-2 gap-0.5 ${product.bestStore === 'amazon' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'bg-card border border-orange-500/30 text-orange-500 hover:bg-orange-500/10'}`}
                       variant={product.bestStore === 'amazon' ? 'default' : 'outline'}
                       onClick={() => { handleLinkClick('Amazon', product); window.open(product.prices.amazon.link, '_blank'); }}
                     >
@@ -234,8 +233,7 @@ const Loja = () => {
 
                   {product.prices.shopee.price > 0 && (
                     <Button 
-                      size="sm"
-                      className={`w-full hover:scale-105 transition-transform flex flex-col items-center justify-center py-3 gap-1 ${product.bestStore === 'shopee' ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-card border border-red-500/30 text-red-500 hover:bg-red-500/10'}`}
+                      className={`h-auto min-h-[50px] w-full hover:scale-105 transition-transform flex flex-col items-center justify-center py-2 gap-0.5 ${product.bestStore === 'shopee' ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-card border border-red-500/30 text-red-500 hover:bg-red-500/10'}`}
                       variant={product.bestStore === 'shopee' ? 'default' : 'outline'}
                       onClick={() => { handleLinkClick('Shopee', product); window.open(product.prices.shopee.link, '_blank'); }}
                     >
@@ -246,8 +244,7 @@ const Loja = () => {
 
                   {product.prices.mercadolivre.price > 0 && (
                     <Button 
-                      size="sm"
-                      className={`w-full hover:scale-105 transition-transform flex flex-col items-center justify-center py-3 gap-1 ${product.bestStore === 'mercadolivre' ? 'bg-yellow-500 hover:bg-yellow-600 text-black' : 'bg-card border border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10'}`}
+                      className={`h-auto min-h-[50px] w-full hover:scale-105 transition-transform flex flex-col items-center justify-center py-2 gap-0.5 ${product.bestStore === 'mercadolivre' ? 'bg-yellow-500 hover:bg-yellow-600 text-black' : 'bg-card border border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10'}`}
                       variant={product.bestStore === 'mercadolivre' ? 'default' : 'outline'}
                       onClick={() => { handleLinkClick('Mercado Livre', product); window.open(product.prices.mercadolivre.link, '_blank'); }}
                     >
@@ -258,8 +255,7 @@ const Loja = () => {
                   
                   {product.prices.aliexpress.price > 0 && (
                     <Button 
-                      size="sm"
-                      className={`w-full hover:scale-105 transition-transform flex flex-col items-center justify-center py-3 gap-1 ${product.bestStore === 'aliexpress' ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'bg-card border border-orange-600/30 text-orange-600 hover:bg-orange-600/10'}`}
+                      className={`h-auto min-h-[50px] w-full hover:scale-105 transition-transform flex flex-col items-center justify-center py-2 gap-0.5 ${product.bestStore === 'aliexpress' ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'bg-card border border-orange-600/30 text-orange-600 hover:bg-orange-600/10'}`}
                       variant={product.bestStore === 'aliexpress' ? 'default' : 'outline'}
                       onClick={() => { handleLinkClick('AliExpress', product); window.open(product.prices.aliexpress.link, '_blank'); }}
                     >
