@@ -66,7 +66,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
   const navItems = [
     { label: 'Início', href: '/user-home' },
     { label: 'Loja', href: '/loja' },
-    { label: 'Suporte VIP', href: 'https://wa.me/5511999999999?text=Olá, preciso de suporte na plataforma Capital Daark.' },
+    { label: 'Suporte VIP', href: 'https://wa.me/5561982201177?text=Olá, preciso de suporte na plataforma Capital Daark.' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
