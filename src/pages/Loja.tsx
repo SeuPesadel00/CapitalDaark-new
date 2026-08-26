@@ -22,9 +22,10 @@ export interface AffiliateProduct {
     amazon: { price: number; link: string };
     shopee: { price: number; link: string };
     mercadolivre: { price: number; link: string };
+    aliexpress: { price: number; link: string };
   };
   bestPrice: number;
-  bestStore: 'amazon' | 'shopee' | 'mercadolivre' | 'nenhuma';
+  bestStore: 'amazon' | 'shopee' | 'mercadolivre' | 'aliexpress' | 'nenhuma';
 }
 
 const categories = [
@@ -51,12 +52,13 @@ const Loja = () => {
       
       if (data) {
         const formatted: AffiliateProduct[] = data.map((d: any) => {
-          let bStore: 'amazon' | 'shopee' | 'mercadolivre' | 'nenhuma' = 'nenhuma';
+          let bStore: 'amazon' | 'shopee' | 'mercadolivre' | 'aliexpress' | 'nenhuma' = 'nenhuma';
           let bPrice = 999999;
           
           if (d.price_amazon && d.price_amazon < bPrice) { bPrice = d.price_amazon; bStore = 'amazon'; }
           if (d.price_shopee && d.price_shopee < bPrice) { bPrice = d.price_shopee; bStore = 'shopee'; }
           if (d.price_meli && d.price_meli < bPrice) { bPrice = d.price_meli; bStore = 'mercadolivre'; }
+          if (d.price_aliexpress && d.price_aliexpress < bPrice) { bPrice = d.price_aliexpress; bStore = 'aliexpress'; }
           
           return {
             id: d.id,
@@ -69,7 +71,8 @@ const Loja = () => {
             prices: {
               amazon: { price: d.price_amazon || 0, link: d.link_amazon || '' },
               shopee: { price: d.price_shopee || 0, link: d.link_shopee || '' },
-              mercadolivre: { price: d.price_meli || 0, link: d.link_meli || '' }
+              mercadolivre: { price: d.price_meli || 0, link: d.link_meli || '' },
+              aliexpress: { price: d.price_aliexpress || 0, link: d.link_aliexpress || '' }
             },
             bestPrice: bPrice === 999999 ? 0 : bPrice,
             bestStore: bStore
@@ -213,41 +216,58 @@ const Loja = () => {
                 </div>
               </CardContent>
 
-              <CardFooter className="p-4 pt-0 flex flex-col gap-2">
-                <p className="text-xs text-foreground/50 text-left w-full">Comparativo:</p>
+              <CardFooter className="p-4 pt-0 flex flex-col gap-3">
+                <p className="text-xs text-foreground/50 text-left w-full border-b border-border/20 pb-1">Comparativo de Preços:</p>
                 
-                {product.prices.amazon.price > 0 && (
-                  <Button 
-                    className={`w-full justify-between hover:scale-105 transition-transform ${product.bestStore === 'amazon' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-card border border-orange-500/30'}`}
-                    variant={product.bestStore === 'amazon' ? 'default' : 'outline'}
-                    onClick={() => { handleLinkClick('Amazon', product); window.open(product.prices.amazon.link, '_blank'); }}
-                  >
-                    <span className="flex items-center gap-2">Amazon</span>
-                    <span className="font-bold">R$ {product.prices.amazon.price.toFixed(2)}</span>
-                  </Button>
-                )}
+                <div className="grid grid-cols-2 gap-2 w-full">
+                  {product.prices.amazon.price > 0 && (
+                    <Button 
+                      size="sm"
+                      className={`w-full hover:scale-105 transition-transform flex flex-col items-center justify-center py-6 ${product.bestStore === 'amazon' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'bg-card border border-orange-500/30 text-orange-500 hover:bg-orange-500/10'}`}
+                      variant={product.bestStore === 'amazon' ? 'default' : 'outline'}
+                      onClick={() => { handleLinkClick('Amazon', product); window.open(product.prices.amazon.link, '_blank'); }}
+                    >
+                      <span className="text-[10px] uppercase tracking-wider mb-1">Amazon</span>
+                      <span className="font-bold text-sm">R$ {product.prices.amazon.price.toFixed(2)}</span>
+                    </Button>
+                  )}
 
-                {product.prices.shopee.price > 0 && (
-                  <Button 
-                    className={`w-full justify-between hover:scale-105 transition-transform ${product.bestStore === 'shopee' ? 'bg-red-500 hover:bg-red-600' : 'bg-card border border-red-500/30'}`}
-                    variant={product.bestStore === 'shopee' ? 'default' : 'outline'}
-                    onClick={() => { handleLinkClick('Shopee', product); window.open(product.prices.shopee.link, '_blank'); }}
-                  >
-                    <span className="flex items-center gap-2">Shopee</span>
-                    <span className="font-bold">R$ {product.prices.shopee.price.toFixed(2)}</span>
-                  </Button>
-                )}
+                  {product.prices.shopee.price > 0 && (
+                    <Button 
+                      size="sm"
+                      className={`w-full hover:scale-105 transition-transform flex flex-col items-center justify-center py-6 ${product.bestStore === 'shopee' ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-card border border-red-500/30 text-red-500 hover:bg-red-500/10'}`}
+                      variant={product.bestStore === 'shopee' ? 'default' : 'outline'}
+                      onClick={() => { handleLinkClick('Shopee', product); window.open(product.prices.shopee.link, '_blank'); }}
+                    >
+                      <span className="text-[10px] uppercase tracking-wider mb-1">Shopee</span>
+                      <span className="font-bold text-sm">R$ {product.prices.shopee.price.toFixed(2)}</span>
+                    </Button>
+                  )}
 
-                {product.prices.mercadolivre.price > 0 && (
-                  <Button 
-                    className={`w-full justify-between hover:scale-105 transition-transform ${product.bestStore === 'mercadolivre' ? 'bg-yellow-500 hover:bg-yellow-600 text-black' : 'bg-card border border-yellow-500/30 text-yellow-500'}`}
-                    variant={product.bestStore === 'mercadolivre' ? 'default' : 'outline'}
-                    onClick={() => { handleLinkClick('Mercado Livre', product); window.open(product.prices.mercadolivre.link, '_blank'); }}
-                  >
-                    <span className="flex items-center gap-2">Mercado Livre</span>
-                    <span className="font-bold">R$ {product.prices.mercadolivre.price.toFixed(2)}</span>
-                  </Button>
-                )}
+                  {product.prices.mercadolivre.price > 0 && (
+                    <Button 
+                      size="sm"
+                      className={`w-full hover:scale-105 transition-transform flex flex-col items-center justify-center py-6 ${product.bestStore === 'mercadolivre' ? 'bg-yellow-500 hover:bg-yellow-600 text-black' : 'bg-card border border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10'}`}
+                      variant={product.bestStore === 'mercadolivre' ? 'default' : 'outline'}
+                      onClick={() => { handleLinkClick('Mercado Livre', product); window.open(product.prices.mercadolivre.link, '_blank'); }}
+                    >
+                      <span className="text-[10px] uppercase tracking-wider mb-1">M. Livre</span>
+                      <span className="font-bold text-sm">R$ {product.prices.mercadolivre.price.toFixed(2)}</span>
+                    </Button>
+                  )}
+                  
+                  {product.prices.aliexpress.price > 0 && (
+                    <Button 
+                      size="sm"
+                      className={`w-full hover:scale-105 transition-transform flex flex-col items-center justify-center py-6 ${product.bestStore === 'aliexpress' ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'bg-card border border-orange-600/30 text-orange-600 hover:bg-orange-600/10'}`}
+                      variant={product.bestStore === 'aliexpress' ? 'default' : 'outline'}
+                      onClick={() => { handleLinkClick('AliExpress', product); window.open(product.prices.aliexpress.link, '_blank'); }}
+                    >
+                      <span className="text-[10px] uppercase tracking-wider mb-1">AliExpress</span>
+                      <span className="font-bold text-sm">R$ {product.prices.aliexpress.price.toFixed(2)}</span>
+                    </Button>
+                  )}
+                </div>
               </CardFooter>
             </Card>
           ))}

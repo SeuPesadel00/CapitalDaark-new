@@ -28,7 +28,9 @@ const AdminAfiliados = () => {
     price_shopee: '',
     link_shopee: '',
     price_meli: '',
-    link_meli: ''
+    link_meli: '',
+    price_aliexpress: '',
+    link_aliexpress: ''
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -67,7 +69,9 @@ const AdminAfiliados = () => {
         price_shopee: formData.price_shopee ? Number(String(formData.price_shopee).replace(',', '.')) : null,
         link_shopee: formData.link_shopee || null,
         price_meli: formData.price_meli ? Number(String(formData.price_meli).replace(',', '.')) : null,
-        link_meli: formData.link_meli || null
+        link_meli: formData.link_meli || null,
+        price_aliexpress: formData.price_aliexpress ? Number(String(formData.price_aliexpress).replace(',', '.')) : null,
+        link_aliexpress: formData.link_aliexpress || null
       };
 
       if (editingId) {
@@ -110,7 +114,9 @@ const AdminAfiliados = () => {
       price_shopee: prod.price_shopee ? String(prod.price_shopee) : '',
       link_shopee: prod.link_shopee || '',
       price_meli: prod.price_meli ? String(prod.price_meli) : '',
-      link_meli: prod.link_meli || ''
+      link_meli: prod.link_meli || '',
+      price_aliexpress: prod.price_aliexpress ? String(prod.price_aliexpress) : '',
+      link_aliexpress: prod.link_aliexpress || ''
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -250,6 +256,20 @@ const AdminAfiliados = () => {
             </div>
           </div>
 
+          <div className="space-y-4">
+            <h3 className="text-lg text-orange-600 pb-2">AliExpress</h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="price_aliexpress">Preço Atual</Label>
+                <Input id="price_aliexpress" name="price_aliexpress" type="number" step="0.01" value={formData.price_aliexpress} onChange={handleChange} placeholder="Ex: 110.00" />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="link_aliexpress">Seu Link de Afiliado AliExpress</Label>
+                <Input id="link_aliexpress" name="link_aliexpress" value={formData.link_aliexpress} onChange={handleChange} placeholder="https://s.click.aliexpress.com/..." />
+              </div>
+            </div>
+          </div>
+
           <Button type="submit" disabled={loading} className="w-full bg-gradient-primary text-lg py-6 shadow-lg shadow-primary/30">
             {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (editingId ? "Salvar Alterações" : "Publicar Nova Oferta")}
           </Button>
@@ -279,6 +299,7 @@ const AdminAfiliados = () => {
                       {prod.price_amazon && <span className="text-[10px] bg-orange-500/20 text-orange-500 px-2 py-0.5 rounded">AMZ</span>}
                       {prod.price_shopee && <span className="text-[10px] bg-red-500/20 text-red-500 px-2 py-0.5 rounded">SHO</span>}
                       {prod.price_meli && <span className="text-[10px] bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded">MELI</span>}
+                      {prod.price_aliexpress && <span className="text-[10px] bg-orange-600/20 text-orange-600 px-2 py-0.5 rounded">ALI</span>}
                     </div>
                   </div>
                   
