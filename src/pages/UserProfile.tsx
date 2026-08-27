@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Settings, Image as ImageIcon, X, Share2 } from 'lucide-react';
+import { Settings, Image as ImageIcon, X, Share2, Heart, MessageCircle } from 'lucide-react';
 import DOMPurify from 'dompurify';
 
 const UserProfile = () => {
