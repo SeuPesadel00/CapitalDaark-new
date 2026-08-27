@@ -19,6 +19,30 @@ interface ChatComposerProps {
 
 export function ChatComposer({ value, onChange, onSend, onAttachment, placeholder, className }: ChatComposerProps) {
   const quillRef = useRef<ReactQuill>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAttachmentClick = (type: 'image' | 'video' | 'link') => {
+    if (type === 'link') {
+      onAttachment?.(type);
+    } else {
+      // Trigger file input
+      if (fileInputRef.current) {
+        fileInputRef.current.accept = type === 'image' ? 'image/*' : 'video/*';
+        fileInputRef.current.click();
+      }
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      // Por enquanto, apenas notifica que um arquivo foi selecionado.
+      // A lógica de upload real para o banco de dados será implementada depois.
+      alert(`Arquivo ${e.target.files[0].name} selecionado! O upload para o banco de dados será configurado em breve.`);
+      onAttachment?.(fileInputRef.current?.accept.includes('image') ? 'image' : 'video');
+      // Limpar input
+      e.target.value = '';
+    }
+  };
 
   const onEmojiClick = (emojiData: EmojiClickData) => {
     const editor = quillRef.current?.getEditor();
@@ -53,17 +77,25 @@ export function ChatComposer({ value, onChange, onSend, onAttachment, placeholde
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="bg-background/95 border-border/50">
-          <DropdownMenuItem onClick={() => onAttachment?.('image')} className="cursor-pointer gap-2">
+          <DropdownMenuItem onClick={() => handleAttachmentClick('image')} className="cursor-pointer gap-2">
             <ImageIcon className="h-4 w-4" /> Foto
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAttachment?.('video')} className="cursor-pointer gap-2">
+          <DropdownMenuItem onClick={() => handleAttachmentClick('video')} className="cursor-pointer gap-2">
             <Video className="h-4 w-4" /> Vídeo
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAttachment?.('link')} className="cursor-pointer gap-2">
+          <DropdownMenuItem onClick={() => handleAttachmentClick('link')} className="cursor-pointer gap-2">
             <Link2 className="h-4 w-4" /> Link
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Hidden File Input */}
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleFileChange} 
+        style={{ display: 'none' }} 
+      />
 
       {/* Caixa de Texto Rica */}
       <div className="flex-1 bg-muted/20 border border-border/30 rounded-2xl relative overflow-hidden focus-within:ring-1 focus-within:ring-primary/50 transition-all flex items-end">

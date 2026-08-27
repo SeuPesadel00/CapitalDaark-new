@@ -102,9 +102,9 @@ export function ChatMessageBubble({ message, isOwn, onReply, onEdit, onDeleteFor
         </div>
       </div>
 
-      {/* Menu de Ações (Aparece no Hover) */}
+      {/* Menu de Ações (Aparece no Hover no desktop, sempre visível no mobile) */}
       <div className={cn(
-        "absolute top-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1",
+        "absolute top-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center gap-1",
         isOwn ? "right-[calc(100%+8px)] flex-row-reverse" : "left-[calc(100%+8px)] flex-row"
       )}>
         <button onClick={() => onReply(message)} className="p-1.5 bg-background/80 hover:bg-muted rounded-full text-muted-foreground hover:text-foreground shadow-sm">
