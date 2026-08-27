@@ -203,9 +203,9 @@ const UserProfile = () => {
                     onClick={() => setSelectedPost(post)}
                   >
                     {post.image_url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
-                      <video src={post.image_url} controls className="w-full max-h-96 object-cover hover:opacity-90 transition-opacity" />
+                      <video src={post.image_url} controls className="w-full h-auto rounded-sm hover:opacity-90 transition-opacity" />
                     ) : (
-                      <img src={post.image_url} alt="post" className="w-full max-h-96 object-cover hover:opacity-90 transition-opacity" />
+                      <img src={post.image_url} alt="post" className="w-full h-auto rounded-sm hover:opacity-90 transition-opacity" />
                     )}
                   </div>
                )}
