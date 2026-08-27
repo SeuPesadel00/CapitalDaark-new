@@ -12,7 +12,6 @@ const Register = lazy(() => import('./pages/Register'));
 const UserHome = lazy(() => import('./pages/UserHome'));
 const Loja = lazy(() => import('./pages/Loja'));
 const ConfiguracoesUnificadas = lazy(() => import('./pages/ConfiguracoesUnificadas'));
-const DadosPessoais = lazy(() => import('./pages/DadosPessoais'));
 const NoticiaDetalhe = lazy(() => import('./pages/NoticiaDetalhe'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
 const RecoverPassword = lazy(() => import('./pages/RecoverPassword'));
@@ -20,7 +19,7 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const PaymentMethods = lazy(() => import('./pages/PaymentMethods'));
-const AccountSettings = lazy(() => import('./pages/AccountSettings'));
+// AccountSettings e DadosPessoais removidos (agora integrados em ConfiguracoesUnificadas)
 const Noticias = lazy(() => import('./pages/Noticias'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const AdminAfiliados = lazy(() => import('./pages/AdminAfiliados'));
@@ -73,9 +72,7 @@ function App() {
             <Route path="/loja" element={<AuthGuard><Loja /></AuthGuard>} />
             <Route path="/noticia/:id" element={<AuthGuard><NoticiaDetalhe /></AuthGuard>} />
             <Route path="/configuracoes-unificadas" element={<AuthGuard><ConfiguracoesUnificadas /></AuthGuard>} />
-            <Route path="/dados-pessoais" element={<AuthGuard><DadosPessoais /></AuthGuard>} />
             <Route path="/payment-methods" element={<AuthGuard><PaymentMethods /></AuthGuard>} />
-            <Route path="/account-settings" element={<AuthGuard><AccountSettings /></AuthGuard>} />
             <Route path="/usuario/:username" element={<AuthGuard><UserProfile /></AuthGuard>} />
             <Route path="/notificacoes" element={<AuthGuard><Notifications /></AuthGuard>} />
             <Route path="/mensagens" element={<AuthGuard><Messages /></AuthGuard>} />

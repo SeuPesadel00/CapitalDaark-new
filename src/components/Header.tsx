@@ -96,7 +96,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 bg-card border-border">
-                    <DropdownMenuItem onClick={() => navigate('/dados-pessoais')} className="cursor-pointer py-3">
+                    <DropdownMenuItem onClick={() => navigate(`/usuario/${profile?.username || user?.id}`)} className="cursor-pointer py-3">
                       <UserCircle className="mr-2 h-5 w-5" /> Meu Perfil
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/configuracoes-unificadas')} className="cursor-pointer py-3">
@@ -183,7 +183,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                     <p className="font-semibold text-sm truncate">{profile?.first_name || 'Usuário'}</p>
                     <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                   </div>
-                  <DropdownMenuItem onClick={() => navigate('/dados-pessoais')} className="cursor-pointer">
+                  <DropdownMenuItem onClick={() => navigate(`/usuario/${profile?.username || user?.id}`)} className="cursor-pointer">
                     <UserCircle className="mr-2 h-4 w-4" /> Meu Perfil
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/configuracoes-unificadas')} className="cursor-pointer">

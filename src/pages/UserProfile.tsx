@@ -119,7 +119,7 @@ const UserProfile = () => {
               <div className="flex gap-2">
                 {isOwnProfile ? (
                   <>
-                    <Button variant="secondary" onClick={() => navigate('/dados-pessoais')} className="h-8 text-sm font-semibold bg-accent hover:bg-accent/80 text-foreground">
+                    <Button variant="secondary" onClick={() => navigate('/configuracoes-unificadas')} className="h-8 text-sm font-semibold bg-accent hover:bg-accent/80 text-foreground">
                       Editar perfil
                     </Button>
                     <Button variant="secondary" onClick={() => navigate('/configuracoes-unificadas')} className="h-8 w-8 p-0 bg-accent hover:bg-accent/80">

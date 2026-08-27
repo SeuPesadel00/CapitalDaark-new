@@ -505,7 +505,11 @@ function UserHome() {
                     
                     {imagePreview && (
                       <div className="relative inline-block mt-2">
-                        <img src={imagePreview} alt="Preview" className="max-h-48 rounded-md border border-primary/30" />
+                        {postImage?.type.startsWith('video/') ? (
+                          <video src={imagePreview} controls className="max-h-48 rounded-md border border-primary/30" />
+                        ) : (
+                          <img src={imagePreview} alt="Preview" className="max-h-48 rounded-md border border-primary/30" />
+                        )}
                         <Button variant="destructive" size="icon" className="absolute -top-2 -right-2 w-6 h-6 rounded-full" onClick={() => {setPostImage(null); setImagePreview(null);}}>
                           <X className="w-3 h-3" />
                         </Button>
@@ -514,7 +518,7 @@ function UserHome() {
 
                     <div className="flex justify-between items-center pt-2">
                       <div className="flex items-center gap-2">
-                        <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageSelect} />
+                        <input type="file" accept="image/*,video/*" className="hidden" ref={fileInputRef} onChange={handleImageSelect} />
                         <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-neon-cyan" onClick={() => fileInputRef.current?.click()}>
                           <ImageIcon className="w-4 h-4 mr-2" /> Mídia
                         </Button>
@@ -598,7 +602,13 @@ function UserHome() {
                         )}
                       </div>
 
-                      {item.image_url && <img src={item.image_url} alt="Post media" className="w-full max-h-96 object-cover border-y border-border/20" />}
+                      {item.image_url && (
+                        item.image_url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                          <video src={item.image_url} controls className="w-full max-h-96 object-contain bg-black border-y border-border/20" />
+                        ) : (
+                          <img src={item.image_url} alt="Post media" className="w-full max-h-96 object-cover border-y border-border/20" />
+                        )
+                      )}
                       
                       <div className="p-3 bg-background/20 flex gap-2">
                         <Button 
