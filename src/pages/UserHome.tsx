@@ -13,8 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { RichTextEditor } from '@/components/RichTextEditor';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import DOMPurify from 'dompurify';
 import { Textarea } from '@/components/ui/textarea';
 import {
   DropdownMenu,
@@ -31,7 +30,9 @@ function UserHome() {
   const navigate = useNavigate();
   const { user, profile, loading } = useAuth();
   
-  const [postContent, setPostContent] = useState('');
+  const [postContent, setPostContent] = useState(() => {
+    return localStorage.getItem('post_draft') || '';
+  });
   const [postImage, setPostImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -59,6 +60,15 @@ function UserHome() {
   const [editCommentContent, setEditCommentContent] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-save rascunho
+  useEffect(() => {
+    if (postContent) {
+      localStorage.setItem('post_draft', postContent);
+    } else {
+      localStorage.removeItem('post_draft');
+    }
+  }, [postContent]);
 
   const fetchTimeline = useCallback(async (isPullToRefresh = false, pageNum = 1) => {
     if (isPullToRefresh) {
@@ -243,6 +253,7 @@ function UserHome() {
       setPostContent('');
       setPostImage(null);
       setImagePreview(null);
+      localStorage.removeItem('post_draft');
       fetchTimeline(true, 1);
     } catch (error) {
       console.error("Erro ao publicar:", error);
@@ -630,9 +641,10 @@ function UserHome() {
                             </div>
                           </div>
                         ) : (
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-invert prose-sm max-w-none text-gray-200">
-                            {item.content}
-                          </ReactMarkdown>
+                          <div 
+                            className="prose prose-invert prose-sm max-w-none text-gray-200"
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.content) }}
+                          />
                         )}
                       </div>
 
@@ -699,9 +711,10 @@ function UserHome() {
                       <CardContent className="p-4">
                         <h3 className="font-bold text-lg mb-2 text-white group-hover:text-neon-purple transition-colors line-clamp-2">{item.title}</h3>
                         <div className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-invert prose-sm max-w-none">
-                            {item.content}
-                          </ReactMarkdown>
+                          <div 
+                            className="prose prose-invert prose-sm max-w-none"
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.content) }}
+                          />
                         </div>
                         <div className="flex items-center text-xs text-muted-foreground">
                           <Clock className="w-3 h-3 mr-1" /> {formatSocialDate(item.date)}
@@ -815,10 +828,11 @@ function UserHome() {
                           {selectedPost.avatar_url ? <img src={selectedPost.avatar_url} className="w-full h-full object-cover"/> : <User className="w-full h-full p-1 text-primary"/>}
                         </div>
                         <div className="text-sm text-gray-200 leading-relaxed w-full">
-                          <span className="font-semibold text-white mr-2">{selectedPost.author}</span>
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-invert prose-sm max-w-none inline-block align-top mt-1">
-                            {selectedPost.content}
-                          </ReactMarkdown>
+                          <span className="font-semibold text-white mr-2 block mb-1">{selectedPost.author}</span>
+                          <div 
+                            className="prose prose-invert prose-sm max-w-none"
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedPost.content) }}
+                          />
                         </div>
                       </div>
                     </div>

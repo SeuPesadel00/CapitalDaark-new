@@ -1,7 +1,10 @@
-import React, { useRef } from 'react';
-import { Bold, Italic, List, Link, Quote } from 'lucide-react';
+import React, { useRef, useState, useMemo } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
+import { Smile } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 interface RichTextEditorProps {
@@ -9,71 +12,104 @@ interface RichTextEditorProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
-export function RichTextEditor({ value, onChange, placeholder, className, onKeyDown }: RichTextEditorProps) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
-  // Função para injetar texto na posição do cursor
-  const insertFormatting = (prefix: string, suffix: string = '') => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+export function RichTextEditor({ value, onChange, placeholder, className }: RichTextEditorProps) {
+  const quillRef = useRef<ReactQuill>(null);
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = textarea.value;
-
-    const selectedText = text.substring(start, end);
-    const newText = text.substring(0, start) + prefix + selectedText + suffix + text.substring(end);
-    
-    onChange(newText);
-    
-    // Restaurar foco e colocar o cursor no lugar certo
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + prefix.length, end + prefix.length);
-    }, 0);
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    const editor = quillRef.current?.getEditor();
+    if (editor) {
+      const selection = editor.getSelection();
+      const cursorPosition = selection ? selection.index : editor.getLength() - 1;
+      editor.insertText(cursorPosition, emojiData.emoji);
+      editor.setSelection(cursorPosition + 1, 0);
+    }
   };
 
-  const handleBold = () => insertFormatting('**', '**');
-  const handleItalic = () => insertFormatting('*', '*');
-  const handleQuote = () => insertFormatting('\n> ');
-  const handleList = () => insertFormatting('\n- ');
-  const handleLink = () => insertFormatting('[', '](https://)');
+  const modules = useMemo(() => ({
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['link', 'blockquote'],
+      ['clean']
+    ]
+  }), []);
 
   return (
-    <div className={cn("border border-border/50 rounded-lg overflow-hidden bg-background/50 focus-within:ring-1 focus-within:ring-primary shadow-inner transition-shadow flex flex-col w-full", className)}>
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-1 p-2 bg-background/80 border-b border-border/50">
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground" onClick={handleBold} title="Negrito" type="button">
-          <Bold className="w-4 h-4" />
-        </Button>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground" onClick={handleItalic} title="Itálico" type="button">
-          <Italic className="w-4 h-4" />
-        </Button>
-        <div className="w-px h-4 bg-border mx-1" />
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground" onClick={handleList} title="Lista" type="button">
-          <List className="w-4 h-4" />
-        </Button>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground" onClick={handleQuote} title="Citação" type="button">
-          <Quote className="w-4 h-4" />
-        </Button>
-        <div className="w-px h-4 bg-border mx-1" />
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground" onClick={handleLink} title="Link" type="button">
-          <Link className="w-4 h-4" />
-        </Button>
+    <div className={cn("border border-border/50 rounded-lg overflow-hidden bg-background/50 focus-within:ring-1 focus-within:ring-primary shadow-inner transition-shadow flex flex-col w-full relative group", className)}>
+      
+      {/* Editor do Quill */}
+      <ReactQuill 
+        ref={quillRef}
+        theme="snow"
+        value={value}
+        onChange={onChange}
+        modules={modules}
+        placeholder={placeholder || "O que está acontecendo?"}
+        className="w-full text-foreground ql-custom-theme"
+      />
+
+      {/* Botão de Emojis */}
+      <div className="absolute top-2 right-2 z-10">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground bg-background/80 hover:bg-background shadow-sm border border-border/50" title="Adicionar Emoji">
+              <Smile className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-none" align="end">
+            <EmojiPicker 
+              onEmojiClick={onEmojiClick} 
+              theme={'dark'} 
+              lazyLoadEmojis={true}
+              searchPlaceHolder="Pesquisar emoji..."
+            />
+          </PopoverContent>
+        </Popover>
       </div>
       
-      {/* Área de texto expandida */}
-      <Textarea
-        ref={textareaRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={onKeyDown}
-        placeholder={placeholder || "O que está acontecendo?"}
-        className="min-h-[120px] resize-y border-0 focus-visible:ring-0 rounded-none bg-transparent"
-      />
+      <style>{`
+        .ql-custom-theme .ql-toolbar {
+          border: none !important;
+          border-bottom: 1px solid hsl(var(--border) / 0.5) !important;
+          background-color: hsl(var(--background) / 0.8) !important;
+          border-radius: 0.5rem 0.5rem 0 0;
+          padding: 8px !important;
+        }
+        .ql-custom-theme .ql-container {
+          border: none !important;
+          font-family: inherit !important;
+          font-size: 1rem !important;
+          min-height: 120px;
+        }
+        .ql-custom-theme .ql-editor {
+          min-height: 120px;
+          padding: 12px 16px !important;
+        }
+        .ql-custom-theme .ql-editor.ql-blank::before {
+          color: hsl(var(--muted-foreground)) !important;
+          font-style: normal !important;
+        }
+        .ql-custom-theme .ql-stroke {
+          stroke: hsl(var(--muted-foreground)) !important;
+        }
+        .ql-custom-theme .ql-fill {
+          fill: hsl(var(--muted-foreground)) !important;
+        }
+        .ql-custom-theme button:hover .ql-stroke {
+          stroke: hsl(var(--foreground)) !important;
+        }
+        .ql-custom-theme button:hover .ql-fill {
+          fill: hsl(var(--foreground)) !important;
+        }
+        .ql-custom-theme .ql-active .ql-stroke {
+          stroke: hsl(var(--primary)) !important;
+        }
+        .ql-custom-theme .ql-active .ql-fill {
+          fill: hsl(var(--primary)) !important;
+        }
+      `}</style>
     </div>
   );
 }
