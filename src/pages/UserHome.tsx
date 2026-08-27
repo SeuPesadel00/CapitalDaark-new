@@ -46,6 +46,9 @@ function UserHome() {
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
 
+  // Estado do Modal (Instagram Post)
+  const [selectedPost, setSelectedPost] = useState<FeedItem | null>(null);
+
   // Estados de Comentários
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
@@ -369,8 +372,8 @@ function UserHome() {
     }
   };
 
-  const renderComments = (item: FeedItem) => {
-    if (!expandedComments[item.id]) return null;
+  const renderComments = (item: FeedItem, forceShow = false) => {
+    if (!expandedComments[item.id] && !forceShow) return null;
     
     return (
       <div className="bg-background/40 border-t border-border/10 p-4 space-y-4">
@@ -604,9 +607,9 @@ function UserHome() {
 
                       {item.image_url && (
                         item.image_url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
-                          <video src={item.image_url} controls className="w-full max-h-96 object-contain bg-black border-y border-border/20" />
+                          <video src={item.image_url} controls className="w-full max-h-[600px] object-contain bg-black border-y border-border/20 cursor-pointer" onClick={() => setSelectedPost(item)} />
                         ) : (
-                          <img src={item.image_url} alt="Post media" className="w-full max-h-96 object-cover border-y border-border/20" />
+                          <img src={item.image_url} alt="Post media" className="w-full max-h-[600px] object-contain bg-black border-y border-border/20 cursor-pointer" onClick={() => setSelectedPost(item)} />
                         )
                       )}
                       
@@ -723,6 +726,91 @@ function UserHome() {
             </div>
           </div>
         </main>
+
+        {/* POST MODAL (Instagram Style) */}
+        {selectedPost && (
+          <div 
+            className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 md:p-10 backdrop-blur-sm"
+            onClick={() => setSelectedPost(null)}
+          >
+            <Button 
+              variant="ghost" 
+              className="absolute top-4 right-4 text-white hover:bg-white/20 z-[110] rounded-full w-10 h-10 p-0"
+              onClick={() => setSelectedPost(null)}
+            >
+              <X className="w-6 h-6" />
+            </Button>
+            
+            <div 
+              className="flex flex-col md:flex-row w-full max-w-6xl bg-card border border-border/30 rounded-lg overflow-hidden h-[85vh] md:h-[90vh] shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Lado Esquerdo: Media */}
+              <div className="flex-1 bg-black flex items-center justify-center relative overflow-hidden h-[45vh] md:h-full">
+                {selectedPost.image_url?.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                  <video src={selectedPost.image_url} controls className="w-full h-full object-contain" />
+                ) : (
+                  <img src={selectedPost.image_url} className="w-full h-full object-contain" />
+                )}
+              </div>
+
+              {/* Lado Direito: Detalhes e Comentários */}
+              <div className="w-full md:w-[400px] flex flex-col bg-card/95 h-[40vh] md:h-full overflow-hidden shrink-0 border-l border-border/20">
+                {/* Header do Autor */}
+                <div className="p-4 border-b border-border/20 flex items-center gap-3 shrink-0 bg-background/50">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 overflow-hidden">
+                    {selectedPost.avatar_url ? <img src={selectedPost.avatar_url} className="w-full h-full object-cover"/> : <User className="w-full h-full p-2 text-primary"/>}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm text-white hover:underline cursor-pointer" onClick={() => {
+                        const searchParam = selectedPost.username || selectedPost.author?.split(' ')[0];
+                        if (searchParam) navigate(`/usuario/${searchParam}`);
+                    }}>{selectedPost.author}</p>
+                    <p className="text-xs text-muted-foreground">{formatSocialDate(selectedPost.date)}</p>
+                  </div>
+                </div>
+                
+                {/* Conteúdo e Comentários */}
+                <div className="flex-1 overflow-y-auto no-scrollbar pb-10">
+                  {/* Legenda Original */}
+                  {selectedPost.content && (
+                    <div className="p-4 border-b border-border/10 space-y-2 bg-background/30">
+                      <div className="flex gap-3 items-start">
+                        <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 mt-1 hidden md:block">
+                          {selectedPost.avatar_url ? <img src={selectedPost.avatar_url} className="w-full h-full object-cover"/> : <User className="w-full h-full p-1 text-primary"/>}
+                        </div>
+                        <p className="text-sm text-gray-200 whitespace-pre-wrap leading-relaxed">
+                          <span className="font-semibold text-white mr-2">{selectedPost.author}</span>
+                          {selectedPost.content}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Ações: Curtir e Comentar (Modal) */}
+                  <div className="p-3 bg-background/20 flex gap-2 border-b border-border/10">
+                    <Button 
+                      variant="ghost" size="sm" className={`flex-1 group ${selectedPost.has_liked ? 'text-orange-500 bg-orange-500/10' : 'text-muted-foreground hover:bg-white/5'}`} 
+                      onClick={() => handleLike(selectedPost)}
+                    >
+                      <Flame className={`w-5 h-5 mr-2 ${selectedPost.has_liked ? 'fill-orange-500 text-orange-500 scale-110' : ''}`} /> 
+                      <span className={`${selectedPost.has_liked ? 'font-bold' : ''}`}>
+                        {selectedPost.likes_count > 0 ? selectedPost.likes_count : 'Gostar'}
+                      </span>
+                    </Button>
+                  </div>
+
+                  {/* Comentários via renderComments forçado a exibir */}
+                  <div className="bg-background/20">
+                     {renderComments(selectedPost, true)}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </AuthGuard>
   );
