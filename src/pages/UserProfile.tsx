@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Settings, Image as ImageIcon } from 'lucide-react';
+import { Settings, Image as ImageIcon, X } from 'lucide-react';
 
 const UserProfile = () => {
   const { username } = useParams();
@@ -15,6 +15,8 @@ const UserProfile = () => {
   const [stats, setStats] = useState({ posts: 0, followers: 0, following: 0 });
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -38,19 +40,21 @@ const UserProfile = () => {
 
         setProfileData(userProfile);
 
-        // Busca estatísticas
+        // Busca estatísticas e posts
         const [postsData, followersData, followingData, checkFollow] = await Promise.all([
-          supabase.from('social_posts').select('*', { count: 'exact', head: true }).eq('user_id', userProfile.id),
+          supabase.from('social_posts').select('*').eq('user_id', userProfile.id).order('date', { ascending: false }),
           supabase.from('followers').select('*', { count: 'exact', head: true }).eq('following_id', userProfile.id),
           supabase.from('followers').select('*', { count: 'exact', head: true }).eq('follower_id', userProfile.id),
           user ? supabase.from('followers').select('*').eq('follower_id', user.id).eq('following_id', userProfile.id).maybeSingle() : Promise.resolve({ data: null })
         ]);
 
         setStats({
-          posts: postsData.count || 0,
+          posts: postsData.data?.length || 0,
           followers: followersData.count || 0,
           following: followingData.count || 0,
         });
+        
+        setPosts(postsData.data || []);
 
         if (checkFollow.data) setIsFollowing(true);
 
@@ -161,7 +165,6 @@ const UserProfile = () => {
           </div>
         </header>
         
-        {/* Border / Tabs for posts list */}
         <div className="border-t border-border flex justify-center gap-12">
           <button className="uppercase tracking-widest text-xs font-semibold py-4 border-t border-foreground flex items-center gap-2 text-foreground">
             <ImageIcon className="w-4 h-4" />
@@ -169,7 +172,53 @@ const UserProfile = () => {
           </button>
         </div>
 
+        {/* Grade de Posts */}
+        <div className="grid grid-cols-3 gap-1 md:gap-4 mt-4">
+          {posts.map(post => (
+            <div 
+              key={post.id} 
+              className="aspect-square bg-card overflow-hidden cursor-pointer group relative border border-border/20 rounded-sm md:rounded-md"
+              onClick={() => setSelectedPost(post)}
+            >
+              {post.image_url ? (
+                post.image_url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                  <video src={post.image_url} className="w-full h-full object-cover" />
+                ) : (
+                  <img src={post.image_url} alt="post" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                )
+              ) : (
+                <div className="w-full h-full p-2 md:p-4 flex items-center justify-center text-[10px] md:text-sm text-center text-muted-foreground bg-secondary/20">
+                  {post.content.length > 50 ? post.content.substring(0, 50) + '...' : post.content}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
       </main>
+
+      {/* Modal de Visualização Simplificada */}
+      {selectedPost && (
+        <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setSelectedPost(null)}>
+          <button onClick={() => setSelectedPost(null)} className="absolute top-4 right-4 z-[110] p-2 rounded-full bg-black/50 text-white hover:bg-white/20 transition-colors">
+            <X className="w-6 h-6"/>
+          </button>
+          
+          <div className="max-w-5xl w-full max-h-[90vh] flex items-center justify-center" onClick={e => e.stopPropagation()}>
+            {selectedPost.image_url ? (
+              selectedPost.image_url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                <video src={selectedPost.image_url} controls className="max-w-full max-h-[90vh] object-contain rounded-lg" />
+              ) : (
+                <img src={selectedPost.image_url} className="max-w-full max-h-[90vh] object-contain rounded-lg" />
+              )
+            ) : (
+              <div className="w-full max-w-2xl bg-card p-10 rounded-lg text-center text-lg whitespace-pre-wrap">
+                {selectedPost.content}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

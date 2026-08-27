@@ -282,6 +282,9 @@ function UserHome() {
           await supabase.from('post_likes').delete().match({ user_id: user.id, post_id: item.id });
         } else {
           await supabase.from('post_likes').insert({ user_id: user.id, post_id: item.id });
+          if (item.user_id !== user.id) {
+            await supabase.from('notifications').insert({ recipient_id: item.user_id, sender_id: user.id, type: 'like_post', reference_id: item.id });
+          }
         }
       } else {
         if (item.has_liked) await supabase.from('news_likes').delete().match({ user_id: user.id, news_link: item.id });
@@ -319,6 +322,9 @@ function UserHome() {
         }).select('id, content, created_at, user_id, profiles(first_name, last_name, username, avatar_url)').single();
         if (error) throw error;
         insertedComment = data;
+        if (item.user_id !== user.id) {
+          await supabase.from('notifications').insert({ recipient_id: item.user_id, sender_id: user.id, type: 'comment_post', reference_id: item.id });
+        }
       } else {
         const { data, error } = await supabase.from('news_comments').insert({
           news_link: item.id,
@@ -404,7 +410,13 @@ function UserHome() {
                 <div className="flex-1 bg-card border border-border/30 rounded-2xl rounded-tl-none p-3 relative">
                   <div className="flex justify-between items-start mb-1">
                     <div className="flex items-baseline gap-2">
-                      <p className="font-semibold text-xs text-white">
+                      <p 
+                        className="font-semibold text-xs text-white cursor-pointer hover:underline"
+                        onClick={() => {
+                            const searchParam = comment.profiles?.username || comment.profiles?.first_name;
+                            if (searchParam) navigate(`/usuario/${searchParam}`);
+                        }}
+                      >
                         {comment.profiles?.first_name || 'Usuário'} {comment.profiles?.last_name || ''}
                       </p>
                       <span className="text-[10px] text-muted-foreground">
