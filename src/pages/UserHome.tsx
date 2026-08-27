@@ -290,6 +290,9 @@ function UserHome() {
       setFeedData(current => current.map(f => f.id === item.id ? {
         ...f, has_liked: !f.has_liked, likes_count: f.has_liked ? f.likes_count - 1 : f.likes_count + 1
       } : f));
+      setSelectedPost(prev => prev?.id === item.id ? {
+        ...prev, has_liked: !prev.has_liked, likes_count: prev.has_liked ? prev.likes_count - 1 : prev.likes_count + 1
+      } : prev);
     } catch (error) {
       console.error("Erro ao curtir", error);
     }
@@ -329,6 +332,9 @@ function UserHome() {
       setFeedData(current => current.map(f => f.id === item.id ? {
         ...f, comments: [...(f.comments || []), insertedComment]
       } : f));
+      setSelectedPost(prev => prev?.id === item.id ? {
+        ...prev, comments: [...(prev.comments || []), insertedComment]
+      } : prev);
       
       setCommentInputs(prev => ({ ...prev, [item.id]: '' }));
     } catch (error) {
@@ -346,6 +352,9 @@ function UserHome() {
       setFeedData(current => current.map(f => f.id === item.id ? {
         ...f, comments: f.comments?.filter(c => c.id !== commentId)
       } : f));
+      setSelectedPost(prev => prev?.id === item.id ? {
+        ...prev, comments: prev.comments?.filter(c => c.id !== commentId)
+      } : prev);
     } catch (error) {
       console.error("Erro ao excluir comentário", error);
     }
@@ -366,6 +375,9 @@ function UserHome() {
       setFeedData(current => current.map(f => f.id === item.id ? {
         ...f, comments: f.comments?.map(c => c.id === commentId ? { ...c, content: editCommentContent } : c)
       } : f));
+      setSelectedPost(prev => prev?.id === item.id ? {
+        ...prev, comments: prev.comments?.map(c => c.id === commentId ? { ...c, content: editCommentContent } : c)
+      } : prev);
       setEditingCommentId(null);
     } catch (error) {
       console.error("Erro ao editar comentário", error);
