@@ -42,7 +42,7 @@ const UserProfile = () => {
 
         // Busca estatísticas e posts
         const [postsData, followersData, followingData, checkFollow] = await Promise.all([
-          supabase.from('social_posts').select('*').eq('user_id', userProfile.id).order('date', { ascending: false }),
+          supabase.from('social_posts').select('*').eq('user_id', userProfile.id).order('created_at', { ascending: false }),
           supabase.from('followers').select('*', { count: 'exact', head: true }).eq('following_id', userProfile.id),
           supabase.from('followers').select('*', { count: 'exact', head: true }).eq('follower_id', userProfile.id),
           user ? supabase.from('followers').select('*').eq('follower_id', user.id).eq('following_id', userProfile.id).maybeSingle() : Promise.resolve({ data: null })
@@ -172,25 +172,42 @@ const UserProfile = () => {
           </button>
         </div>
 
-        {/* Grade de Posts */}
-        <div className="grid grid-cols-3 gap-1 md:gap-4 mt-4">
+        {/* Lista de Posts Estilo X/Twitter */}
+        <div className="flex flex-col gap-6 mt-4 w-full max-w-2xl mx-auto">
           {posts.map(post => (
-            <div 
-              key={post.id} 
-              className="aspect-square bg-card overflow-hidden cursor-pointer group relative border border-border/20 rounded-sm md:rounded-md"
-              onClick={() => setSelectedPost(post)}
-            >
-              {post.image_url ? (
-                post.image_url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
-                  <video src={post.image_url} className="w-full h-full object-cover" />
-                ) : (
-                  <img src={post.image_url} alt="post" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                )
-              ) : (
-                <div className="w-full h-full p-2 md:p-4 flex items-center justify-center text-[10px] md:text-sm text-center text-muted-foreground bg-secondary/20">
-                  {post.content.length > 50 ? post.content.substring(0, 50) + '...' : post.content}
-                </div>
-              )}
+            <div key={post.id} className="bg-card border border-border/20 rounded-xl p-4 md:p-5 space-y-4">
+               <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-secondary overflow-hidden shrink-0 flex items-center justify-center border border-border/50">
+                    {profileData.avatar_url ? (
+                      <img src={profileData.avatar_url} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-primary font-bold text-lg">
+                        {profileData.first_name?.[0] || profileData.username?.[0]}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm text-foreground">{profileData.first_name} {profileData.last_name}</h3>
+                    <p className="text-[11px] text-muted-foreground">{new Date(post.created_at).toLocaleDateString()}</p>
+                  </div>
+               </div>
+               
+               <p className="text-sm md:text-base text-foreground whitespace-pre-wrap leading-relaxed">
+                 {post.content}
+               </p>
+
+               {post.image_url && (
+                  <div 
+                    className="w-full rounded-lg overflow-hidden cursor-pointer mt-3 border border-border/20"
+                    onClick={() => setSelectedPost(post)}
+                  >
+                    {post.image_url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                      <video src={post.image_url} controls className="w-full max-h-96 object-cover hover:opacity-90 transition-opacity" />
+                    ) : (
+                      <img src={post.image_url} alt="post" className="w-full max-h-96 object-cover hover:opacity-90 transition-opacity" />
+                    )}
+                  </div>
+               )}
             </div>
           ))}
         </div>

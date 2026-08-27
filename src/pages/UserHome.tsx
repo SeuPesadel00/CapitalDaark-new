@@ -283,7 +283,7 @@ function UserHome() {
         } else {
           await supabase.from('post_likes').insert({ user_id: user.id, post_id: item.id });
           if (item.user_id !== user.id) {
-            await supabase.from('notifications').insert({ recipient_id: item.user_id, sender_id: user.id, type: 'like_post', reference_id: item.id });
+            await supabase.from('notifications').insert({ recipient_id: item.user_id, sender_id: user.id, type: 'like_post' });
           }
         }
       } else {
@@ -323,7 +323,7 @@ function UserHome() {
         if (error) throw error;
         insertedComment = data;
         if (item.user_id !== user.id) {
-          await supabase.from('notifications').insert({ recipient_id: item.user_id, sender_id: user.id, type: 'comment_post', reference_id: item.id });
+          await supabase.from('notifications').insert({ recipient_id: item.user_id, sender_id: user.id, type: 'comment_post' });
         }
       } else {
         const { data, error } = await supabase.from('news_comments').insert({
