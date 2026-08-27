@@ -196,7 +196,7 @@ const UserProfile = () => {
                
                <div className="text-sm md:text-base text-foreground leading-relaxed">
                  <div 
-                   className="prose prose-invert prose-sm max-w-none"
+                   className="prose prose-invert max-w-none text-gray-100 text-base md:text-lg"
                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
                  />
                </div>

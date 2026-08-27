@@ -5,9 +5,10 @@ import Header from '@/components/Header';
 import { supabase } from '@/integrations/supabase/client';
 import { encryptMessage, decryptMessage, importPublicKey, importPrivateKey } from '@/lib/cryptoUtils';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ArrowLeft, Send, Lock } from 'lucide-react';
+import { ArrowLeft, Lock, X } from 'lucide-react';
 import { format } from 'date-fns';
+import { ChatComposer } from '@/components/ChatComposer';
+import { ChatMessageBubble, ChatMessage } from '@/components/ChatMessageBubble';
 
 export default function Messages() {
   const { id: targetUserId } = useParams(); // If present, we are in a direct chat
@@ -21,6 +22,9 @@ export default function Messages() {
   
   const [localPrivateKey, setLocalPrivateKey] = useState<CryptoKey | null>(null);
   const [targetPublicKey, setTargetPublicKey] = useState<CryptoKey | null>(null);
+
+  const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
+  const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -139,6 +143,22 @@ export default function Messages() {
   const handleSend = async () => {
     if (!newMessage.trim() || !user || !targetUserId || !targetPublicKey) return;
 
+    // Se estiver editando
+    if (editingMessage) {
+      const encrypted = await encryptMessage(newMessage, targetPublicKey);
+      const { data, error } = await supabase.from('messages')
+        .update({ encrypted_content: encrypted, is_edited: true })
+        .eq('id', editingMessage.id)
+        .select().single();
+      
+      if (!error && data) {
+        setMessages(prev => prev.map(m => m.id === data.id ? { ...data, decrypted_content: newMessage, is_edited: true } : m));
+        setNewMessage('');
+        setEditingMessage(null);
+      }
+      return;
+    }
+
     // Criptografa a mensagem com a chave PÚBLICA DO ALVO
     const encrypted = await encryptMessage(newMessage, targetPublicKey);
 
@@ -146,13 +166,48 @@ export default function Messages() {
     const { data, error } = await supabase.from('messages').insert({
       sender_id: user.id,
       receiver_id: targetUserId,
-      encrypted_content: encrypted
+      encrypted_content: encrypted,
+      reply_to_id: replyingTo?.id || null
     }).select().single();
 
     if (!error && data) {
-      // Adiciona na tela localmente como texto puro para o sender ver imediatamente
-      setMessages(prev => [...prev, { ...data, decrypted_content: newMessage }]);
+      // Adiciona na tela localmente como texto puro
+      const nova = { ...data, decrypted_content: newMessage, reply_to_message: replyingTo };
+      setMessages(prev => [...prev, nova]);
       setNewMessage('');
+      setReplyingTo(null);
+    }
+  };
+
+  const handleEdit = (msg: ChatMessage) => {
+    setEditingMessage(msg);
+    setNewMessage(msg.decrypted_content || '');
+    setReplyingTo(null); // Cancela o reply se for editar
+  };
+
+  const handleReply = (msg: ChatMessage) => {
+    setReplyingTo(msg);
+    setEditingMessage(null);
+  };
+
+  const handleDeleteForMe = async (msg: ChatMessage) => {
+    const updatedDeletedFor = [...(msg.deleted_for || []), user?.id || ''];
+    const { error } = await supabase.from('messages')
+      .update({ deleted_for: updatedDeletedFor })
+      .eq('id', msg.id);
+    
+    if (!error) {
+      setMessages(prev => prev.filter(m => m.id !== msg.id));
+    }
+  };
+
+  const handleDeleteForEveryone = async (msg: ChatMessage) => {
+    const { error } = await supabase.from('messages')
+      .update({ is_deleted_for_everyone: true })
+      .eq('id', msg.id);
+    
+    if (!error) {
+      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, is_deleted_for_everyone: true } : m));
     }
   };
 
@@ -212,40 +267,60 @@ export default function Messages() {
             </div>
 
             {/* Mensagens */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-20 pt-20">
+            <div className="flex-1 overflow-y-auto p-4 pb-[180px] pt-20">
               {messages.map(msg => {
                 const isMine = msg.sender_id === user?.id;
+                // Transforma o formato de Messages.tsx no formato do Bubble
+                const bubbleMsg = {
+                  ...msg,
+                  content: msg.decrypted_content || msg.encrypted_content,
+                };
                 return (
-                  <div key={msg.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-                    <div className={`max-w-[75%] rounded-2xl px-4 py-2 ${isMine ? 'bg-primary text-primary-foreground rounded-tr-sm' : 'bg-card border border-border text-foreground rounded-tl-sm'}`}>
-                      {msg.decrypted_content}
-                    </div>
-                    <span className="text-[10px] text-muted-foreground mt-1 mx-1">
-                      {format(new Date(msg.created_at), "HH:mm")}
-                    </span>
-                  </div>
+                  <ChatMessageBubble 
+                    key={msg.id} 
+                    message={bubbleMsg} 
+                    isOwn={isMine} 
+                    onReply={handleReply}
+                    onEdit={handleEdit}
+                    onDeleteForMe={handleDeleteForMe}
+                    onDeleteForEveryone={handleDeleteForEveryone}
+                  />
                 );
               })}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
-            <div className="p-4 bg-card border-t border-border absolute bottom-0 left-0 w-full">
-              {targetPublicKey ? (
-                <div className="flex gap-2 relative">
-                  <Input 
-                    value={newMessage}
-                    onChange={e => setNewMessage(e.target.value)}
-                    placeholder="Mensagem criptografada..."
-                    className="flex-1 rounded-full bg-background border-border pr-12 focus-visible:ring-primary"
-                    onKeyDown={e => e.key === 'Enter' && handleSend()}
-                  />
-                  <Button size="icon" className="absolute right-1 top-1 bottom-1 rounded-full w-8 h-8 bg-primary hover:bg-primary/90 text-black" onClick={handleSend} disabled={!newMessage.trim()}>
-                    <Send className="w-4 h-4 ml-1" />
+            {/* Area Fixa do Compositor */}
+            <div className="absolute bottom-0 left-0 w-full bg-card/80 backdrop-blur-md border-t border-border flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.2)]">
+              
+              {/* Avisos de Contexto (Edit/Reply) */}
+              {(replyingTo || editingMessage) && (
+                <div className="px-4 py-2 bg-black/40 border-b border-border/50 flex items-center justify-between">
+                  <div className="text-xs truncate text-muted-foreground flex items-center gap-2">
+                    {editingMessage ? (
+                      <><span className="text-primary font-bold">Editando mensagem</span></>
+                    ) : (
+                      <>
+                        <span className="text-primary font-bold">Respondendo a</span> 
+                        <span className="truncate max-w-[200px]" dangerouslySetInnerHTML={{ __html: replyingTo?.content?.replace(/<[^>]+>/g, '') || '' }} />
+                      </>
+                    )}
+                  </div>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground" onClick={() => { setReplyingTo(null); setEditingMessage(null); setNewMessage(''); }}>
+                    <X className="w-4 h-4" />
                   </Button>
                 </div>
+              )}
+
+              {targetPublicKey ? (
+                <ChatComposer 
+                  value={newMessage}
+                  onChange={setNewMessage}
+                  onSend={handleSend}
+                  onAttachment={(type) => console.log('Upload de ' + type + ' em breve')}
+                />
               ) : (
-                <div className="text-center text-sm text-destructive p-2 bg-destructive/10 rounded-lg">
+                <div className="text-center text-sm text-destructive p-4 bg-destructive/10">
                   Este usuário ainda não gerou chaves de criptografia.
                 </div>
               )}
