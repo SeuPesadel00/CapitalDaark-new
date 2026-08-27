@@ -631,9 +631,9 @@ function UserHome() {
 
                       {item.image_url && (
                         item.image_url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
-                          <video src={item.image_url} controls className="w-full max-h-[600px] object-contain bg-black border-y border-border/20 cursor-pointer" onClick={() => setSelectedPost(item)} />
+                          <video src={item.image_url} controls className="w-full h-auto max-h-[750px] object-cover cursor-pointer rounded-sm" onClick={() => setSelectedPost(item)} />
                         ) : (
-                          <img src={item.image_url} alt="Post media" className="w-full max-h-[600px] object-contain bg-black border-y border-border/20 cursor-pointer" onClick={() => setSelectedPost(item)} />
+                          <img src={item.image_url} alt="Post media" className="w-full h-auto max-h-[750px] object-cover cursor-pointer rounded-sm" onClick={() => setSelectedPost(item)} />
                         )
                       )}
                       
