@@ -52,8 +52,8 @@ export default function Messages() {
         .from('messages')
         .select(`
           id, sender_id, receiver_id, created_at,
-          sender:profiles!messages_sender_id_fkey(id, username, first_name, avatar_url),
-          receiver:profiles!messages_receiver_id_fkey(id, username, first_name, avatar_url)
+          sender:profiles!sender_id(id, username, first_name, avatar_url),
+          receiver:profiles!receiver_id(id, username, first_name, avatar_url)
         `)
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
@@ -78,7 +78,7 @@ export default function Messages() {
 
   // 3. Carregar Chat Específico e Chave Pública do Alvo
   useEffect(() => {
-    if (!user || !targetUserId || !localPrivateKey) return;
+    if (!user || !targetUserId) return;
 
     const loadChat = async () => {
       // Busca perfil do alvo
@@ -103,6 +103,7 @@ export default function Messages() {
         // Para simplificar, mensagens recebidas serão decifradas. As enviadas não poderão ser lidas se não tivermos a cópia, mas para PoC vamos tentar decifrar tudo. 
         // ATENÇÃO: Na verdade a chave pública criptografa APENAS para o receiver. Então o sender NÃO CONSEGUE LER o que ele mesmo enviou do banco depois (a menos que tenhamos salvo uma "cópia enviada" cifrada para a chave pública do sender).
         // Vamos mostrar "Mensagem enviada criptografada" para as enviadas.
+        const decryptedMsgs = await Promise.all(msgs.map(async (m) => {
           try {
             const plaintext = m.encrypted_content.startsWith('U2F') // Simplificação: se for base64 tentamos, senão é texto puro
               ? await decryptMessage(m.encrypted_content, localPrivateKey)
@@ -112,6 +113,7 @@ export default function Messages() {
             // Se falhar a decriptação (ex: remetente lendo do banco)
             return { ...m, decrypted_content: m.encrypted_content }; // Fallback para texto puro da nossa "simulação"
           }
+        }));
         setMessages(decryptedMsgs);
       }
     };
