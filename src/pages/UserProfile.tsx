@@ -75,6 +75,7 @@ const UserProfile = () => {
       setIsFollowing(false);
     } else {
       await supabase.from('followers').insert({ follower_id: user.id, following_id: profileData.id });
+      await supabase.from('notifications').insert({ recipient_id: profileData.id, sender_id: user.id, type: 'follow_user' });
       setStats(s => ({ ...s, followers: s.followers + 1 }));
       setIsFollowing(true);
     }
