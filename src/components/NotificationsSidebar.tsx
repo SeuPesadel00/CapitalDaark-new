@@ -45,7 +45,7 @@ export function NotificationsSidebar({ open, onOpenChange, onUnreadCountChange }
         .from('notifications')
         .select(`
           *,
-          sender:profiles!notifications_sender_id_fkey(first_name, last_name, avatar_url)
+          sender:profiles!notifications_sender_id_fkey(first_name, last_name, avatar_url, username)
         `)
         .eq('recipient_id', user?.id)
         .order('created_at', { ascending: false })
@@ -84,7 +84,12 @@ export function NotificationsSidebar({ open, onOpenChange, onUnreadCountChange }
 
   const handleNotificationClick = (notif: any) => {
     onOpenChange(false);
-    navigate('/user-home');
+    const userIdentifier = notif.sender?.username || notif.sender_id;
+    if (userIdentifier) {
+      navigate(`/usuario/${userIdentifier}`);
+    } else {
+      navigate('/user-home');
+    }
   };
 
   return (
