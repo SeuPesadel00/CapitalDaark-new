@@ -642,7 +642,7 @@ function UserHome() {
                           </div>
                         ) : (
                           <div 
-                            className="prose prose-invert max-w-none text-gray-100 text-base md:text-lg"
+                            className="prose prose-invert max-w-none text-gray-100 text-base md:text-lg break-words w-full overflow-hidden"
                             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.content) }}
                           />
                         )}
@@ -712,7 +712,7 @@ function UserHome() {
                         <h3 className="font-bold text-lg mb-2 text-white group-hover:text-neon-purple transition-colors line-clamp-2">{item.title}</h3>
                         <div className="text-sm text-muted-foreground mb-4 line-clamp-2">
                           <div 
-                            className="prose prose-invert max-w-none text-gray-100 text-base"
+                            className="prose prose-invert max-w-none text-gray-100 text-base break-words w-full overflow-hidden"
                             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.content) }}
                           />
                         </div>
@@ -830,7 +830,7 @@ function UserHome() {
                         <div className="text-sm text-gray-200 leading-relaxed w-full">
                           <span className="font-semibold text-white mr-2 block mb-1">{selectedPost.author}</span>
                           <div 
-                            className="prose prose-invert max-w-none text-gray-100 text-base"
+                            className="prose prose-invert max-w-none text-gray-100 text-base break-words w-full overflow-hidden"
                             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedPost.content) }}
                           />
                         </div>

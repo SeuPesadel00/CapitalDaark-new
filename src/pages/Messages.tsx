@@ -125,8 +125,14 @@ export default function Messages() {
         filter: `receiver_id=eq.${user.id}`
       }, async (payload) => {
         if (payload.new.sender_id === targetUserId) {
-          const plaintext = await decryptMessage(payload.new.encrypted_content, localPrivateKey);
-          setMessages(prev => [...prev, { ...payload.new, decrypted_content: plaintext }]);
+          try {
+            const plaintext = payload.new.encrypted_content.startsWith('U2F')
+              ? await decryptMessage(payload.new.encrypted_content, localPrivateKey)
+              : payload.new.encrypted_content;
+            setMessages(prev => [...prev, { ...payload.new, decrypted_content: plaintext }]);
+          } catch (e) {
+            setMessages(prev => [...prev, { ...payload.new, decrypted_content: payload.new.encrypted_content }]);
+          }
         }
       }).subscribe();
 

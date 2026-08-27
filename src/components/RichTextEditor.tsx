@@ -81,11 +81,15 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           border: none !important;
           font-family: inherit !important;
           font-size: 1rem !important;
-          min-height: 120px;
         }
         .ql-custom-theme .ql-editor {
-          min-height: 120px;
+          min-height: 80px;
           padding: 12px 16px !important;
+        }
+        @media (min-width: 768px) {
+          .ql-custom-theme .ql-editor {
+            min-height: 150px;
+          }
         }
         .ql-custom-theme .ql-editor.ql-blank::before {
           color: hsl(var(--muted-foreground)) !important;

@@ -226,6 +226,14 @@ const Header = ({ hideNav = false }: HeaderProps) => {
             </button>
 
             <button 
+              onClick={() => navigate('/mensagens')} 
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive('/mensagens') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              <MessageSquare className="w-6 h-6" strokeWidth={isActive('/mensagens') ? 2.5 : 2} />
+              <span className="text-[10px] font-medium">Chat</span>
+            </button>
+
+            <button 
               onClick={() => navigate('/loja')} 
               className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive('/loja') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             >

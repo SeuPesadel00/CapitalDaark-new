@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Settings, Image as ImageIcon, X } from 'lucide-react';
+import { Settings, Image as ImageIcon, X, Share2 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 
 const UserProfile = () => {
@@ -196,7 +196,7 @@ const UserProfile = () => {
                
                <div className="text-sm md:text-base text-foreground leading-relaxed">
                  <div 
-                   className="prose prose-invert max-w-none text-gray-100 text-base md:text-lg"
+                   className="prose prose-invert max-w-none text-gray-100 text-base md:text-lg break-words w-full overflow-hidden"
                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
                  />
                </div>
@@ -213,6 +213,20 @@ const UserProfile = () => {
                     )}
                   </div>
                )}
+
+               <div className="flex items-center gap-6 mt-4 pt-4 border-t border-border/10 text-muted-foreground">
+                 <button className="flex items-center gap-2 text-sm font-medium hover:text-white transition-colors">
+                   <Heart className="w-5 h-5" />
+                   <span>0</span>
+                 </button>
+                 <button className="flex items-center gap-2 text-sm font-medium hover:text-white transition-colors">
+                   <MessageCircle className="w-5 h-5" />
+                   <span>0</span>
+                 </button>
+                 <button className="flex items-center gap-2 text-sm font-medium hover:text-white transition-colors ml-auto">
+                   <Share2 className="w-5 h-5" />
+                 </button>
+               </div>
             </div>
           ))}
         </div>
