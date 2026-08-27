@@ -12,6 +12,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { RichTextEditor } from '@/components/RichTextEditor';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Textarea } from '@/components/ui/textarea';
 import {
   DropdownMenu,
@@ -522,12 +525,14 @@ function UserHome() {
                     {profile?.avatar_url ? <img src={profile.avatar_url} className="w-full h-full object-cover" /> : <User className="w-full h-full p-2 text-primary" />}
                   </div>
                   <div className="flex-grow space-y-3">
-                    <Input 
+                    <RichTextEditor 
                       value={postContent}
-                      onChange={(e) => setPostContent(e.target.value)}
+                      onChange={setPostContent}
                       placeholder={`Compartilhe uma atualização com a rede, ${profile?.first_name || 'membro'}...`}
-                      className="bg-background/80 border-border/50 focus-visible:ring-primary shadow-inner"
-                      onKeyDown={(e) => e.key === 'Enter' && handlePublish()}
+                      className="bg-background/80 shadow-inner"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && e.ctrlKey) handlePublish();
+                      }}
                     />
                     
                     {imagePreview && (
@@ -625,7 +630,9 @@ function UserHome() {
                             </div>
                           </div>
                         ) : (
-                          item.content
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-invert prose-sm max-w-none text-gray-200">
+                            {item.content}
+                          </ReactMarkdown>
                         )}
                       </div>
 
@@ -691,7 +698,11 @@ function UserHome() {
                       )}
                       <CardContent className="p-4">
                         <h3 className="font-bold text-lg mb-2 text-white group-hover:text-neon-purple transition-colors line-clamp-2">{item.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{item.content}</p>
+                        <div className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-invert prose-sm max-w-none">
+                            {item.content}
+                          </ReactMarkdown>
+                        </div>
                         <div className="flex items-center text-xs text-muted-foreground">
                           <Clock className="w-3 h-3 mr-1" /> {formatSocialDate(item.date)}
                         </div>
@@ -803,10 +814,12 @@ function UserHome() {
                         <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 mt-1 hidden md:block">
                           {selectedPost.avatar_url ? <img src={selectedPost.avatar_url} className="w-full h-full object-cover"/> : <User className="w-full h-full p-1 text-primary"/>}
                         </div>
-                        <p className="text-sm text-gray-200 whitespace-pre-wrap leading-relaxed">
+                        <div className="text-sm text-gray-200 leading-relaxed w-full">
                           <span className="font-semibold text-white mr-2">{selectedPost.author}</span>
-                          {selectedPost.content}
-                        </p>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-invert prose-sm max-w-none inline-block align-top mt-1">
+                            {selectedPost.content}
+                          </ReactMarkdown>
+                        </div>
                       </div>
                     </div>
                   )}

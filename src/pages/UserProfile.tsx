@@ -5,6 +5,8 @@ import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Settings, Image as ImageIcon, X } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const UserProfile = () => {
   const { username } = useParams();
@@ -193,9 +195,11 @@ const UserProfile = () => {
                   </div>
                </div>
                
-               <p className="text-sm md:text-base text-foreground whitespace-pre-wrap leading-relaxed">
-                 {post.content}
-               </p>
+               <div className="text-sm md:text-base text-foreground leading-relaxed">
+                 <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-invert prose-sm max-w-none">
+                   {post.content}
+                 </ReactMarkdown>
+               </div>
 
                {post.image_url && (
                   <div 
@@ -230,8 +234,10 @@ const UserProfile = () => {
                 <img src={selectedPost.image_url} className="max-w-full max-h-[90vh] object-contain rounded-lg" />
               )
             ) : (
-              <div className="w-full max-w-2xl bg-card p-10 rounded-lg text-center text-lg whitespace-pre-wrap">
-                {selectedPost.content}
+              <div className="w-full max-w-2xl bg-card p-10 rounded-lg text-left text-lg">
+                <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-invert max-w-none">
+                  {selectedPost.content}
+                </ReactMarkdown>
               </div>
             )}
           </div>
