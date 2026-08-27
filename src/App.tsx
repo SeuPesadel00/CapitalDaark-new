@@ -21,7 +21,6 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const PaymentMethods = lazy(() => import('./pages/PaymentMethods'));
 // AccountSettings e DadosPessoais removidos (agora integrados em ConfiguracoesUnificadas)
 const Noticias = lazy(() => import('./pages/Noticias'));
-const Notifications = lazy(() => import('./pages/Notifications'));
 const AdminAfiliados = lazy(() => import('./pages/AdminAfiliados'));
 const Messages = lazy(() => import('./pages/Messages'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -74,7 +73,6 @@ function App() {
             <Route path="/configuracoes-unificadas" element={<AuthGuard><ConfiguracoesUnificadas /></AuthGuard>} />
             <Route path="/payment-methods" element={<AuthGuard><PaymentMethods /></AuthGuard>} />
             <Route path="/usuario/:username" element={<AuthGuard><UserProfile /></AuthGuard>} />
-            <Route path="/notificacoes" element={<AuthGuard><Notifications /></AuthGuard>} />
             <Route path="/mensagens" element={<AuthGuard><Messages /></AuthGuard>} />
             <Route path="/mensagens/:id" element={<AuthGuard><Messages /></AuthGuard>} />
             <Route path="/admin/ofertas" element={<AuthGuard><AdminAfiliados /></AuthGuard>} />

@@ -10,6 +10,7 @@ import {
 import { User, Settings, UserCircle, LogOut, Home, Compass, Bell, ShoppingBag, HelpCircle, UserPlus, LogIn, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { NotificationsSidebar } from './NotificationsSidebar';
 
 interface HeaderProps {
   hideNav?: boolean;
@@ -22,6 +23,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
   
   const [unreadCount, setUnreadCount] = useState(0);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -62,7 +64,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
     { label: 'Página Inicial', href: '/user-home', icon: Home },
     { label: 'Vitrine/Loja', href: '/loja', icon: ShoppingBag },
     { label: 'Mensagens', href: '/mensagens', icon: MessageSquare },
-    { label: 'Notificações', href: '/notificacoes', icon: Bell, badge: unreadCount },
+    { label: 'Notificações', href: '#notificacoes', icon: Bell, badge: unreadCount, action: () => setNotificationsOpen(true) },
     { label: 'Suporte VIP', href: 'https://wa.me/5561982201177?text=Olá, preciso de suporte na plataforma Capital Daark.', icon: HelpCircle },
   ];
 
@@ -135,9 +137,13 @@ const Header = ({ hideNav = false }: HeaderProps) => {
                 key={item.label}
                 variant="ghost"
                 className={`justify-start px-2 py-6 rounded-xl w-full transition-colors relative ${
-                  isActive(item.href) ? 'bg-primary/10 text-primary font-bold' : 'text-muted-foreground hover:bg-card hover:text-foreground'
+                  isActive(item.href) && !item.action ? 'bg-primary/10 text-primary font-bold' : 'text-muted-foreground hover:bg-card hover:text-foreground'
                 }`}
-                onClick={() => item.href.startsWith('http') ? window.open(item.href, '_blank') : navigate(item.href)}
+                onClick={() => {
+                  if (item.action) item.action();
+                  else if (item.href.startsWith('http')) window.open(item.href, '_blank');
+                  else navigate(item.href);
+                }}
               >
                 <div className="flex items-center w-full">
                   <div className="relative">
@@ -228,8 +234,8 @@ const Header = ({ hideNav = false }: HeaderProps) => {
             </button>
             
             <button 
-              onClick={() => navigate('/notificacoes')} 
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors relative ${isActive('/notificacoes') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+              onClick={() => setNotificationsOpen(true)} 
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors relative ${notificationsOpen ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             >
               <Bell className="w-6 h-6" strokeWidth={isActive('/notificacoes') ? 2.5 : 2} />
               <span className="text-[10px] font-medium">Alertas</span>
@@ -243,6 +249,13 @@ const Header = ({ hideNav = false }: HeaderProps) => {
           </div>
         </nav>
       )}
+
+      {/* ---------------- NOTIFICATIONS SIDEBAR ---------------- */}
+      <NotificationsSidebar 
+        open={notificationsOpen} 
+        onOpenChange={setNotificationsOpen} 
+        onUnreadCountChange={setUnreadCount} 
+      />
     </>
   );
 };
