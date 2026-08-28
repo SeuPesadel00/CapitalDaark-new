@@ -47,31 +47,52 @@ export default function Messages() {
   useEffect(() => {
     if (!user) return;
     const fetchConversations = async () => {
-      // Pega todas as mensagens onde o usuário é remetente ou destinatário
+      // Busca mensagens
       const { data, error } = await supabase
         .from('messages')
-        .select(`
-          id, sender_id, receiver_id, created_at,
-          sender:profiles!sender_id(id, username, first_name, avatar_url),
-          receiver:profiles!receiver_id(id, username, first_name, avatar_url)
-        `)
+        .select('sender_id, receiver_id, created_at')
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
-      if (error || !data) return;
+      if (error || !data) {
+        console.error("Erro ao buscar mensagens para a sidebar:", error);
+        return;
+      }
 
-      // Agrupa por usuário
-      const contactsMap = new Map();
+      // Extrai IDs únicos dos contatos
+      const contactIds = new Set<string>();
       data.forEach(msg => {
-        const otherUser = msg.sender_id === user.id ? msg.receiver : msg.sender;
-        if (!contactsMap.has(otherUser.id)) {
-          contactsMap.set(otherUser.id, {
-            ...otherUser,
-            lastMessageDate: msg.created_at
-          });
-        }
+        if (msg.sender_id !== user.id) contactIds.add(msg.sender_id);
+        if (msg.receiver_id !== user.id) contactIds.add(msg.receiver_id);
       });
-      setConversations(Array.from(contactsMap.values()));
+
+      if (contactIds.size === 0) return;
+
+      // Busca perfis dos contatos
+      const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, username, first_name, avatar_url')
+        .in('id', Array.from(contactIds));
+
+      if (profileError || !profiles) {
+        console.error("Erro ao buscar perfis para a sidebar:", profileError);
+        return;
+      }
+
+      const contactsMap = new Map();
+      profiles.forEach(p => {
+        const latestMsg = data.find(m => m.sender_id === p.id || m.receiver_id === p.id);
+        contactsMap.set(p.id, {
+          ...p,
+          lastMessageDate: latestMsg ? latestMsg.created_at : new Date().toISOString()
+        });
+      });
+      
+      const sortedConversations = Array.from(contactsMap.values()).sort((a, b) => 
+        new Date(b.lastMessageDate).getTime() - new Date(a.lastMessageDate).getTime()
+      );
+
+      setConversations(sortedConversations);
     };
     fetchConversations();
   }, [user, targetUserId]);
@@ -274,63 +295,66 @@ export default function Messages() {
             </div>
 
             {/* Mensagens */}
-            <div className="flex-1 overflow-y-auto p-4 pb-[180px] pt-20">
-              {messages.map(msg => {
-                const isMine = msg.sender_id === user?.id;
-                // Transforma o formato de Messages.tsx no formato do Bubble
-                const bubbleMsg = {
-                  ...msg,
-                  content: msg.decrypted_content || msg.encrypted_content,
-                };
-                return (
-                  <ChatMessageBubble 
-                    key={msg.id} 
-                    message={bubbleMsg} 
-                    isOwn={isMine} 
-                    onReply={handleReply}
-                    onEdit={handleEdit}
-                    onDeleteForMe={handleDeleteForMe}
-                    onDeleteForEveryone={handleDeleteForEveryone}
-                  />
-                );
-              })}
-              <div ref={messagesEndRef} />
+            <div className="flex-1 overflow-y-auto p-4 pb-[180px] pt-20 flex flex-col items-center">
+              <div className="w-full max-w-4xl flex flex-col w-full">
+                {messages.map(msg => {
+                  const isMine = msg.sender_id === user?.id;
+                  // Transforma o formato de Messages.tsx no formato do Bubble
+                  const bubbleMsg = {
+                    ...msg,
+                    content: msg.decrypted_content || msg.encrypted_content,
+                  };
+                  return (
+                    <ChatMessageBubble 
+                      key={msg.id} 
+                      message={bubbleMsg} 
+                      isOwn={isMine} 
+                      onReply={handleReply}
+                      onEdit={handleEdit}
+                      onDeleteForMe={handleDeleteForMe}
+                      onDeleteForEveryone={handleDeleteForEveryone}
+                    />
+                  );
+                })}
+                <div ref={messagesEndRef} />
+              </div>
             </div>
 
             {/* Area Fixa do Compositor */}
-            <div className="absolute bottom-0 left-0 w-full bg-card/80 backdrop-blur-md border-t border-border flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.2)]">
-              
-              {/* Avisos de Contexto (Edit/Reply) */}
-              {(replyingTo || editingMessage) && (
-                <div className="px-4 py-2 bg-black/40 border-b border-border/50 flex items-center justify-between">
-                  <div className="text-xs truncate text-muted-foreground flex items-center gap-2">
-                    {editingMessage ? (
-                      <><span className="text-primary font-bold">Editando mensagem</span></>
-                    ) : (
-                      <>
-                        <span className="text-primary font-bold">Respondendo a</span> 
-                        <span className="truncate max-w-[200px]" dangerouslySetInnerHTML={{ __html: replyingTo?.content?.replace(/<[^>]+>/g, '') || '' }} />
-                      </>
-                    )}
+            <div className="absolute bottom-0 left-0 w-full bg-card/80 backdrop-blur-md border-t border-border shadow-[0_-10px_40px_rgba(0,0,0,0.2)] flex justify-center">
+              <div className="w-full max-w-4xl flex flex-col">
+                {/* Avisos de Contexto (Edit/Reply) */}
+                {(replyingTo || editingMessage) && (
+                  <div className="px-4 py-2 bg-black/40 border-b border-border/50 flex items-center justify-between">
+                    <div className="text-xs truncate text-muted-foreground flex items-center gap-2">
+                      {editingMessage ? (
+                        <><span className="text-primary font-bold">Editando mensagem</span></>
+                      ) : (
+                        <>
+                          <span className="text-primary font-bold">Respondendo a</span> 
+                          <span className="truncate max-w-[200px]" dangerouslySetInnerHTML={{ __html: replyingTo?.content?.replace(/<[^>]+>/g, '') || '' }} />
+                        </>
+                      )}
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground" onClick={() => { setReplyingTo(null); setEditingMessage(null); setNewMessage(''); }}>
+                      <X className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground" onClick={() => { setReplyingTo(null); setEditingMessage(null); setNewMessage(''); }}>
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
+                )}
 
-              {targetPublicKey ? (
-                <ChatComposer 
-                  value={newMessage}
-                  onChange={setNewMessage}
-                  onSend={handleSend}
-                  onAttachment={(type) => console.log('Upload de ' + type + ' em breve')}
-                />
-              ) : (
-                <div className="text-center text-sm text-destructive p-4 bg-destructive/10">
-                  Este usuário ainda não gerou chaves de criptografia.
-                </div>
-              )}
+                {targetPublicKey ? (
+                  <ChatComposer 
+                    value={newMessage}
+                    onChange={setNewMessage}
+                    onSend={handleSend}
+                    onAttachment={(type) => console.log('Upload de ' + type + ' em breve')}
+                  />
+                ) : (
+                  <div className="text-center text-sm text-destructive p-4 bg-destructive/10">
+                    Este usuário ainda não gerou chaves de criptografia.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ) : (
