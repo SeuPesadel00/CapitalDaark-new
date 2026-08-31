@@ -1,11 +1,6 @@
-// frontend/src/pages/RecoverPassword.tsx
-
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import Layout from '../components/Layout';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import AuthSplitLayout from '../components/AuthSplitLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -54,59 +49,54 @@ function RecoverPassword() {
   };
 
   return (
-    <Layout hideNav>
-      <div className="w-full max-w-md px-4">
-          {/* Cabeçalho com animação */}
-          <div className="text-center mb-8 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-accent mb-2">
-              Recuperar Acesso
-            </h1>
-            <p className="text-muted-foreground">
-              Digite seu email para receber o link de redefinição
-            </p>
+    <AuthSplitLayout themeColor="accent" imageAlt="Recuperar Senha Capital Daark">
+      <div className="text-center mb-8 animate-fade-in">
+        <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-fuchsia-500 mb-2 drop-shadow-[0_0_15px_rgba(217,70,239,0.3)]">
+          Recuperar Acesso
+        </h1>
+        <p className="text-muted-foreground">
+          Digite seu email para receber o link de redefinição
+        </p>
+      </div>
+
+      <div className="bg-card/60 backdrop-blur-md rounded-2xl p-8 shadow-[0_0_40px_-10px_rgba(217,70,239,0.15)] border border-fuchsia-500/20 animate-scale-in">
+        <form onSubmit={handleResetPassword} className="space-y-6">
+          <div className="group">
+            <label htmlFor="email" className="text-sm font-medium text-fuchsia-500 block mb-2 transition-colors group-focus-within:text-fuchsia-400">
+              Email cadastrado
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/30 transition-all duration-300 hover:border-fuchsia-500/50"
+              placeholder="seu@email.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
+          
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-[0_0_20px_-5px_rgba(217,70,239,0.5)] hover:shadow-[0_0_25px_-5px_rgba(217,70,239,0.7)] border border-fuchsia-500/50 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 mt-6"
+          >
+            {loading ? 'Enviando...' : 'Enviar Link de Recuperação'}
+          </button>
+        </form>
 
-          {/* Cartao de recuperação com efeito de vidro */}
-          <div className="bg-card rounded-2xl p-8 shadow-soft border border-border animate-scale-in">
-            <form onSubmit={handleResetPassword} className="space-y-6">
-              <div className="group">
-                <Label htmlFor="email" className="text-sm font-medium text-accent block mb-2">
-                  Email cadastrado
-                </Label>
-                <Input
-                  type="email"
-                  id="email"
-                  name="email"
-                  className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground focus:border-accent transition-all duration-300 hover:border-accent/70"
-                  placeholder="seu@email.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-xl hover:bg-accent/90 transition-all duration-300 shadow-soft border border-accent/30 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Enviando...' : 'Enviar Link de Recuperação'}
-              </Button>
-            </form>
-
-
-            {/* Link de volta */}
-            <div className="mt-8 text-center">
-              <Link
-                className="text-sm text-primary hover:text-primary/80 transition-colors hover:underline"
-                to="/login"
-              >
-                ← Voltar para o Login
-              </Link>
-            </div>
-          </div>
+        <div className="mt-8 text-center pt-2">
+          <Link
+            className="text-sm text-muted-foreground hover:text-fuchsia-400 font-semibold transition-colors hover:underline"
+            to="/login"
+          >
+            ← Voltar para o Login
+          </Link>
         </div>
-    </Layout>
+      </div>
+    </AuthSplitLayout>
   );
 }
 
-export default RecoverPassword;
+export default RecoverPassword;

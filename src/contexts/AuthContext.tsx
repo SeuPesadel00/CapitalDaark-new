@@ -19,6 +19,7 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<{ error: any }>;
   verifyOtp: (email: string, token: string) => Promise<{ error: any }>;
   updatePassword: (password: string) => Promise<{ error: any }>;
+  signInWithOAuth: (provider: any) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -243,6 +244,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
+  const signInWithOAuth = async (provider: any) => {
+    const redirectUrl = `${window.location.origin}/`;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: redirectUrl
+      }
+    });
+    return { error };
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -288,7 +300,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     resetPassword,
     verifyOtp,
-    updatePassword
+    updatePassword,
+    signInWithOAuth
   };
 
   return (
