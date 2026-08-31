@@ -66,9 +66,6 @@ export function NotificationsSidebar({ open, onOpenChange }: NotificationsSideba
   const markAllAsRead = async () => {
     if (!user) return;
     try {
-      const unreadCount = notifications.filter(n => !n.read).length;
-      if (unreadCount === 0) return;
-
       await supabase
         .from('notifications')
         .update({ read: true })
