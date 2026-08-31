@@ -23,7 +23,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
       const selection = editor.getSelection();
       const cursorPosition = selection ? selection.index : editor.getLength() - 1;
       editor.insertText(cursorPosition, emojiData.emoji);
-      editor.setSelection(cursorPosition + 1, 0);
+      editor.setSelection(cursorPosition + emojiData.emoji.length, 0);
     }
   };
 
