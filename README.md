@@ -1,4 +1,4 @@
-## [💻 Capital Daark](https://capitaldaark.com.br/login)
+## [💻 Capital Daark](https://capital-daark-new.vercel.app/loja)
 
 Seja bem-vindo ao CapitalDaark, um portal digital futurista com uma estética cyberpunk e funcionalidades completas de um site moderno. Este projeto é uma prova de conceito que demonstra a criação de uma aplicação web full-stack utilizando as tecnologias mais atuais do mercado, com foco em segurança, experiência do usuário e design inovador.
 
