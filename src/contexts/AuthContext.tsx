@@ -7,6 +7,8 @@ interface AuthContextType {
   session: Session | null;
   profile: any;
   loading: boolean;
+  unreadMessagesCount: number;
+  setUnreadMessagesCount: React.Dispatch<React.SetStateAction<number>>;
   signUp: (email: string, password: string, userData: any) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -30,6 +32,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) {
+      setUnreadMessagesCount(0);
+      return;
+    }
+
+    let msgChannel: any;
+
+    const setupUnreadCounter = async () => {
+      // 1. Fetch muted targets
+      const { data: mutedData } = await supabase
+        .from('muted_conversations')
+        .select('target_user_id')
+        .eq('user_id', user.id);
+      
+      const mutedTargets = mutedData ? mutedData.map(m => m.target_user_id) : [];
+
+      // 2. Fetch unread messages
+      let query = supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('receiver_id', user.id)
+        .is('read_at', null);
+
+      if (mutedTargets.length > 0) {
+        query = query.not('sender_id', 'in', `(${mutedTargets.join(',')})`);
+      }
+
+      const { count } = await query;
+      setUnreadMessagesCount(count || 0);
+
+      // 3. Listen to realtime changes
+      msgChannel = supabase.channel('global_unread_msgs')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` }, 
+        (payload) => {
+          if (!mutedTargets.includes(payload.new.sender_id)) {
+            setUnreadMessagesCount(prev => prev + 1);
+          }
+        })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` }, 
+        (payload) => {
+          if (!mutedTargets.includes(payload.new.sender_id)) {
+            if (payload.new.read_at && !payload.old.read_at) {
+              setUnreadMessagesCount(prev => Math.max(0, prev - 1));
+            }
+          }
+        })
+        .subscribe();
+    };
+
+    setupUnreadCounter();
+
+    return () => {
+      if (msgChannel) supabase.removeChannel(msgChannel);
+    };
+  }, [user]);
 
   useEffect(() => {
     // Configurar o ouvinte de estado de autenticação PRIMEIRO
@@ -145,6 +205,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     profile,
     loading,
+    unreadMessagesCount,
+    setUnreadMessagesCount,
     signUp,
     signIn,
     signOut,

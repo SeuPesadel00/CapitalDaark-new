@@ -5,7 +5,13 @@ import Header from '@/components/Header';
 import { supabase } from '@/integrations/supabase/client';
 import { encryptMessage, decryptMessage, importPublicKey, importPrivateKey } from '@/lib/cryptoUtils';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Lock, X } from 'lucide-react';
+import { ArrowLeft, Lock, X, MoreVertical, Trash2, BellOff, Bell } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { ChatComposer } from '@/components/ChatComposer';
 import { ChatMessageBubble, ChatMessage } from '@/components/ChatMessageBubble';
@@ -22,6 +28,10 @@ export default function Messages() {
   
   const [localPrivateKey, setLocalPrivateKey] = useState<CryptoKey | null>(null);
   const [targetPublicKey, setTargetPublicKey] = useState<CryptoKey | null>(null);
+
+  const [mutedConversations, setMutedConversations] = useState<string[]>([]);
+  const [swipedChatId, setSwipedChatId] = useState<string | null>(null);
+  const [touchStart, setTouchStart] = useState(0);
 
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null);
@@ -79,13 +89,36 @@ export default function Messages() {
         return;
       }
 
+      // Busca deleted_conversations
+      const { data: deletedData } = await supabase
+        .from('deleted_conversations')
+        .select('target_user_id, deleted_at')
+        .eq('user_id', user.id);
+      
+      const deletedMap = new Map(deletedData?.map(d => [d.target_user_id, new Date(d.deleted_at).getTime()]) || []);
+
+      // Busca muted_conversations
+      const { data: mutedData } = await supabase
+        .from('muted_conversations')
+        .select('target_user_id')
+        .eq('user_id', user.id);
+        
+      setMutedConversations(mutedData?.map(m => m.target_user_id) || []);
+
       const contactsMap = new Map();
       profiles.forEach(p => {
         const latestMsg = data.find(m => m.sender_id === p.id || m.receiver_id === p.id);
-        contactsMap.set(p.id, {
-          ...p,
-          lastMessageDate: latestMsg ? latestMsg.created_at : new Date().toISOString()
-        });
+        if (latestMsg) {
+          const msgTime = new Date(latestMsg.created_at).getTime();
+          const deletedTime = deletedMap.get(p.id) || 0;
+          // Se a mensagem mais recente for ANTES da data de exclusão, ignoramos essa conversa
+          if (msgTime <= deletedTime) return;
+
+          contactsMap.set(p.id, {
+            ...p,
+            lastMessageDate: latestMsg.created_at
+          });
+        }
       });
       
       const sortedConversations = Array.from(contactsMap.values()).sort((a, b) => 
@@ -250,6 +283,49 @@ export default function Messages() {
     }
   };
 
+  const handleTouchStart = (e: React.TouchEvent, id: string) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+  
+  const handleTouchMove = (e: React.TouchEvent, id: string) => {
+    const touchEnd = e.targetTouches[0].clientX;
+    const distance = touchStart - touchEnd;
+    if (distance > 50) { // Swiped left
+      setSwipedChatId(id);
+    } else if (distance < -50) { // Swiped right
+      setSwipedChatId(null);
+    }
+  };
+
+  const handleDeleteConversation = async (targetId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); 
+    try {
+      const { error } = await supabase
+        .from('deleted_conversations')
+        .upsert({ user_id: user?.id, target_user_id: targetId, deleted_at: new Date().toISOString() }, { onConflict: 'user_id,target_user_id' });
+      
+      if (!error) {
+        setConversations(prev => prev.filter(c => c.id !== targetId));
+        if (targetUserId === targetId) navigate('/mensagens');
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  const handleMuteConversation = async (targetId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const isMuted = mutedConversations.includes(targetId);
+      if (isMuted) {
+        await supabase.from('muted_conversations').delete().match({ user_id: user?.id, target_user_id: targetId });
+        setMutedConversations(prev => prev.filter(id => id !== targetId));
+      } else {
+        await supabase.from('muted_conversations').insert({ user_id: user?.id, target_user_id: targetId });
+        setMutedConversations(prev => [...prev, targetId]);
+      }
+      setSwipedChatId(null);
+    } catch (err) { console.error(err); }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row">
       <Header />
@@ -270,15 +346,68 @@ export default function Messages() {
               conversations.map(c => (
                 <div 
                   key={c.id} 
-                  onClick={() => navigate(`/mensagens/${c.id}`)}
-                  className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-accent transition-colors border-b border-border/20 ${targetUserId === c.id ? 'bg-accent/50' : ''}`}
+                  className="relative border-b border-border/20 overflow-hidden"
                 >
-                  <div className="w-12 h-12 rounded-full bg-secondary overflow-hidden shrink-0">
-                    {c.avatar_url ? <img src={c.avatar_url} className="w-full h-full object-cover"/> : <div className="w-full h-full flex items-center justify-center text-primary font-bold">{c.username?.[0]}</div>}
+                  {/* Swipe Actions Background (Mobile) */}
+                  <div className="absolute top-0 right-0 h-full flex items-center md:hidden z-0">
+                    <button 
+                      className="bg-muted-foreground/50 hover:bg-muted-foreground/70 h-full w-16 flex items-center justify-center text-white transition-colors"
+                      onClick={(e) => handleMuteConversation(c.id, e as any)}
+                    >
+                      {mutedConversations.includes(c.id) ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
+                    </button>
+                    <button 
+                      className="bg-destructive hover:bg-destructive/80 h-full w-16 flex items-center justify-center text-white transition-colors"
+                      onClick={(e) => handleDeleteConversation(c.id, e as any)}
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
                   </div>
-                  <div className="flex-1 overflow-hidden">
-                    <p className="font-semibold truncate">{c.username}</p>
-                    <p className="text-xs text-muted-foreground truncate">{c.first_name}</p>
+
+                  {/* Conversation Item (Foreground) */}
+                  <div 
+                    onClick={() => {
+                       if (swipedChatId === c.id) setSwipedChatId(null);
+                       else navigate(`/mensagens/${c.id}`);
+                    }}
+                    onTouchStart={(e) => handleTouchStart(e, c.id)}
+                    onTouchMove={(e) => handleTouchMove(e, c.id)}
+                    className={`relative z-10 bg-card flex items-center gap-3 p-4 cursor-pointer hover:bg-accent transition-transform duration-300 group ${targetUserId === c.id ? 'bg-accent/50' : ''}`}
+                    style={{ transform: swipedChatId === c.id ? 'translateX(-128px)' : 'translateX(0px)' }}
+                  >
+                     <div className="w-12 h-12 rounded-full bg-secondary overflow-hidden shrink-0">
+                       {c.avatar_url ? <img src={c.avatar_url} className="w-full h-full object-cover"/> : <div className="w-full h-full flex items-center justify-center text-primary font-bold">{c.username?.[0]}</div>}
+                     </div>
+                     <div className="flex-1 overflow-hidden">
+                       <div className="flex justify-between items-center pr-4 md:pr-8">
+                         <p className="font-semibold truncate">{c.username}</p>
+                         {mutedConversations.includes(c.id) && <BellOff className="w-3 h-3 text-muted-foreground shrink-0" />}
+                       </div>
+                       <p className="text-xs text-muted-foreground truncate">{c.first_name}</p>
+                     </div>
+                     
+                     {/* Desktop Dropdown */}
+                     <div className="hidden md:block opacity-0 group-hover:opacity-100 transition-opacity absolute right-4">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-card border-border/20 z-50">
+                            <DropdownMenuItem onClick={(e) => handleMuteConversation(c.id, e as any)} className="cursor-pointer hover:bg-muted">
+                              {mutedConversations.includes(c.id) ? (
+                                <><Bell className="mr-2 h-4 w-4" /> Remover Silêncio</>
+                              ) : (
+                                <><BellOff className="mr-2 h-4 w-4" /> Silenciar</>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => handleDeleteConversation(c.id, e as any)} className="cursor-pointer hover:bg-destructive/20 text-destructive">
+                              <Trash2 className="mr-2 h-4 w-4" /> Deletar Conversa
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                     </div>
                   </div>
                 </div>
               ))

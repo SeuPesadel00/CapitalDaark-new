@@ -19,10 +19,9 @@ interface HeaderProps {
 const Header = ({ hideNav = false }: HeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, unreadMessagesCount } = useAuth();
   
   const [unreadCount, setUnreadCount] = useState(0);
-  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
@@ -38,38 +37,14 @@ const Header = ({ hideNav = false }: HeaderProps) => {
     };
     fetchUnread();
 
-    const fetchUnreadMessages = async () => {
-      const { count } = await supabase
-        .from('messages')
-        .select('*', { count: 'exact', head: true })
-        .eq('receiver_id', user.id)
-        .is('read_at', null);
-      if (count !== null) setUnreadMessagesCount(count);
-    };
-    fetchUnreadMessages();
-
     const channel = supabase.channel('realtime_notifications')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${user.id}` }, 
       () => {
         setUnreadCount(prev => prev + 1);
       }).subscribe();
-
-    const msgChannel = supabase.channel('realtime_unread_msgs')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` }, 
-      () => {
-        setUnreadMessagesCount(prev => prev + 1);
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` }, 
-      (payload) => {
-        if (payload.new.read_at && !payload.old.read_at) {
-          setUnreadMessagesCount(prev => Math.max(0, prev - 1));
-        }
-      })
-      .subscribe();
       
     return () => { 
       supabase.removeChannel(channel); 
-      supabase.removeChannel(msgChannel);
     }
   }, [user]);
   
