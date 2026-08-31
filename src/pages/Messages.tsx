@@ -145,19 +145,36 @@ export default function Messages() {
         }
       }
 
+      // Busca data de exclusão da conversa
+      const { data: deletedData } = await supabase
+        .from('deleted_conversations')
+        .select('deleted_at')
+        .eq('user_id', user.id)
+        .eq('target_user_id', targetUserId)
+        .maybeSingle();
+
       // Busca mensagens
-      const { data: msgs } = await supabase
+      let query = supabase
         .from('messages')
         .select('*')
         .or(`and(sender_id.eq.${user.id},receiver_id.eq.${targetUserId}),and(sender_id.eq.${targetUserId},receiver_id.eq.${user.id})`)
         .order('created_at', { ascending: true });
 
+      if (deletedData?.deleted_at) {
+        query = query.gt('created_at', deletedData.deleted_at);
+      }
+
+      const { data: msgs } = await query;
+
       if (msgs) {
+        // Filtra mensagens deletadas individualmente para mim
+        const visibleMsgs = msgs.filter(m => !(m.deleted_for && m.deleted_for.includes(user.id)));
+
         // Descriptografar mensagens (Só decifra as recebidas; as enviadas nós não conseguimos decifrar a não ser que armazenássemos uma cópia criptografada com NOSSA chave. Num E2EE simples de chat, normalmente salvamos 2 cópias ou não exibimos histórico de enviadas em outro device).
         // Para simplificar, mensagens recebidas serão decifradas. As enviadas não poderão ser lidas se não tivermos a cópia, mas para PoC vamos tentar decifrar tudo. 
         // ATENÇÃO: Na verdade a chave pública criptografa APENAS para o receiver. Então o sender NÃO CONSEGUE LER o que ele mesmo enviou do banco depois (a menos que tenhamos salvo uma "cópia enviada" cifrada para a chave pública do sender).
         // Vamos mostrar "Mensagem enviada criptografada" para as enviadas.
-        const decryptedMsgs = await Promise.all(msgs.map(async (m) => {
+        const decryptedMsgs = await Promise.all(visibleMsgs.map(async (m) => {
           try {
             const plaintext = m.encrypted_content.startsWith('U2F') // Simplificação: se for base64 tentamos, senão é texto puro
               ? await decryptMessage(m.encrypted_content, localPrivateKey)
