@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 interface AuthSplitLayoutProps {
   children: ReactNode;
   imageAlt?: string;
-  themeColor?: 'primary' | 'secondary' | 'accent';
+  themeColor?: 'primary' | 'secondary' | 'accent' | 'success';
 }
 
 const AuthSplitLayout = ({ 
@@ -20,6 +20,7 @@ const AuthSplitLayout = ({
     primary: 'from-orange-950/40 via-background to-background', // Laranja/Dourado
     secondary: 'from-blue-950/40 via-background to-background',  // Azul
     accent: 'from-purple-950/40 via-background to-background',   // Roxo
+    success: 'from-emerald-950/40 via-background to-background', // Verde/Esmeralda
   };
 
   return (

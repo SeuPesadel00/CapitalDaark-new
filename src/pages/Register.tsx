@@ -131,9 +131,9 @@ function Register() {
   };
 
   return (
-    <AuthSplitLayout themeColor="secondary" imageAlt="Cadastro Capital Daark">
+    <AuthSplitLayout themeColor="success" imageAlt="Cadastro Capital Daark">
       <div className="text-center mb-8 animate-fade-in">
-        <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-sky-400 mb-2 drop-shadow-[0_0_15px_rgba(14,165,233,0.3)]">
+        <h1 className="text-4xl md:text-5xl font-orbitron font-bold text-emerald-400 mb-2 drop-shadow-[0_0_15px_rgba(14,165,233,0.3)]">
           {isVerifyingOtp ? 'Verificar E-mail' : 'Junte-se a Nós'}
         </h1>
         <p className="text-muted-foreground">
@@ -143,18 +143,18 @@ function Register() {
         </p>
       </div>
 
-      <div className="bg-card/60 backdrop-blur-md rounded-2xl p-8 shadow-[0_0_40px_-10px_rgba(14,165,233,0.15)] border border-sky-400/20 animate-scale-in">
+      <div className="bg-card/60 backdrop-blur-md rounded-2xl p-8 shadow-[0_0_40px_-10px_rgba(14,165,233,0.15)] border border-emerald-400/20 animate-scale-in">
         {isVerifyingOtp ? (
           <form onSubmit={handleVerifyOtp} className="space-y-6">
             <div className="group">
-              <label htmlFor="otp" className="text-sm font-medium text-sky-400 block mb-2 transition-colors group-focus-within:text-sky-300">
+              <label htmlFor="otp" className="text-sm font-medium text-emerald-400 block mb-2 transition-colors group-focus-within:text-emerald-300">
                 Código de Verificação (OTP)
               </label>
               <input
                 type="text"
                 id="otp"
                 name="otp"
-                className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 transition-all duration-300 hover:border-sky-400/50 text-center tracking-[0.5em] font-mono text-2xl"
+                className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 transition-all duration-300 hover:border-emerald-400/50 text-center tracking-[0.5em] font-mono text-2xl"
                 placeholder="123456"
                 maxLength={6}
                 required
@@ -165,7 +165,7 @@ function Register() {
             <button 
               type="submit" 
               disabled={loading || otp.length !== 6}
-              className="w-full bg-sky-500 hover:bg-sky-400 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-[0_0_20px_-5px_rgba(14,165,233,0.5)] hover:shadow-[0_0_25px_-5px_rgba(14,165,233,0.7)] border border-sky-400/50 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-[0_0_20px_-5px_rgba(14,165,233,0.5)] hover:shadow-[0_0_25px_-5px_rgba(14,165,233,0.7)] border border-emerald-400/50 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
               {loading ? 'Verificando...' : 'Verificar e Entrar'}
             </button>
@@ -174,14 +174,14 @@ function Register() {
           <form onSubmit={handleRegister} className="space-y-6">
             <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
               <div className="group">
-                <label htmlFor="email" className="text-sm font-medium text-sky-400 block mb-2 transition-colors group-focus-within:text-sky-300">
+                <label htmlFor="email" className="text-sm font-medium text-emerald-400 block mb-2 transition-colors group-focus-within:text-emerald-300">
                   Email
                 </label>
                 <input
                   type="email"
                   id="email"
                   name="email"
-                  className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 transition-all duration-300 hover:border-sky-400/50"
+                  className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 transition-all duration-300 hover:border-emerald-400/50"
                   placeholder="seu@email.com"
                   required
                   value={email}
@@ -190,14 +190,14 @@ function Register() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="group">
-                  <label htmlFor="firstName" className="text-sm font-medium text-sky-400 block mb-2 transition-colors group-focus-within:text-sky-300">
+                  <label htmlFor="firstName" className="text-sm font-medium text-emerald-400 block mb-2 transition-colors group-focus-within:text-emerald-300">
                     Nome
                   </label>
                   <input
                     type="text"
                     id="firstName"
                     name="firstName"
-                    className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 transition-all duration-300 hover:border-sky-400/50"
+                    className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 transition-all duration-300 hover:border-emerald-400/50"
                     placeholder="Primeiro nome"
                     required
                     value={firstName}
@@ -205,14 +205,14 @@ function Register() {
                   />
                 </div>
                 <div className="group">
-                  <label htmlFor="lastName" className="text-sm font-medium text-sky-400 block mb-2 transition-colors group-focus-within:text-sky-300">
+                  <label htmlFor="lastName" className="text-sm font-medium text-emerald-400 block mb-2 transition-colors group-focus-within:text-emerald-300">
                     Sobrenome
                   </label>
                   <input
                     type="text"
                     id="lastName"
                     name="lastName"
-                    className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 transition-all duration-300 hover:border-sky-400/50"
+                    className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 transition-all duration-300 hover:border-emerald-400/50"
                     placeholder="Sobrenome"
                     required
                     value={lastName}
@@ -221,14 +221,14 @@ function Register() {
                 </div>
               </div>
               <div className="group">
-                <label htmlFor="username" className="text-sm font-medium text-sky-400 block mb-2 transition-colors group-focus-within:text-sky-300">
+                <label htmlFor="username" className="text-sm font-medium text-emerald-400 block mb-2 transition-colors group-focus-within:text-emerald-300">
                   Nome de Usuário
                 </label>
                 <input
                   type="text"
                   id="username"
                   name="username"
-                  className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 transition-all duration-300 hover:border-sky-400/50"
+                  className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 transition-all duration-300 hover:border-emerald-400/50"
                   placeholder="Como quer ser chamado?"
                   required
                   value={username}
@@ -236,14 +236,14 @@ function Register() {
                 />
               </div>
               <div className="group">
-                <label htmlFor="phone" className="text-sm font-medium text-sky-400 block mb-2 transition-colors group-focus-within:text-sky-300">
+                <label htmlFor="phone" className="text-sm font-medium text-emerald-400 block mb-2 transition-colors group-focus-within:text-emerald-300">
                   Telefone
                 </label>
                 <input
                   type="tel"
                   id="phone"
                   name="phone"
-                  className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 transition-all duration-300 hover:border-sky-400/50"
+                  className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 transition-all duration-300 hover:border-emerald-400/50"
                   placeholder="(11) 99999-9999"
                   required
                   value={phone}
@@ -251,7 +251,7 @@ function Register() {
                 />
               </div>
               <div className="group">
-                <label htmlFor="password" className="text-sm font-medium text-sky-400 block mb-2 transition-colors group-focus-within:text-sky-300">
+                <label htmlFor="password" className="text-sm font-medium text-emerald-400 block mb-2 transition-colors group-focus-within:text-emerald-300">
                   Senha
                 </label>
                 <div className="relative">
@@ -259,7 +259,7 @@ function Register() {
                     type={showPassword ? "text" : "password"}
                     id="password"
                     name="password"
-                    className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 transition-all duration-300 hover:border-sky-400/50 pr-12"
+                    className="w-full px-4 py-3 rounded-xl bg-background/80 border border-input text-foreground placeholder:text-muted-foreground focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 transition-all duration-300 hover:border-emerald-400/50 pr-12"
                     placeholder="••••••••"
                     required
                     value={password}
@@ -268,7 +268,7 @@ function Register() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-sky-400 transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-emerald-400 transition-colors"
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -283,11 +283,11 @@ function Register() {
                     checked={termsAccepted}
                     onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
                     required
-                    className="border-sky-400 data-[state=checked]:bg-sky-500"
+                    className="border-emerald-400 data-[state=checked]:bg-emerald-500"
                   />
                   <label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed cursor-pointer select-none">
                     Eu aceito os{' '}
-                    <Link to="/terms" target="_blank" className="text-sky-400 hover:text-sky-300 hover:underline">
+                    <Link to="/terms" target="_blank" className="text-emerald-400 hover:text-emerald-300 hover:underline">
                       Termos de Uso
                     </Link>
                   </label>
@@ -299,11 +299,11 @@ function Register() {
                     checked={privacyAccepted}
                     onCheckedChange={(checked) => setPrivacyAccepted(checked as boolean)}
                     required
-                    className="border-sky-400 data-[state=checked]:bg-sky-500"
+                    className="border-emerald-400 data-[state=checked]:bg-emerald-500"
                   />
                   <label htmlFor="privacy" className="text-sm text-muted-foreground leading-relaxed cursor-pointer select-none">
                     Eu aceito a{' '}
-                    <Link to="/privacy" target="_blank" className="text-sky-400 hover:text-sky-300 hover:underline">
+                    <Link to="/privacy" target="_blank" className="text-emerald-400 hover:text-emerald-300 hover:underline">
                       Política de Privacidade
                     </Link>
                   </label>
@@ -314,7 +314,7 @@ function Register() {
             <button 
               type="submit" 
               disabled={loading || !termsAccepted || !privacyAccepted}
-              className="w-full bg-sky-500 hover:bg-sky-400 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-[0_0_20px_-5px_rgba(14,165,233,0.5)] hover:shadow-[0_0_25px_-5px_rgba(14,165,233,0.7)] border border-sky-400/50 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 mt-6"
+              className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-[0_0_20px_-5px_rgba(14,165,233,0.5)] hover:shadow-[0_0_25px_-5px_rgba(14,165,233,0.7)] border border-emerald-400/50 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 mt-6"
             >
               {loading ? 'Criando Conta...' : 'Criar Minha Conta'}
             </button>
@@ -354,7 +354,7 @@ function Register() {
               Já tem uma conta?{' '}
               <Link 
                 to="/login" 
-                className="text-sky-400 hover:text-orange-400 font-semibold transition-colors hover:underline"
+                className="text-emerald-400 hover:text-orange-400 font-semibold transition-colors hover:underline"
               >
                 Fazer login
               </Link>
