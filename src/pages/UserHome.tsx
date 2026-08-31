@@ -198,6 +198,16 @@ function UserHome() {
     }
   }, [user, fetchTimeline]);
 
+  // Listener Global de Exclusão de Posts (Sincroniza com UserProfile)
+  useEffect(() => {
+    const handlePostDeleted = (e: CustomEvent) => {
+      const { postId } = e.detail;
+      setFeedData(current => current.filter(item => item.id !== postId));
+    };
+    window.addEventListener('postDeleted', handlePostDeleted as EventListener);
+    return () => window.removeEventListener('postDeleted', handlePostDeleted as EventListener);
+  }, []);
+
   // Lógica do Intersection Observer para INFINITE SCROLL
   useEffect(() => {
     const observer = new IntersectionObserver(

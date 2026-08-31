@@ -19,7 +19,7 @@ import { ChatMessageBubble, ChatMessage } from '@/components/ChatMessageBubble';
 export default function Messages() {
   const { id: targetUserId } = useParams(); // If present, we are in a direct chat
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, refreshUnreadCount } = useAuth();
   
   const [conversations, setConversations] = useState<any[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
@@ -180,7 +180,7 @@ export default function Messages() {
       .eq('receiver_id', user.id)
       .eq('sender_id', targetUserId)
       .is('read_at', null)
-      .then();
+      .then(() => refreshUnreadCount());
 
     // Inscrever para novas mensagens
     const channel = supabase.channel(`chat_${user.id}_${targetUserId}`)
@@ -327,11 +327,11 @@ export default function Messages() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row">
+    <div className="h-[100dvh] bg-background text-foreground flex flex-col md:flex-row overflow-hidden">
       <Header />
       
       {/* Container Principal */}
-      <main className="flex-1 flex overflow-hidden pt-16 md:pt-0" style={{ height: '100vh' }}>
+      <main className="flex-1 flex overflow-hidden pt-16 md:pt-0">
         
         {/* Lista de Conversas (Esconde no mobile se estiver num chat) */}
         <div className={`w-full md:w-80 border-r border-border bg-card flex flex-col ${targetUserId ? 'hidden md:flex' : 'flex'}`}>
@@ -417,9 +417,9 @@ export default function Messages() {
 
         {/* Área do Chat */}
         {targetUserId ? (
-          <div className="flex-1 flex flex-col bg-background relative h-full">
+          <div className="flex-1 flex flex-col bg-background relative h-full max-w-full">
             {/* Header do Chat */}
-            <div className="h-16 border-b border-border bg-card/80 backdrop-blur-md flex items-center px-4 shrink-0 gap-3 z-10 absolute top-0 left-0 w-full">
+            <div className="h-16 border-b border-border bg-card/80 backdrop-blur-md flex items-center px-4 shrink-0 gap-3 z-10 w-full">
               <Button variant="ghost" size="icon" className="md:hidden" onClick={() => navigate('/mensagens')}>
                 <ArrowLeft className="w-5 h-5" />
               </Button>
@@ -435,8 +435,8 @@ export default function Messages() {
             </div>
 
             {/* Mensagens */}
-            <div className="flex-1 overflow-y-auto p-4 pb-[180px] pt-20 flex flex-col items-center">
-              <div className="w-full max-w-4xl flex flex-col w-full">
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center">
+              <div className="w-full max-w-4xl flex flex-col">
                 {messages.map(msg => {
                   const isMine = msg.sender_id === user?.id;
                   // Transforma o formato de Messages.tsx no formato do Bubble
@@ -461,7 +461,7 @@ export default function Messages() {
             </div>
 
             {/* Area Fixa do Compositor */}
-            <div className="absolute bottom-0 left-0 w-full bg-card/80 backdrop-blur-md border-t border-border shadow-[0_-10px_40px_rgba(0,0,0,0.2)] flex justify-center">
+            <div className="w-full shrink-0 bg-card/80 backdrop-blur-md border-t border-border shadow-[0_-10px_40px_rgba(0,0,0,0.2)] flex justify-center pb-safe">
               <div className="w-full max-w-4xl flex flex-col">
                 {/* Avisos de Contexto (Edit/Reply) */}
                 {(replyingTo || editingMessage) && (

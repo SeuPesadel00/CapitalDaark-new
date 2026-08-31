@@ -96,6 +96,9 @@ const UserProfile = () => {
       const { error } = await supabase.from('social_posts').delete().eq('id', postId);
       if (error) throw error;
       setPosts(current => current.filter(item => item.id !== postId));
+      
+      // FIX: Dispatch event so UserHome (Feed Principal) invalidates this post from cache
+      window.dispatchEvent(new CustomEvent('postDeleted', { detail: { postId } }));
     } catch (error) {
       console.error("Erro ao excluir", error);
     }

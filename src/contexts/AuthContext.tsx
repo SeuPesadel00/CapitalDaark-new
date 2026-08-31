@@ -9,6 +9,7 @@ interface AuthContextType {
   loading: boolean;
   unreadMessagesCount: number;
   setUnreadMessagesCount: React.Dispatch<React.SetStateAction<number>>;
+  refreshUnreadCount: () => Promise<void>;
   signUp: (email: string, password: string, userData: any) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -34,6 +35,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
+  const refreshUnreadCount = async () => {
+    if (!user) return;
+    
+    // 1. Fetch muted targets
+    const { data: mutedData } = await supabase
+      .from('muted_conversations')
+      .select('target_user_id')
+      .eq('user_id', user.id);
+    const mutedTargets = mutedData ? mutedData.map(m => m.target_user_id) : [];
+
+    // 2. Fetch deleted targets
+    const { data: deletedData } = await supabase
+      .from('deleted_conversations')
+      .select('target_user_id')
+      .eq('user_id', user.id);
+    const deletedTargets = deletedData ? deletedData.map(d => d.target_user_id) : [];
+
+    // Ignorar se estiver silenciado OU deletado
+    const ignoreTargets = [...new Set([...mutedTargets, ...deletedTargets])];
+
+    // 3. Fetch unread messages
+    let query = supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('receiver_id', user.id)
+      .is('read_at', null);
+
+    if (ignoreTargets.length > 0) {
+      query = query.not('sender_id', 'in', `(${ignoreTargets.join(',')})`);
+    }
+
+    const { count } = await query;
+    setUnreadMessagesCount(count || 0);
+  };
+
   useEffect(() => {
     if (!user) {
       setUnreadMessagesCount(0);
@@ -42,28 +78,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     let msgChannel: any;
 
-    const setupUnreadCounter = async () => {
-      // 1. Fetch muted targets
-      const { data: mutedData } = await supabase
-        .from('muted_conversations')
-        .select('target_user_id')
-        .eq('user_id', user.id);
-      
+    const setupRealtimeCounter = async () => {
+      // Faz o fetch inicial
+      await refreshUnreadCount();
+
+      // Precisa dos silenciados para o realtime não pipocar (porém, um chat recém apagado não emitirá update porque read_at é null, mas um INSERT sim. 
+      // Por segurança, o realtime só filtra `mutedTargets`, se deletar precisamos esconder a conversa na UI de qualquer jeito. 
+      // Aqui refazemos a busca pra deixar a callback limpa.
+      const { data: mutedData } = await supabase.from('muted_conversations').select('target_user_id').eq('user_id', user.id);
       const mutedTargets = mutedData ? mutedData.map(m => m.target_user_id) : [];
-
-      // 2. Fetch unread messages
-      let query = supabase
-        .from('messages')
-        .select('*', { count: 'exact', head: true })
-        .eq('receiver_id', user.id)
-        .is('read_at', null);
-
-      if (mutedTargets.length > 0) {
-        query = query.not('sender_id', 'in', `(${mutedTargets.join(',')})`);
-      }
-
-      const { count } = await query;
-      setUnreadMessagesCount(count || 0);
 
       // 3. Listen to realtime changes
       msgChannel = supabase.channel('global_unread_msgs')
@@ -76,15 +99,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` }, 
         (payload) => {
           if (!mutedTargets.includes(payload.new.sender_id)) {
-            if (payload.new.read_at && !payload.old.read_at) {
-              setUnreadMessagesCount(prev => Math.max(0, prev - 1));
-            }
+             // Como o replica identity não traz o old.read_at nativamente,
+             // chamamos refreshUnreadCount se houver nova marcação de lido (qualquer update na tabela)
+             if (payload.new.read_at) refreshUnreadCount();
           }
         })
         .subscribe();
     };
 
-    setupUnreadCounter();
+    setupRealtimeCounter();
 
     return () => {
       if (msgChannel) supabase.removeChannel(msgChannel);
@@ -207,6 +230,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     unreadMessagesCount,
     setUnreadMessagesCount,
+    refreshUnreadCount,
     signUp,
     signIn,
     signOut,

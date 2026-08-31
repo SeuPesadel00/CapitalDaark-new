@@ -46,11 +46,11 @@ export function ChatMessageBubble({ message, isOwn, onReply, onEdit, onDeleteFor
   }
 
   return (
-    <div className={cn("flex w-full mb-4 group relative", isOwn ? "justify-end" : "justify-start")}>
+    <div className={cn("flex w-full mb-4", isOwn ? "justify-end" : "justify-start")}>
       
       {/* Container Principal do Balão */}
       <div className={cn(
-        "max-w-[85%] md:max-w-[70%] flex flex-col gap-1 relative",
+        "max-w-[85%] md:max-w-[70%] flex flex-col gap-1 relative group",
         isOwn ? "items-end" : "items-start"
       )}>
         
@@ -104,16 +104,16 @@ export function ChatMessageBubble({ message, isOwn, onReply, onEdit, onDeleteFor
 
       {/* Menu de Ações (Aparece no Hover no desktop, sempre visível no mobile) */}
       <div className={cn(
-        "absolute top-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center gap-1",
+        "absolute top-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center gap-1 z-10",
         isOwn ? "right-[calc(100%+8px)] flex-row-reverse" : "left-[calc(100%+8px)] flex-row"
       )}>
-        <button onClick={() => onReply(message)} className="p-1.5 bg-background/80 hover:bg-muted rounded-full text-muted-foreground hover:text-foreground shadow-sm">
+        <button onClick={() => onReply(message)} className="p-1.5 bg-background border border-border/50 hover:bg-muted rounded-full text-muted-foreground hover:text-foreground shadow-sm">
           <Reply className="w-4 h-4" />
         </button>
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="p-1.5 bg-background/80 hover:bg-muted rounded-full text-muted-foreground hover:text-foreground shadow-sm">
+            <button className="p-1.5 bg-background border border-border/50 hover:bg-muted rounded-full text-muted-foreground hover:text-foreground shadow-sm">
               <MoreVertical className="w-4 h-4" />
             </button>
           </DropdownMenuTrigger>
