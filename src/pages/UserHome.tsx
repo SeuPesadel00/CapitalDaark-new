@@ -198,6 +198,105 @@ function UserHome() {
     }
   }, [user, fetchTimeline]);
 
+  // Efeito Real-Time para Feed Público
+  useEffect(() => {
+    if (!user) return;
+
+    // Escutar novos posts
+    const postChannel = supabase.channel('public:social_posts')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'social_posts' }, async (payload) => {
+        // Ignorar se foi o próprio usuário que postou (a UI já faz optimistic update)
+        if (payload.new.user_id === user.id) return;
+
+        // Buscar detalhes do usuário do post recém-criado
+        const { data: profile } = await supabase.from('profiles').select('first_name, last_name, avatar_url, username').eq('id', payload.new.user_id).single();
+        
+        const newPost: FeedItem = {
+          type: 'post',
+          id: payload.new.id,
+          user_id: payload.new.user_id,
+          content: payload.new.content,
+          image_url: payload.new.image_url,
+          date: new Date(payload.new.created_at),
+          author: profile ? `${profile.first_name || 'Usuário'} ${profile.last_name || ''}` : 'Usuário',
+          username: profile?.username,
+          avatar_url: profile?.avatar_url,
+          likes_count: 0,
+          has_liked: false,
+          comments: []
+        };
+
+        setFeedData(prev => {
+          // Evitar duplicatas caso o state já tenha adicionado
+          if (prev.some(p => p.id === newPost.id)) return prev;
+          return [newPost, ...prev];
+        });
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'social_posts' }, (payload) => {
+        setFeedData(prev => prev.filter(item => item.id !== payload.old.id));
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'social_posts' }, (payload) => {
+        setFeedData(prev => prev.map(item => item.id === payload.new.id ? { ...item, content: payload.new.content, image_url: payload.new.image_url } : item));
+      })
+      .subscribe();
+
+    // Escutar likes
+    const likeChannel = supabase.channel('public:post_likes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'post_likes' }, (payload) => {
+         if (payload.new.user_id === user.id) return; // Optimistic UI local already handles this
+         setFeedData(prev => prev.map(item => {
+           if (item.id === payload.new.post_id) {
+             return { ...item, likes_count: item.likes_count + 1 };
+           }
+           return item;
+         }));
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'post_likes' }, (payload) => {
+         // O old.post_id pode não estar disponível a menos que replica identity seja FULL, mas tentamos:
+         const postId = (payload.old as any).post_id;
+         if (!postId) return;
+         setFeedData(prev => prev.map(item => {
+           if (item.id === postId) {
+             return { ...item, likes_count: Math.max(0, item.likes_count - 1) };
+           }
+           return item;
+         }));
+      })
+      .subscribe();
+
+    // Escutar comentários
+    const commentChannel = supabase.channel('public:post_comments')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'post_comments' }, async (payload) => {
+         if (payload.new.user_id === user.id) return; // Local já adiciona
+         
+         const { data: profile } = await supabase.from('profiles').select('first_name, last_name, username, avatar_url').eq('id', payload.new.user_id).single();
+         
+         const newComment = {
+            id: payload.new.id,
+            content: payload.new.content,
+            created_at: payload.new.created_at,
+            user_id: payload.new.user_id,
+            profiles: profile || {}
+         };
+
+         setFeedData(prev => prev.map(item => {
+           if (item.id === payload.new.post_id) {
+             const commentExists = item.comments?.some((c:any) => c.id === newComment.id);
+             if (commentExists) return item;
+             return { ...item, comments: [...(item.comments || []), newComment] };
+           }
+           return item;
+         }));
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(postChannel);
+      supabase.removeChannel(likeChannel);
+      supabase.removeChannel(commentChannel);
+    };
+  }, [user]);
+
   // Listener Global de Exclusão de Posts (Sincroniza com UserProfile)
   useEffect(() => {
     const handlePostDeleted = (e: CustomEvent) => {
