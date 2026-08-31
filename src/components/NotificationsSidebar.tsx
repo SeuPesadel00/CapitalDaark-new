@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Bell, Heart, MessageSquare, User, UserPlus } from 'lucide-react';
+import { Bell, Heart, MessageSquare, User, UserPlus, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -11,11 +11,10 @@ import { useNavigate } from 'react-router-dom';
 interface NotificationsSidebarProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUnreadCountChange: (count: number) => void;
 }
 
-export function NotificationsSidebar({ open, onOpenChange, onUnreadCountChange }: NotificationsSidebarProps) {
-  const { user } = useAuth();
+export function NotificationsSidebar({ open, onOpenChange }: NotificationsSidebarProps) {
+  const { user, refreshUnreadNotificationsCount } = useAuth();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,8 +23,12 @@ export function NotificationsSidebar({ open, onOpenChange, onUnreadCountChange }
     if (!user) return;
     fetchNotifications();
 
-    const channel = supabase.channel('realtime_notifications')
+    const channel = supabase.channel('realtime_notifications_sidebar')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${user.id}` }, 
+      () => {
+        fetchNotifications();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${user.id}` }, 
       () => {
         fetchNotifications();
       }).subscribe();
@@ -53,9 +56,6 @@ export function NotificationsSidebar({ open, onOpenChange, onUnreadCountChange }
         
       if (error) throw error;
       setNotifications(data || []);
-      
-      const unread = data?.filter(n => !n.read).length || 0;
-      onUnreadCountChange(unread);
     } catch (error) {
       console.error("Erro ao carregar notificações", error);
     } finally {
@@ -76,9 +76,34 @@ export function NotificationsSidebar({ open, onOpenChange, onUnreadCountChange }
         .eq('read', false);
         
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-      onUnreadCountChange(0);
+      refreshUnreadNotificationsCount();
     } catch (error) {
       console.error("Erro ao marcar lido", error);
+    }
+  };
+
+  const handleDeleteNotification = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation(); // Evita navegar ao clicar na lixeira
+    if (!user) return;
+    
+    try {
+      // Remove do estado local instantaneamente (Optimistic UI)
+      setNotifications(prev => prev.filter(n => n.id !== id));
+      
+      // Remove do banco
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      // Atualiza o contador global
+      refreshUnreadNotificationsCount();
+    } catch (error) {
+      console.error("Erro ao excluir notificação", error);
+      // Se der erro, recarrega a lista do banco
+      fetchNotifications();
     }
   };
 
@@ -150,9 +175,18 @@ export function NotificationsSidebar({ open, onOpenChange, onUnreadCountChange }
                     </p>
                   </div>
                   
-                  {!notif.read && (
-                    <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
-                  )}
+                  <div className="flex flex-col items-end shrink-0 gap-2 mt-1">
+                    {!notif.read && (
+                      <div className="w-2 h-2 rounded-full bg-primary"></div>
+                    )}
+                    <button
+                      onClick={(e) => handleDeleteNotification(e, notif.id)}
+                      className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors"
+                      title="Excluir notificação"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

@@ -10,6 +10,9 @@ interface AuthContextType {
   unreadMessagesCount: number;
   setUnreadMessagesCount: React.Dispatch<React.SetStateAction<number>>;
   refreshUnreadCount: () => Promise<void>;
+  unreadNotificationsCount: number;
+  setUnreadNotificationsCount: React.Dispatch<React.SetStateAction<number>>;
+  refreshUnreadNotificationsCount: () => Promise<void>;
   signUp: (email: string, password: string, userData: any) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -34,6 +37,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+
+  const refreshUnreadNotificationsCount = async () => {
+    if (!user) return;
+    const { count } = await supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('recipient_id', user.id)
+      .eq('read', false);
+    setUnreadNotificationsCount(count || 0);
+  };
 
   const refreshUnreadCount = async () => {
     if (!user) return;
@@ -111,6 +125,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       if (msgChannel) supabase.removeChannel(msgChannel);
+    };
+  }, [user]);
+
+  // Efeito Real-Time para as Notificações
+  useEffect(() => {
+    if (!user) {
+      setUnreadNotificationsCount(0);
+      return;
+    }
+
+    let notifChannel: any;
+
+    const setupNotificationsCounter = async () => {
+      await refreshUnreadNotificationsCount();
+
+      notifChannel = supabase.channel('global_unread_notifs')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${user.id}` }, 
+        () => {
+          refreshUnreadNotificationsCount();
+        })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${user.id}` }, 
+        () => {
+          refreshUnreadNotificationsCount();
+        })
+        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${user.id}` }, 
+        () => {
+          refreshUnreadNotificationsCount();
+        })
+        .subscribe();
+    };
+
+    setupNotificationsCounter();
+
+    return () => {
+      if (notifChannel) supabase.removeChannel(notifChannel);
     };
   }, [user]);
 
@@ -231,6 +280,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     unreadMessagesCount,
     setUnreadMessagesCount,
     refreshUnreadCount,
+    unreadNotificationsCount,
+    setUnreadNotificationsCount,
+    refreshUnreadNotificationsCount,
     signUp,
     signIn,
     signOut,

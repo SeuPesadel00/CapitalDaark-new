@@ -20,34 +20,10 @@ interface HeaderProps {
 const Header = ({ hideNav = false, hideBottomNav = false }: HeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, profile, signOut, unreadMessagesCount } = useAuth();
+  const { user, profile, signOut, unreadMessagesCount, unreadNotificationsCount } = useAuth();
   
-  const [unreadCount, setUnreadCount] = useState(0);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-
-  useEffect(() => {
-    if (!user) return;
-    const fetchUnread = async () => {
-      const { count } = await supabase
-        .from('notifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('recipient_id', user.id)
-        .eq('read', false);
-      if (count !== null) setUnreadCount(count);
-    };
-    fetchUnread();
-
-    const channel = supabase.channel('realtime_notifications')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${user.id}` }, 
-      () => {
-        setUnreadCount(prev => prev + 1);
-      }).subscribe();
-      
-    return () => { 
-      supabase.removeChannel(channel); 
-    }
-  }, [user]);
   
   useEffect(() => {
     const handleResize = () => {
@@ -67,7 +43,7 @@ const Header = ({ hideNav = false, hideBottomNav = false }: HeaderProps) => {
     { label: 'Página Inicial', href: '/user-home', icon: Home },
     { label: 'Vitrine/Loja', href: '/loja', icon: ShoppingBag },
     { label: 'Mensagens', href: '/mensagens', icon: MessageSquare, badge: unreadMessagesCount },
-    { label: 'Notificações', href: '#notificacoes', icon: Bell, badge: unreadCount, action: () => setNotificationsOpen(true) },
+    { label: 'Notificações', href: '#notificacoes', icon: Bell, badge: unreadNotificationsCount, action: () => setNotificationsOpen(true) },
     { label: 'Suporte VIP', href: 'https://wa.me/5561982201177?text=Olá, preciso de suporte na plataforma Capital Daark.', icon: HelpCircle },
   ];
 
@@ -255,9 +231,9 @@ const Header = ({ hideNav = false, hideBottomNav = false }: HeaderProps) => {
             >
               <Bell className="w-6 h-6" strokeWidth={isActive('/notificacoes') ? 2.5 : 2} />
               <span className="text-[10px] font-medium">Alertas</span>
-              {unreadCount > 0 && (
+              {unreadNotificationsCount > 0 && (
                 <span className="absolute top-1 right-1 sm:right-3 bg-destructive text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
-                  {unreadCount > 9 ? '9+' : unreadCount}
+                  {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
                 </span>
               )}
             </button>
@@ -270,7 +246,6 @@ const Header = ({ hideNav = false, hideBottomNav = false }: HeaderProps) => {
       <NotificationsSidebar 
         open={notificationsOpen} 
         onOpenChange={setNotificationsOpen} 
-        onUnreadCountChange={setUnreadCount} 
       />
     </>
   );
