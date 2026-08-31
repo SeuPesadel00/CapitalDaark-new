@@ -141,6 +141,14 @@ export default function Messages() {
     
     loadChat();
 
+    // Marcar como lido
+    supabase.from('messages')
+      .update({ read_at: new Date().toISOString() })
+      .eq('receiver_id', user.id)
+      .eq('sender_id', targetUserId)
+      .is('read_at', null)
+      .then();
+
     // Inscrever para novas mensagens
     const channel = supabase.channel(`chat_${user.id}_${targetUserId}`)
       .on('postgres_changes', { 
@@ -153,8 +161,11 @@ export default function Messages() {
               ? await decryptMessage(payload.new.encrypted_content, localPrivateKey)
               : payload.new.encrypted_content;
             setMessages(prev => [...prev, { ...payload.new, decrypted_content: plaintext }]);
+            // Marca a nova mensagem recebida como lida instantaneamente se estivermos no chat
+            supabase.from('messages').update({ read_at: new Date().toISOString() }).eq('id', payload.new.id).then();
           } catch (e) {
             setMessages(prev => [...prev, { ...payload.new, decrypted_content: payload.new.encrypted_content }]);
+            supabase.from('messages').update({ read_at: new Date().toISOString() }).eq('id', payload.new.id).then();
           }
         }
       }).subscribe();
@@ -249,7 +260,7 @@ export default function Messages() {
         {/* Lista de Conversas (Esconde no mobile se estiver num chat) */}
         <div className={`w-full md:w-80 border-r border-border bg-card flex flex-col ${targetUserId ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-4 border-b border-border font-bold text-lg flex items-center justify-between">
-            Mensagens (E2EE)
+            Conversas
             <Lock className="w-4 h-4 text-primary" />
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -347,7 +358,37 @@ export default function Messages() {
                     value={newMessage}
                     onChange={setNewMessage}
                     onSend={handleSend}
-                    onAttachment={(type) => console.log('Upload de ' + type + ' em breve')}
+                    onAttachment={(file, type) => {
+                      if (type === 'link') return; // ToDo
+                      const reader = new FileReader();
+                      reader.onloadend = async () => {
+                        const base64String = reader.result as string;
+                        let attachmentHtml = '';
+                        if (type === 'image') {
+                          attachmentHtml = `<img src="${base64String}" class="max-w-full max-h-64 rounded-md object-contain" />`;
+                        } else if (type === 'video') {
+                          attachmentHtml = `<video src="${base64String}" controls class="max-w-full max-h-64 rounded-md"></video>`;
+                        }
+                        
+                        if (attachmentHtml) {
+                          const { data, error } = await supabase.from('messages').insert({
+                            sender_id: user.id,
+                            receiver_id: targetUserId,
+                            encrypted_content: attachmentHtml,
+                            reply_to_id: replyingTo?.id || null
+                          }).select().single();
+
+                          if (!error && data) {
+                            const nova = { ...data, decrypted_content: attachmentHtml, reply_to_message: replyingTo };
+                            setMessages(prev => [...prev, nova]);
+                            setReplyingTo(null);
+                          } else if (error) {
+                            alert("Erro ao enviar imagem: pode ser muito grande para esta implementação.");
+                          }
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }}
                   />
                 ) : (
                   <div className="text-center text-sm text-destructive p-4 bg-destructive/10">
@@ -362,9 +403,9 @@ export default function Messages() {
             <div className="w-24 h-24 rounded-full border-2 border-dashed border-border flex items-center justify-center mb-4">
               <Lock className="w-10 h-10 text-border" />
             </div>
-            <p className="font-semibold text-lg">Suas Mensagens (E2EE)</p>
+            <p className="font-semibold text-lg">Suas Conversas</p>
             <p className="text-sm max-w-sm text-center mt-2">
-              Selecione uma conversa ao lado ou vá no perfil de alguém para iniciar um chat 100% privado e criptografado de ponta a ponta.
+              Selecione uma conversa ao lado ou vá no perfil de alguém para iniciar um chat privado.
             </p>
           </div>
         )}

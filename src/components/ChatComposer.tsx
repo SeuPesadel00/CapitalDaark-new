@@ -12,7 +12,7 @@ interface ChatComposerProps {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
-  onAttachment?: (type: 'image' | 'video' | 'link') => void;
+  onAttachment?: (file: File, type: 'image' | 'video' | 'link') => void;
   placeholder?: string;
   className?: string;
 }
@@ -35,10 +35,9 @@ export function ChatComposer({ value, onChange, onSend, onAttachment, placeholde
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      // Por enquanto, apenas notifica que um arquivo foi selecionado.
-      // A lógica de upload real para o banco de dados será implementada depois.
-      alert(`Arquivo ${e.target.files[0].name} selecionado! O upload para o banco de dados será configurado em breve.`);
-      onAttachment?.(fileInputRef.current?.accept.includes('image') ? 'image' : 'video');
+      const file = e.target.files[0];
+      const type = fileInputRef.current?.accept.includes('image') ? 'image' : 'video';
+      onAttachment?.(file, type);
       // Limpar input
       e.target.value = '';
     }

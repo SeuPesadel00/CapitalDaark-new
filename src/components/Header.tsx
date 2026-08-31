@@ -22,6 +22,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
   const { user, profile, signOut } = useAuth();
   
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
@@ -37,13 +38,39 @@ const Header = ({ hideNav = false }: HeaderProps) => {
     };
     fetchUnread();
 
+    const fetchUnreadMessages = async () => {
+      const { count } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('receiver_id', user.id)
+        .is('read_at', null);
+      if (count !== null) setUnreadMessagesCount(count);
+    };
+    fetchUnreadMessages();
+
     const channel = supabase.channel('realtime_notifications')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${user.id}` }, 
       () => {
         setUnreadCount(prev => prev + 1);
       }).subscribe();
+
+    const msgChannel = supabase.channel('realtime_unread_msgs')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` }, 
+      () => {
+        setUnreadMessagesCount(prev => prev + 1);
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` }, 
+      (payload) => {
+        if (payload.new.read_at && !payload.old.read_at) {
+          setUnreadMessagesCount(prev => Math.max(0, prev - 1));
+        }
+      })
+      .subscribe();
       
-    return () => { supabase.removeChannel(channel); }
+    return () => { 
+      supabase.removeChannel(channel); 
+      supabase.removeChannel(msgChannel);
+    }
   }, [user]);
   
   useEffect(() => {
@@ -63,7 +90,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
   const navItems = [
     { label: 'Página Inicial', href: '/user-home', icon: Home },
     { label: 'Vitrine/Loja', href: '/loja', icon: ShoppingBag },
-    { label: 'Mensagens', href: '/mensagens', icon: MessageSquare },
+    { label: 'Mensagens', href: '/mensagens', icon: MessageSquare, badge: unreadMessagesCount },
     { label: 'Notificações', href: '#notificacoes', icon: Bell, badge: unreadCount, action: () => setNotificationsOpen(true) },
     { label: 'Suporte VIP', href: 'https://wa.me/5561982201177?text=Olá, preciso de suporte na plataforma Capital Daark.', icon: HelpCircle },
   ];
@@ -227,10 +254,15 @@ const Header = ({ hideNav = false }: HeaderProps) => {
 
             <button 
               onClick={() => navigate('/mensagens')} 
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive('/mensagens') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors relative ${isActive('/mensagens') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             >
               <MessageSquare className="w-6 h-6" strokeWidth={isActive('/mensagens') ? 2.5 : 2} />
               <span className="text-[10px] font-medium">Chat</span>
+              {unreadMessagesCount > 0 && (
+                <span className="absolute top-1 right-1 sm:right-3 bg-destructive text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                  {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                </span>
+              )}
             </button>
 
             <button 
