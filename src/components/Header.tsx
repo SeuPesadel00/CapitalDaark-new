@@ -14,9 +14,10 @@ import { NotificationsSidebar } from './NotificationsSidebar';
 
 interface HeaderProps {
   hideNav?: boolean;
+  hideBottomNav?: boolean;
 }
 
-const Header = ({ hideNav = false }: HeaderProps) => {
+const Header = ({ hideNav = false, hideBottomNav = false }: HeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile, signOut, unreadMessagesCount } = useAuth();
@@ -215,7 +216,7 @@ const Header = ({ hideNav = false }: HeaderProps) => {
       )}
 
       {/* ---------------- BOTTOM NAVIGATION BAR (Mobile Only) ---------------- */}
-      {!hideNav && user && !isKeyboardOpen && (
+      {!hideNav && !hideBottomNav && user && !isKeyboardOpen && (
         <nav className="md:hidden fixed bottom-0 left-0 w-full bg-card/95 backdrop-blur-md border-t border-border shadow-[0_-5px_20px_rgba(0,0,0,0.5)] z-50 pb-safe">
           <div className="flex justify-around items-center h-16 px-2">
             

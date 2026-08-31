@@ -328,7 +328,7 @@ export default function Messages() {
 
   return (
     <div className="h-[100dvh] bg-background text-foreground flex flex-col md:flex-row overflow-hidden">
-      <Header />
+      <Header hideBottomNav={!!targetUserId} />
       
       {/* Container Principal */}
       <main className="flex-1 flex overflow-hidden pt-16 md:pt-0">
